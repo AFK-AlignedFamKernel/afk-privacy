@@ -58,17 +58,18 @@ const MobileDrawerNavbar: React.FC = () => {
                   Zk Email
                 </Button>
               </Link>
-              <Link href="/zk-did" passHref>
-                <Button variant="ghost" width="100%" onClick={onClose}>
-                  Zk Email
-                </Button>
-              </Link>
+          
               <Link href="/zk-twitter" passHref>
                 <Button variant="ghost" width="100%" onClick={onClose}>
                   Zk Twitter
                 </Button>
               </Link>
-              <Link href="/zk-did" passHref>
+              <Link href="/z-did" passHref>
+                <Button variant="ghost" width="100%" onClick={onClose}>
+                  Zk DID
+                </Button>
+              </Link>
+              <Link href="/zkdid" passHref>
                 <Button variant="ghost" width="100%" onClick={onClose}>
                   Zk DID
                 </Button>
