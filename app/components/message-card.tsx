@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import TimeAgo from "javascript-time-ago";
 import Link from "next/link";
@@ -35,9 +35,22 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [comments, setComments] = useState<SignedMessageWithProof[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [parentMessage, setParentMessage] = useState<SignedMessageWithProof | null>(null);
+  const [loadingParent, setLoadingParent] = useState(false);
 
   const isGroupPage = window.location.pathname === `/${provider.getSlug()}/${message.anonGroupId}`;
   const isMessagePage = window.location.pathname === `/messages/${message.id}`;
+
+  // Fetch parent message if this is a reply
+  useEffect(() => {
+    if (message.parentId) {
+      setLoadingParent(true);
+      fetchMessage(message.parentId, isInternal)
+        .then(setParentMessage)
+        .catch(console.error)
+        .finally(() => setLoadingParent(false));
+    }
+  }, [message.parentId, isInternal]);
 
   // Handlers
   async function onLikeClick() {
@@ -85,6 +98,12 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCommentAdded = (newComment: SignedMessageWithProof) => {
+    setComments(prev => [newComment, ...prev]);
+    // Update the reply count in the UI
+    message.replyCount = (message.replyCount || 0) + 1;
   };
 
   // Render Helpers
@@ -193,7 +212,26 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
 
   // Render
   return (
-    <div className="message-card">
+    <div className="message-card" data-is-reply={!!message.parentId}>
+      {/* Reply Note */}
+      {message.parentId && (
+        <div className="message-card-reply-note">
+          <IonIcon name="return-up-back-outline" />
+          <span>
+            Replying to{" "}
+            {loadingParent ? (
+              <span className="loading-dots">...</span>
+            ) : parentMessage ? (
+              <span className="reply-author">
+                {generateNameFromPubkey(parentMessage?.ephemeralPubkey?.toString() || "")}
+              </span>
+            ) : (
+              <span className="deleted-message">deleted message</span>
+            )}
+          </span>
+        </div>
+      )}
+
       <header className="message-card-header">
         <div className="message-card-header-sender">
           {renderLogo()}
@@ -223,7 +261,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
             disabled={isLoading}
           >
             <IonIcon name="chatbubble-outline" />
-            <span>{message?.replyCount || 0}</span>
+            <span>{message.replyCount || 0}</span>
           </button>
         </div>
       </div>
@@ -234,20 +272,26 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
           onClose={() => setShowCommentDialog(false)}
         >
           <div className="comments-container">
-            {comments.map((comment) => (
-              <MessageCard
-                key={comment.id}
-                message={comment}
-                isInternal={isInternal}
-              />
-            ))}
             <CommentForm
               parentId={message.id}
               isInternal={isInternal}
-              onCommentAdded={(newComment) => {
-                setComments((prev) => [newComment, ...prev]);
-              }}
+              onCommentAdded={handleCommentAdded}
             />
+            <div className="comments-list">
+              {isLoading ? (
+                <div className="loading-spinner">Loading comments...</div>
+              ) : comments.length > 0 ? (
+                comments.map((comment) => (
+                  <MessageCard
+                    key={comment.id}
+                    message={comment}
+                    isInternal={isInternal}
+                  />
+                ))
+              ) : (
+                <div className="no-comments">No comments yet</div>
+              )}
+            </div>
           </div>
         </Dialog>
       )}

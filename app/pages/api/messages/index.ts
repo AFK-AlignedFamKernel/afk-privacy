@@ -44,6 +44,8 @@ export async function postMessage(
       ephemeralPubkey: BigInt(body.ephemeralPubkey),
       ephemeralPubkeyExpiry: new Date(body.ephemeralPubkeyExpiry),
       likes: 0,
+      parentId: body?.parentId || null,
+      replyCount: 0
     }
 
     // Verify pubkey is registered
@@ -82,6 +84,8 @@ export async function postMessage(
         signature: signedMessage.signature.toString(),
         pubkey: signedMessage.ephemeralPubkey.toString(),
         internal: signedMessage.internal,
+        parent_id: signedMessage?.parentId,
+        reply_count: 0
       },
     ]);
 
@@ -89,7 +93,35 @@ export async function postMessage(
       throw insertError;
     }
 
-    res.status(201).json({ message: "Message saved successfully" });
+    // Return the created message
+    const { data: createdMessage, error: fetchError } = await supabase
+      .from("messages")
+      .select(`
+        id,
+        group_id,
+        group_provider,
+        text,
+        timestamp,
+        signature,
+        pubkey,
+        internal,
+        likes,
+        reply_count,
+        parent_id,
+        memberships!fk_message_membership (
+          proof,
+          pubkey_expiry,
+          proof_args
+        )
+      `)
+      .eq("id", signedMessage.id)
+      .single();
+
+    if (fetchError) {
+      throw fetchError;
+    }
+
+    res.status(201).json(createdMessage);
     res.end();
   } catch (error) {
     console.error(error);
