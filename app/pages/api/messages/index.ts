@@ -222,6 +222,8 @@ export async function fetchMessages(
     ephemeralPubkey: message.pubkey,
     internal: message.internal,
     likes: message.likes,
+    replyCount: message.reply_count,
+    parentId: message.parent_id
   }));
 
   res.json(messages);
