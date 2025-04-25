@@ -7,12 +7,14 @@ export async function fetchMessages({
   isInternal,
   beforeTimestamp,
   afterTimestamp,
+  parentId,
 }: {
   limit: number;
   isInternal?: boolean;
   groupId?: string;
   beforeTimestamp?: number | null;
   afterTimestamp?: number | null;
+  parentId?: string | null;
 }) {
   const url = new URL(window.location.origin + "/api/messages");
 
@@ -21,6 +23,7 @@ export async function fetchMessages({
   if (isInternal) url.searchParams.set("isInternal", "true");
   if (afterTimestamp) url.searchParams.set("afterTimestamp", afterTimestamp.toString());
   if (beforeTimestamp) url.searchParams.set("beforeTimestamp", beforeTimestamp.toString());
+  if (parentId) url.searchParams.set("parentId", parentId);
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -31,7 +34,7 @@ export async function fetchMessages({
     if (!pubkey) {
       throw new Error("No public key found");
     }
-    headers["Authorization"] = `Bearer ${pubkey}`; // Pubkey modulus is used as the bearer token
+    headers["Authorization"] = `Bearer ${pubkey}`;
   }
 
   const response = await fetch(url, { headers });

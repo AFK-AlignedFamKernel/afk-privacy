@@ -6,10 +6,12 @@ import IonIcon from "@reacticons/ionicons";
 import type { SignedMessageWithProof } from "../lib/types";
 import { generateNameFromPubkey } from "../lib/utils";
 import { setMessageLiked, isMessageLiked } from "../lib/store";
-import { fetchMessage, toggleLike } from "../lib/api";
+import { fetchMessage, toggleLike, fetchMessages } from "../lib/api";
 import { hasEphemeralKey } from "../lib/ephemeral-key";
 import { verifyMessage } from "../lib/core";
 import { Providers } from "../lib/providers";
+import Dialog from "./dialog";
+import CommentForm from "./comment-form";
 
 interface MessageCardProps {
   message: SignedMessageWithProof;
@@ -30,6 +32,9 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
   const [isLiked, setIsLiked] = useState(isMessageLiked(message.id));
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus>("idle");
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [comments, setComments] = useState<SignedMessageWithProof[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isGroupPage = window.location.pathname === `/${provider.getSlug()}/${message.anonGroupId}`;
   const isMessagePage = window.location.pathname === `/messages/${message.id}`;
@@ -64,6 +69,23 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
       setVerificationStatus("error");
     }
   }
+
+  const handleShowComments = async () => {
+    setIsLoading(true);
+    try {
+      const fetchedComments = await fetchMessages({
+        limit: 50,
+        isInternal: message.internal,
+        parentId: message.id
+      });
+      setComments(fetchedComments);
+      setShowCommentDialog(true);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Render Helpers
   function renderLogo() {
@@ -194,7 +216,41 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
             <span className="like-count">{likeCount}</span>
           </button>
         </div>
+        <div className="message-card-actions">
+          <button 
+            onClick={handleShowComments}
+            className="message-card-action-button"
+            disabled={isLoading}
+          >
+            <IonIcon name="chatbubble-outline" />
+            <span>{message?.replyCount || 0}</span>
+          </button>
+        </div>
       </div>
+
+      {showCommentDialog && (
+        <Dialog
+          title="Comments"
+          onClose={() => setShowCommentDialog(false)}
+        >
+          <div className="comments-container">
+            {comments.map((comment) => (
+              <MessageCard
+                key={comment.id}
+                message={comment}
+                isInternal={isInternal}
+              />
+            ))}
+            <CommentForm
+              parentId={message.id}
+              isInternal={isInternal}
+              onCommentAdded={(newComment) => {
+                setComments((prev) => [newComment, ...prev]);
+              }}
+            />
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 };

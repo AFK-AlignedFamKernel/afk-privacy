@@ -60,11 +60,13 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_reply_count()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF TG_OP = 'INSERT' THEN
+    IF TG_OP = 'INSERT' AND NEW.parent_id IS NOT NULL THEN
+        -- When inserting a comment, increment the parent's reply count
         UPDATE messages 
         SET reply_count = reply_count + 1 
         WHERE id = NEW.parent_id;
-    ELSIF TG_OP = 'DELETE' THEN
+    ELSIF TG_OP = 'DELETE' AND OLD.parent_id IS NOT NULL THEN
+        -- When deleting a comment, decrement the parent's reply count
         UPDATE messages 
         SET reply_count = reply_count - 1 
         WHERE id = OLD.parent_id;
@@ -73,11 +75,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger for reply count
-CREATE TRIGGER update_reply_count_trigger
-    AFTER INSERT OR DELETE ON messages
+-- Create separate triggers for INSERT and DELETE
+CREATE TRIGGER update_reply_count_insert_trigger
+    AFTER INSERT ON messages
     FOR EACH ROW
-    WHEN (NEW.parent_id IS NOT NULL OR OLD.parent_id IS NOT NULL)
+    EXECUTE FUNCTION update_reply_count();
+
+CREATE TRIGGER update_reply_count_delete_trigger
+    AFTER DELETE ON messages
+    FOR EACH ROW
     EXECUTE FUNCTION update_reply_count();
 
 -- Create indexes for better query performance

@@ -107,11 +107,12 @@ export async function fetchMessages(
   const limit = parseInt(request.query?.limit as string) || 50;
   const afterTimestamp = request.query?.afterTimestamp as string;
   const beforeTimestamp = request.query?.beforeTimestamp as string;
+  const parentId = request.query?.parentId as string;
 
   let query = supabase
     .from("messages")
     .select(
-      "id, text, timestamp, signature, pubkey, internal, likes, group_id, group_provider"
+      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id"
     )
     .order("timestamp", { ascending: false })
     .limit(limit);
@@ -122,18 +123,18 @@ export async function fetchMessages(
     query = query.eq("group_id", groupId);
   }
 
+  if (parentId) {
+    query = query.eq("parent_id", parentId);
+  } else {
+    query = query.is("parent_id", null);
+  }
+
   if (afterTimestamp) {
-    query = query.gt(
-      "timestamp",
-      new Date(Number(afterTimestamp)).toISOString()
-    );
+    query = query.gt("timestamp", new Date(Number(afterTimestamp)).toISOString());
   }
 
   if (beforeTimestamp) {
-    query = query.lt(
-      "timestamp",
-      new Date(Number(beforeTimestamp)).toISOString()
-    );
+    query = query.lt("timestamp", new Date(Number(beforeTimestamp)).toISOString());
   }
 
   // Internal messages require a valid pubkey from the same group (as Authorization header)
