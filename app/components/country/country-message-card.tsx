@@ -38,7 +38,7 @@ const CountryMessageCard: React.FC<MessageCardProps> = ({ message, isInternal })
   const [parentMessage, setParentMessage] = useState<SignedMessageWithProofWithPassport | null>(null);
   const [loadingParent, setLoadingParent] = useState(false);
 
-  // const isGroupPage = window.location.pathname === `/${provider.getSlug()}/${message.anonGroupId}`;
+  const isGroupPage = window.location.pathname === `/country/${message?.nationality}`;
   const isMessagePage = window.location.pathname === `/messages/${message.id}`;
 
   // Fetch parent message if this is a reply
@@ -73,7 +73,7 @@ const CountryMessageCard: React.FC<MessageCardProps> = ({ message, isInternal })
     setVerificationStatus("verifying");
 
     try {
-      const fullMessage = await fetchMessage(message.id, message.internal);
+      const fullMessage = await fetchMessageCountry(message.id, message.internal);
       const isValid = await verifyMessage(fullMessage);
 
       setVerificationStatus(isValid ? "valid" : "invalid");
@@ -161,11 +161,11 @@ const CountryMessageCard: React.FC<MessageCardProps> = ({ message, isInternal })
           <span>Someone from {COUNTRY_DATA[message?.nationality ?? "WTF"]?.name} {COUNTRY_DATA[message?.nationality ?? "WTF"]?.flag}</span>
         </div>
         <div className="message-card-header-sender-name">
-          {/* {isGroupPage ? (
-            <span>{message?.country}</span>
+          {isGroupPage ? (
+            <span>{message?.nationality}</span>
           ) : (
-            <Link href={`/country/${message?.country}`}>{message?.country}</Link>
-          )} */}
+            <Link href={`/country/${message?.nationality}`}>{message?.nationality}</Link>
+          )}
 
           {isMessagePage ? (
             timestampComponent

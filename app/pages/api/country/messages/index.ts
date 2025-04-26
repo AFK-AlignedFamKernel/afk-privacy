@@ -166,7 +166,8 @@ export async function fetchMessagesCountry(
   query = query.eq("internal", !!isInternal);
 
   if (groupId) {
-    query = query.eq("group_id", groupId);
+    // query = query.eq("group_id", groupId);
+    query = query.eq("nationality", groupId);
   }
 
   if (parentId) {

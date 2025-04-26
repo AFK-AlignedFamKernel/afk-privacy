@@ -216,7 +216,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
 
       <div className="message-list" ref={messageListRef}>
         {messages.map((message, index) => {
-          console.log("message", message);
+          // console.log("message", message);
           return (
             <div
               key={message.id || index}
