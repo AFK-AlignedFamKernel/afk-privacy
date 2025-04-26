@@ -54,21 +54,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log("Result:", result);
       if (result.isValid) {
 
-        const { error: insertError } = await supabase.from("passport_registrations").insert([
-          {
-            id: userId,
-            group_id: userId,
-            provider: "selfxyz",
-            id_register: userId,
-            timestamp: new Date().toISOString(),
-            pubkey: pubkey ?? userId,
-            proof: proof,
-            proof_args: publicSignals,
-            nationality: result.credentialSubject.nationality,
-            date_of_birth: result.credentialSubject.date_of_birth,
-            gender: result.credentialSubject.gender,
-          },  
-        ]);
+        const { error: insertError } = await supabase.from("passport_registrations").update({
+          is_verified: true,
+          proof: proof,
+          proof_args: publicSignals,
+          nationality: result.credentialSubject.nationality,
+          date_of_birth: result.credentialSubject.date_of_birth,
+          gender: result.credentialSubject.gender,
+        }).eq("id_register", userId);
+
         console.log("Inserted passport registration:", insertError);
         // Return successful verification response
         return res.status(200).json({
