@@ -2,9 +2,11 @@
 DROP INDEX IF EXISTS idx_passport_registrations_pubkey;
 DROP INDEX IF EXISTS idx_passport_registrations_group_id;
 DROP INDEX IF EXISTS idx_passport_registrations_provider;
+DROP INDEX IF EXISTS idx_ephemeral_keys_pubkey;
 
 -- Drop existing table
 DROP TABLE IF EXISTS passport_registrations;
+DROP TABLE IF EXISTS ephemeral_keys;
 
 -- Create tables with proper relationships and constraints
 CREATE TABLE IF NOT EXISTS ephemeral_keys (
@@ -42,3 +44,4 @@ CREATE TABLE IF NOT EXISTS passport_registrations (
 CREATE INDEX IF NOT EXISTS idx_passport_registrations_pubkey ON passport_registrations(pubkey);
 CREATE INDEX IF NOT EXISTS idx_passport_registrations_group_id ON passport_registrations(group_id);
 CREATE INDEX IF NOT EXISTS idx_passport_registrations_provider ON passport_registrations(provider);
+CREATE INDEX IF NOT EXISTS idx_ephemeral_keys_pubkey ON ephemeral_keys(pubkey);
