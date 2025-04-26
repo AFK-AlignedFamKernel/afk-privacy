@@ -9,11 +9,11 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SELF_SCOPE_URL = process.env.SELF_SCOPE_URL as string;
 const SELF_VERIFY_URL = process.env.SELF_VERIFY_URL as string;
 
-// if (!supabaseUrl || !supabaseKey) {
-//     throw new Error("Missing Supabase environment variables");
-// }
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("Missing Supabase environment variables");
+}
 
-// const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
@@ -35,20 +35,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Initialize and configure the verifier
       const selfBackendVerifier = new SelfBackendVerifier(
-        SELF_SCOPE_URL ?? 'scope-verify-afk-privacy', 
+        SELF_SCOPE_URL ?? 'scope-verify-afk-privacy',
         SELF_VERIFY_URL ?? 'https://privacy.afk-community.xyz/api/register/self-xyz'
       );
 
       // Verify the proof
       const result = await selfBackendVerifier.verify(proof, publicSignals);
-      
+
       console.log("Result:", result);
       if (result.isValid) {
+
+        const { error: insertError } = await supabase.from("passport_registrations").insert([
+          {
+            id: userId,
+            group_id: userId,
+            provider: "selfxyz",
+            id_register: userId,
+            timestamp: new Date().toISOString(),
+            pubkey: userId ?? ephemeralKey?.toString(),
+            proof: proof,
+            proof_args: publicSignals,
+            nationality: result.credentialSubject.nationality,
+            date_of_birth: result.credentialSubject.date_of_birth,
+            gender: result.credentialSubject.gender,
+          },  
+        ]);
+        console.log("Inserted passport registration:", insertError);
         // Return successful verification response
         return res.status(200).json({
           status: 'success',
           result: true,
-          credentialSubject: result.credentialSubject
+          credentialSubject: result.credentialSubject,
+          proof: proof,
         });
       } else {
         // Return failed verification response

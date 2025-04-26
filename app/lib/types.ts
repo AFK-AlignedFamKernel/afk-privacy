@@ -118,4 +118,5 @@ export const LocalStorageKeys = {
   DarkMode: "darkMode",
   HasSeenWelcomeMessage: "hasSeenWelcomeMessage",
   EphemeralKeyPassportRegistration: "ephemeralKeyPassportRegistration",
+  SelfKeyPassportRegistration: "selfKeyPassportRegistration",
 };
