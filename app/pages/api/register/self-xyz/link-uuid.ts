@@ -76,39 +76,55 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!data) {
 
         await supabase
-        .from("ephemeral_keys")
-        .insert({
-          pubkey: signedMessage.ephemeralPubkey.toString(),
-          signature: signedMessage.signature.toString(),
-          uuid: uuid,
-        })
+          .from("ephemeral_keys")
+          .insert({
+            pubkey: signedMessage.ephemeralPubkey.toString(),
+            signature: signedMessage.signature.toString(),
+            uuid: uuid,
+          })
 
         // throw new Error("Ephemeral key not registered");
       }
 
-      const { data: passportRegistration, error: passportRegistrationError } = await supabase
+      const { data: passportRegistrationFind, error: passportRegistrationFindError } = await supabase
         .from("passport_registrations")
-        .insert({
-          provider: signedMessage.anonGroupProvider,
-          pubkey: signedMessage.ephemeralPubkey.toString(),
-          id_register: uuid,
-          signature: signedMessage.signature.toString(),
-          is_verified: false,
-          group_id: uuid,
-          // created_at: new Date().toISOString(),
-          ephemeral_key_id: data.id,
-          // signature: signedMessage.signature.toString(),
-        })
+        .select("*")
+        .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+        .single();
 
-
-      if (passportRegistrationError) {
-        console.error('Error registering passport registration:', passportRegistrationError);
-        throw new Error("Failed to register passport registration");
+      if (passportRegistrationFind) {
+        console.log("Passport registration found");
       }
 
-      if (!passportRegistration) {
-        // throw new Error("Failed to register passport registration");
+      // created_at: new Date().toISOString(),
+
+      if (!passportRegistrationFind) {
+        const { data: passportRegistration, error: passportRegistrationError } = await supabase
+          .from("passport_registrations")
+          .insert({
+            provider: signedMessage.anonGroupProvider,
+            pubkey: signedMessage.ephemeralPubkey.toString(),
+            id_register: uuid,
+            signature: signedMessage.signature.toString(),
+            is_verified: false,
+            group_id: uuid,
+            // created_at: new Date().toISOString(),
+            ephemeral_key_id: data.id,
+            // signature: signedMessage.signature.toString(),
+          })
+
+
+        if (passportRegistrationError) {
+          console.error('Error registering passport registration:', passportRegistrationError);
+          throw new Error("Failed to register passport registration");
+        }
+        if (!passportRegistration) {
+          // throw new Error("Failed to register passport registration");
+        }
+
+
       }
+
 
       return res.status(200).json({
         status: 'success',
