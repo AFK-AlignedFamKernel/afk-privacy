@@ -117,4 +117,21 @@ export const LocalStorageKeys = {
   GoogleOAuthNonce: "googleOAuthNonce",
   DarkMode: "darkMode",
   HasSeenWelcomeMessage: "hasSeenWelcomeMessage",
+  EphemeralKeyPassportRegistration: "ephemeralKeyPassportRegistration",
+  SelfKeyPassportRegistration: "selfKeyPassportRegistration",
+  CurrentKYCProvider: "currentKYCProvider",
+
 };
+
+export interface PassportRegistration {
+  id_register?: string;
+  nationality?: string;
+  date_of_birth?: string;
+  gender?: string;
+  is_verified?: boolean;
+  proof_args?: string;
+}
+
+export interface SignedMessageWithProofWithPassport extends PassportRegistration, SignedMessageWithProof {
+
+}

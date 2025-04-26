@@ -5,6 +5,7 @@ dotenv.config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['@zkpassport/sdk'],
   experimental: {
     outputFileTracingIncludes: {
       '/api/messages': [
@@ -35,6 +36,8 @@ const nextConfig = {
   },
   env: {
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    NEXT_PUBLIC_SELF_SCOPE_URL: process.env.NEXT_PUBLIC_SELF_SCOPE_URL,
+    NEXT_PUBLIC_SELF_VERIFY_URL: process.env.NEXT_PUBLIC_SELF_VERIFY_URL,
   },
   webpack: (config) => {
     config.experiments = {

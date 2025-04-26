@@ -1,7 +1,8 @@
-import { Message, SignedMessage, SignedMessageWithProof } from "./types";
-import { getEphemeralPubkey } from "./ephemeral-key";
+import { Message, SignedMessage, SignedMessageWithProof } from "../types";
+import { getEphemeralPubkey } from "../ephemeral-key";
+import { signMessageSelfXyz } from "../zk-did";
 
-export async function fetchMessages({
+export async function fetchMessagesCountry({
   limit,
   groupId,
   isInternal,
@@ -16,7 +17,7 @@ export async function fetchMessages({
   afterTimestamp?: number | null;
   parentId?: string | null;
 }) {
-  const url = new URL(window.location.origin + "/api/messages");
+  const url = new URL(window.location.origin + "/api/country/messages");
 
   url.searchParams.set("limit", limit.toString());
   if (groupId) url.searchParams.set("groupId", groupId);
@@ -51,7 +52,7 @@ export async function fetchMessages({
   }));
 }
 
-export async function fetchMessage(
+export async function fetchMessageCountry(
   id: string,
   isInternal: boolean = false
 ): Promise<SignedMessageWithProof> {
@@ -67,7 +68,7 @@ export async function fetchMessage(
     headers["Authorization"] = `Bearer ${pubkey}`;
   }
 
-  const response = await fetch(`/api/messages/${id}`, { headers });
+  const response = await fetch(`/api/country/messages/${id}`, { headers });
 
   if (!response.ok) {
     const errorMessage = await response.text();
@@ -88,7 +89,7 @@ export async function fetchMessage(
   return message;
 }
 
-export async function createMembership({
+export async function createMembershipCountry({
   ephemeralPubkey,
   ephemeralPubkeyExpiry,
   groupId,
@@ -103,7 +104,7 @@ export async function createMembership({
   proof: Uint8Array;
   proofArgs: object;
 }) {
-  const response = await fetch("/api/memberships", {
+  const response = await fetch("/api/country/memberships", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -122,9 +123,9 @@ export async function createMembership({
     throw new Error("Call to /memberships API failed");
   }
 }
-
-export async function createMessage(signedMessage: SignedMessage) {
-  const response = await fetch("/api/messages", {
+  
+export async function createMessageCountry(signedMessage: SignedMessage) {
+  const response = await fetch("/api/country/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -143,11 +144,11 @@ export async function createMessage(signedMessage: SignedMessage) {
   }
 }
 
-export async function toggleLike(messageId: string, like: boolean) {
+export async function toggleLikeCountry(messageId: string, like: boolean) {
   try {
     const pubkey = getEphemeralPubkey();
 
-    const response = await fetch("/api/likes", {
+    const response = await fetch("/api/country/likes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -195,4 +196,60 @@ export async function createLinkSelfXyz(signedMessage: SignedMessage, uuid: stri
     console.error(`Call to /messages API failed: ${errorMessage}`);
     throw new Error("Call to /messages API failed");
   }
+}
+export async function postMessageCountry(message: Message) {
+  // Sign the message with the ephemeral key pair
+  const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+  const signedMessage: SignedMessage = {
+    ...message,
+    signature: signature,
+    ephemeralPubkey: ephemeralPubkey,
+    ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+  };
+
+  // Send the signed message to the server
+  await createMessageCountry(signedMessage);
+
+  return signedMessage;
+}
+
+export async function fetchMyDataMessageCountry(signedMessage: SignedMessage) {
+  const response = await fetch("/api/country/profile", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...signedMessage,
+      ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+      signature: signedMessage.signature.toString(),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    console.error(`Call to /messages API failed: ${errorMessage}`);
+    throw new Error("Call to /messages API failed");
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+
+export async function getMyDataMessageCountry(message: Message) {
+  // Sign the message with the ephemeral key pair
+  const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+  const signedMessage: SignedMessage = {
+    ...message,
+    signature: signature,
+    ephemeralPubkey: ephemeralPubkey,
+    ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+  };
+
+  // Send the signed message to the server
+  const response = await fetchMyDataMessageCountry(signedMessage);
+
+  console.log("response", response);
+  return response;
 }

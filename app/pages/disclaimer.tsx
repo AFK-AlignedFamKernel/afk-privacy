@@ -5,7 +5,7 @@ export default function DisclaimerPage() {
     return (
         <>
             <Head>
-                <title>Disclaimer - StealthNote</title>
+                <title>Disclaimer - AFK</title>
             </Head>
 
             <div className="article">

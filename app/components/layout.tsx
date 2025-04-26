@@ -66,13 +66,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             className="mobile-header-logo"
             style={isSidebarOpen ? { display: "none" } : {}}
           >
-            <Link href="/">StealthNote</Link>
+            <Link href="/">AFK</Link>
           </div>
         </div>
         <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
           <div className="logo">
             <Link href="/">
-              <Image src={logo} alt="StealthNote" width={150} height={50} />
+              <Image src={logo} alt="AFK" width={150} height={50} />
             </Link>
           </div>
           <nav className="sidebar-nav">
@@ -85,6 +85,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Home
               </Link>
 
+              <Link
+                onClick={() => setIsSidebarOpen(false)}
+                href="/country"
+                className="sidebar-nav-item"
+              >
+                Country
+              </Link>
+              <Link
+              onClick={() => setIsSidebarOpen(false)}
+              href="/zk-passport"
+              className="sidebar-nav-item"
+            >
+              zkDID
+            </Link>
+
+
               {slug && (
                 <Link
                   onClick={() => setIsSidebarOpen(false)}
@@ -96,6 +112,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               )}
             </div>
 
+        
             <div className="sidebar-nav-footer">
               <button
                 onClick={() => {
@@ -141,10 +158,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
           <p className="sidebar-nav-copyright">
             <span>Made with </span>
-            <Link 
-              href="https://noir-lang.org" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <Link
+              href="https://noir-lang.org"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ color: '#382E81' }}
             >
               Noir
