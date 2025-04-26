@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
-import { verifyMessageSignature } from "../../../lib/ephemeral-key";
-import { SignedMessage } from "../../../lib/types";
 import { ZKPassport } from "@zkpassport/sdk";
 
 const supabaseUrl = process.env.SUPABASE_URL;
