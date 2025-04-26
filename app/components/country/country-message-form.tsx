@@ -11,6 +11,7 @@ import SignWithGoogleButton from "../siwg";
 import { postMessageCountry } from "@/lib/country";
 import Dialog from "../dialog";
 import SelfXyzRegistration from "../zkdid/self-xyz";
+import COUNTRY_DATA from "@/assets/country";
 // import SignInWithMicrosoftButton from "./siwm";
 
 type MessageFormProps = {
@@ -19,14 +20,14 @@ type MessageFormProps = {
   connectedKyc?:PassportRegistration
 };
 
-const prompts = (companyName: string) => [
-  `What’s the tea at ${companyName}?`,
-  `What’s going unsaid at ${companyName}?`,
-  `What’s happening behind the scenes at ${companyName}?`,
-  `What would you say if you weren’t being watched?`,
-  `What’s the thing nobody’s admitting at ${companyName}?`,
+const prompts = (companyName: string, nationality: string) => [
+  `What’s the tea at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s going unsaid at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s happening behind the scenes at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What would you say if you weren’t being watched? ${COUNTRY_DATA[nationality]?.flag}`,
+  `What’s the thing nobody’s admitting at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
 ];
-const randomPromptIndex = Math.floor(Math.random() * prompts("").length);
+const randomPromptIndex = Math.floor(Math.random() * prompts("","your Nationality").length);
 
 const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc }) => {
   const [currentGroupId, setCurrentGroupId] = useLocalStorage<string | null>(
@@ -132,7 +133,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
 
   const isTextAreaDisabled = !!isRegistering || isPosting || !isRegistered;
 
-  const randomPrompt = prompts(connectedKyc?.nationality ?? "your Nationality")[randomPromptIndex]
+  const randomPrompt = prompts(connectedKyc?.nationality ?? "your Nationality", connectedKyc?.nationality ?? "your Nationality")[randomPromptIndex]
 
   return (
     <div className="message-form">
