@@ -5,6 +5,7 @@ dotenv.config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ['@zkpassport/sdk'],
   experimental: {
     outputFileTracingIncludes: {
       '/api/messages': [
