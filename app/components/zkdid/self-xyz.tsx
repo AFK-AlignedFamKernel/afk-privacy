@@ -69,7 +69,7 @@ function SelfXyzRegistration() {
     appName: "AFK Privacy",
     scope: process.env.NEXT_PUBLIC_SELF_SCOPE_URL as string ?? "scope-verify-afk-privacy",
     endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL as string
-      ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}/api/register/self-xyz`
+      ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}`
       : `https://privacy-afk-community.xyz/api/register/self-xyz`,
 
       // ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}/api/register/self-xyz?pubkey=${pubkey}`
