@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
-import MessageCard from "../message-card";
+import CountryMessageCard from "./country-message-card";
 import { Message, SignedMessageWithProof } from "../../lib/types";
 import CountryMessageForm from "./country-message-form";
 
@@ -53,7 +53,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
       const res = await getMyDataMessageCountry(messageObj);
 
       const myData = res?.credentialSubject;
-      console.log("myData", myData);  
+      console.log("myData", myData);
       setMyData(myData);
       console.log("myData", myData);
     };
@@ -89,6 +89,8 @@ const MessageListCountry: React.FC<MessageListProps> = ({
           beforeTimestamp,
           groupId,
         });
+
+        console.log("fetchedMessages", fetchedMessages);
 
         const existingMessageIds: Record<string, boolean> = {};
         messages.forEach((m) => {
@@ -207,23 +209,26 @@ const MessageListCountry: React.FC<MessageListProps> = ({
     <>
       {showMessageForm && (
         <CountryMessageForm
-        
-        connectedKyc={myData}
-        isInternal={isInternal} onSubmit={onNewMessageSubmit} />
+
+          connectedKyc={myData}
+          isInternal={isInternal} onSubmit={onNewMessageSubmit} />
       )}
 
       <div className="message-list" ref={messageListRef}>
-        {messages.map((message, index) => (
-          <div
-            key={message.id || index}
-            ref={index === messages.length - 1 ? lastMessageElementRef : null}
-          >
-            <MessageCard
-              message={message as SignedMessageWithProof}
-              isInternal={isInternal}
-            />
-          </div>
-        ))}
+        {messages.map((message, index) => {
+          console.log("message", message);
+          return (
+            <div
+              key={message.id || index}
+              ref={index === messages.length - 1 ? lastMessageElementRef : null}
+            >
+              <CountryMessageCard
+                message={message as SignedMessageWithProof}
+                isInternal={isInternal}
+              />
+            </div>
+          )
+        })}
         {loading && renderLoading()}
         {!loading && !error && messages.length === 0 && renderNoMessages()}
       </div>

@@ -6,7 +6,8 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>StealthNote - Anonymous messages from your coworkers</title>
+        <title>AFK - Anonymous messages from your coworkers, country and people</title>
+        <meta name="description" content="AFK is a platform for anonymous messages from your coworkers, country and people" />
       </Head>
 
       <div className="home-page">

@@ -74,6 +74,17 @@ export async function postMessageCountry(
       throw new Error("Message signature check failed");
     }
 
+
+    const { data: passportData, error: passportError } = await supabase.from("passport_registrations").select("*").eq("pubkey", signedMessage.ephemeralPubkey.toString()).single();
+
+
+    if (!passportData || passportError) {
+      console.error("Passport data not found", passportError);
+      throw new Error("Passport data not found");
+    }
+    const nationality = passportData?.nationality;
+    const gender = passportData?.gender;
+    const dateOfBirth = passportData?.date_of_birth;
     const { error: insertError } = await supabase.from("country_messages").insert([
       {
         id: signedMessage.id,
@@ -86,7 +97,9 @@ export async function postMessageCountry(
         internal: signedMessage.internal,
         parent_id: signedMessage?.parentId,
         reply_count: 0,
-        
+        nationality: nationality,
+        gender: gender,
+        date_of_birth: dateOfBirth,
       },
     ]);
 
@@ -121,6 +134,7 @@ export async function postMessageCountry(
       throw fetchError;
     }
 
+    console.log("createdMessage", createdMessage);
     res.status(201).json(createdMessage);
     res.end();
   } catch (error) {
@@ -144,7 +158,7 @@ export async function fetchMessagesCountry(
   let query = supabase
     .from("country_messages")
     .select(
-      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id"
+      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, nationality, gender, date_of_birth"
     )
     .order("timestamp", { ascending: false })
     .limit(limit);
@@ -223,7 +237,10 @@ export async function fetchMessagesCountry(
     internal: message.internal,
     likes: message.likes,
     replyCount: message.reply_count,
-    parentId: message.parent_id
+    parentId: message.parent_id,
+    nationality: message.nationality,
+    gender: message.gender,
+    dateOfBirth: message.date_of_birth
   }));
 
   res.json(messages);

@@ -28,7 +28,7 @@ export default function GroupPage() {
   return (
     <>
       <Head>
-        <title>Anonymous messages from members of {groupId} - StealthNote</title>
+        <title>{groupId} Anonymous messages from members of {anonGroup.title} - AFK</title>
       </Head>
 
       <div className="domain-page">

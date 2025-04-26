@@ -129,6 +129,9 @@ export interface PassportRegistration {
   date_of_birth?: string;
   gender?: string;
   is_verified?: boolean;
-  proof?: string;
   proof_args?: string;
+}
+
+export interface SignedMessageWithProofWithPassport extends PassportRegistration, SignedMessageWithProof {
+
 }

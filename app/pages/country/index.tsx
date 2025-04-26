@@ -6,7 +6,8 @@ export default function CountryPage() {
   return (
     <>
       <Head>
-        <title>StealthNote - Anonymous messages from your coworkers</title>
+        <title>AFK - Anonymous messages from people around the world and in your country</title>
+        <meta name="description" content="AFK is a platform for anonymous messages from people around the world and in your country" />
       </Head>
 
       <div className="home-page">
