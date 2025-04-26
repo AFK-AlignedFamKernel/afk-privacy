@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS country_messages (
     nationality TEXT,
     date_of_birth TEXT,
     gender TEXT,
-    -- CONSTRAINT fk_ephemeral_key
-    --     FOREIGN KEY (pubkey)
-    --     REFERENCES ephemeral_keys(pubkey)
+    group_id TEXT NOT NULL,
+    group_provider TEXT NOT NULL,
+    internal BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE INDEX IF NOT EXISTS idx_country_messages_nationality ON country_messages(nationality);
@@ -24,3 +24,5 @@ CREATE INDEX IF NOT EXISTS idx_country_messages_gender ON country_messages(gende
 CREATE INDEX IF NOT EXISTS idx_country_messages_ephemeral_key_id ON country_messages(ephemeral_key_id);
 CREATE INDEX IF NOT EXISTS idx_country_messages_passport_registration_id ON country_messages(passport_registration_id);
 CREATE INDEX IF NOT EXISTS idx_country_messages_pubkey ON country_messages(pubkey);
+CREATE INDEX IF NOT EXISTS idx_country_messages_group_id ON country_messages(group_id);
+CREATE INDEX IF NOT EXISTS idx_country_messages_group_provider ON country_messages(group_provider);
