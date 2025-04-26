@@ -117,4 +117,5 @@ export const LocalStorageKeys = {
   GoogleOAuthNonce: "googleOAuthNonce",
   DarkMode: "darkMode",
   HasSeenWelcomeMessage: "hasSeenWelcomeMessage",
+  EphemeralKeyPassportRegistration: "ephemeralKeyPassportRegistration",
 };

@@ -6,19 +6,24 @@ import { getUserIdentifier, SelfBackendVerifier, countryCodes } from '@selfxyz/c
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const SELF_SCOPE_URL = process.env.SELF_SCOPE_URL;
-const SELF_VERIFY_URL = process.env.SELF_VERIFY_URL;
+const SELF_SCOPE_URL = process.env.SELF_SCOPE_URL as string;
+const SELF_VERIFY_URL = process.env.SELF_VERIFY_URL as string;
 
-if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase environment variables");
-}
+// if (!supabaseUrl || !supabaseKey) {
+//     throw new Error("Missing Supabase environment variables");
+// }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const { proof, publicSignals, publicKey, ephemeralKey } = req.body;
+
+      console.log("Proof:", proof);
+      console.log("PublicSignals:", publicSignals);
+      console.log("PublicKey:", publicKey);
+      console.log("EphemeralKey:", ephemeralKey);
 
       if (!proof || !publicSignals) {
         return res.status(400).json({ message: 'Proof and publicSignals are required' });
@@ -30,13 +35,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Initialize and configure the verifier
       const selfBackendVerifier = new SelfBackendVerifier(
-        SELF_SCOPE_URL ?? 'my-application-scope', 
-        SELF_VERIFY_URL ?? 'https://myapp.com/api/verify'
+        SELF_SCOPE_URL ?? 'scope-verify-afk-privacy', 
+        SELF_VERIFY_URL ?? 'https://privacy.afk-community.xyz/api/register/self-xyz'
       );
 
       // Verify the proof
       const result = await selfBackendVerifier.verify(proof, publicSignals);
       
+      console.log("Result:", result);
       if (result.isValid) {
         // Return successful verification response
         return res.status(200).json({

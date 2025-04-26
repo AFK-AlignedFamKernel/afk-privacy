@@ -24,11 +24,22 @@ function SelfXyzRegistration() {
   if (!isClient || !userId || !SelfComponents) return null;
 
   // Create the SelfApp configuration
+  console.log("process.env.NEXT_PUBLIC_SELF_SCOPE_URL", process.env.NEXT_PUBLIC_SELF_SCOPE_URL);
+  console.log("process.env.NEXT_PUBLIC_SELF_VERIFY_URL", process.env.NEXT_PUBLIC_SELF_VERIFY_URL);
   const selfApp = new SelfComponents.SelfAppBuilder({
     appName: "AFK Privacy",
-    scope: process.env.NEXT_PUBLIC_SELF_SCOPE_URL ?? "scope-verify-afk-privacy",
-    endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL ?? "https://privacy-afk-community.xyz/api/register/self-xyz",
+    scope: process.env.NEXT_PUBLIC_SELF_SCOPE_URL  as string ?? "scope-verify-afk-privacy",
+    endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL  as string ?? "https://privacy-afk-community.xyz/api/register/self-xyz",
     userId,
+    endpointType: "https",
+    disclosures:{
+      nationality: true,
+      // country: true,
+      gender: true,
+      // expiry_date: true,
+      // date_of_birth: true,
+    },
+    devMode: true,
   }).build();
 
   return (
@@ -38,11 +49,15 @@ function SelfXyzRegistration() {
       
       <SelfComponents.SelfQRcodeWrapper
         selfApp={selfApp}
+        onError={(error: any  ) => {
+          console.error("Error:", error);
+        }}
         onSuccess={() => {
           // Handle successful verification
           console.log("Verification successful!");
           // Redirect or update UI
         }}
+        // type="deeplink"
         size={350}
       />
       
