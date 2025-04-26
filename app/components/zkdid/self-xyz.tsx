@@ -2,6 +2,7 @@
 
 import { postLinkSelfXyz } from '@/lib/self-xyz';
 import { loadOrInitializeEphemeralKey } from '@/lib/zk-did';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +11,10 @@ function SelfXyzRegistration() {
   const [pubkey, setPubkey] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [SelfComponents, setSelfComponents] = useState<any>(null);
-
+  const [usedPubkeySelfXyz, setUsedPubkeySelfXyz] = useLocalStorage<string | null>(
+    "usedPubkeySelfXyz",
+    null
+  );
   useEffect(() => {
     setIsClient(true);
 
@@ -99,6 +103,8 @@ function SelfXyzRegistration() {
           // Handle successful verification
           console.log("Verification successful!");
           console.log("E:", e);
+          setUsedPubkeySelfXyz(pubkey);
+          
           // Redirect or update UI
         }}
         // type="deeplink"

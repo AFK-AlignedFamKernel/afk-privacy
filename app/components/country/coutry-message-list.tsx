@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { fetchMessages } from "../../lib/country/index";
+import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
 import MessageCard from "../message-card";
-import { SignedMessageWithProof } from "../../lib/types";
-import MessageForm from "../message-form";
+import { Message, SignedMessageWithProof } from "../../lib/types";
+import CountryMessageForm from "./country-message-form";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds
@@ -33,6 +33,33 @@ const MessageListCountry: React.FC<MessageListProps> = ({
   const observer = useRef<IntersectionObserver | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
+
+  const [myData, setMyData] = useState<any>(null);
+  useEffect(() => {
+    const fetchMyData = async () => {
+      const message = "getMyData";
+      const messageObj: Message = {
+        // id: crypto.randomUUID().split("-").slice(0, 2).join(""),
+        id: crypto.randomUUID(),
+        timestamp: new Date(),
+        text: message,
+        internal: !!isInternal,
+        likes: 0,
+        anonGroupId: "selfxyz",
+        anonGroupProvider: "selfxyz",
+      };
+
+      console.log("messageObj", messageObj);
+      const res = await getMyDataMessageCountry(messageObj);
+
+      const myData = res?.credentialSubject;
+      console.log("myData", myData);  
+      setMyData(myData);
+      console.log("myData", myData);
+    };
+    fetchMyData();
+  }, []);
+
   // Ref to keep track of the last message element (to load more messages on scroll)
   const lastMessageElementRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -56,7 +83,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
       setLoading(true);
 
       try {
-        const fetchedMessages = await fetchMessages({
+        const fetchedMessages = await fetchMessagesCountry({
           isInternal: !!isInternal,
           limit: MESSAGES_PER_PAGE,
           beforeTimestamp,
@@ -87,7 +114,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
     if (isInternal && !groupId) return;
 
     try {
-      const newMessages = await fetchMessages({
+      const newMessages = await fetchMessagesCountry({
         groupId,
         isInternal: !!isInternal,
         limit: MESSAGES_PER_PAGE,
@@ -179,7 +206,10 @@ const MessageListCountry: React.FC<MessageListProps> = ({
   return (
     <>
       {showMessageForm && (
-        <MessageForm isInternal={isInternal} onSubmit={onNewMessageSubmit} />
+        <CountryMessageForm
+        
+        connectedKyc={myData}
+        isInternal={isInternal} onSubmit={onNewMessageSubmit} />
       )}
 
       <div className="message-list" ref={messageListRef}>
