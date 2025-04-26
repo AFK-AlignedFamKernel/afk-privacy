@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import IonIcon from "@reacticons/ionicons";
@@ -21,11 +21,11 @@ type MessageFormProps = {
 };
 
 const prompts = (companyName: string, nationality: string) => [
-  `What’s the tea at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What’s going unsaid at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What’s happening behind the scenes at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s the tea at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s going unsaid at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s happening behind the scenes at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
   `What would you say if you weren’t being watched? ${COUNTRY_DATA[nationality]?.flag}`,
-  `What’s the thing nobody’s admitting at ${companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What’s the thing nobody’s admitting at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
 ];
 const randomPromptIndex = Math.floor(Math.random() * prompts("","your Nationality").length);
 
@@ -56,10 +56,15 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   const anonGroup =
     provider && currentGroupId ? provider.getAnonGroup(currentGroupId) : null;
 
-  const isRegistered = !!usedPubkeySelfXyz;
+  // const isRegistered = !!connectedKyc;
+  const isRegistered = useMemo(() => {
+    return !!connectedKyc;
+  }, [connectedKyc]);
+
   const senderName = isInternal
     ? generateNameFromPubkey(getEphemeralPubkey()?.toString() ?? "")
-    : `Someone from ${currentKycUUID}`;
+    : `Someone from ${COUNTRY_DATA[connectedKyc?.nationality ?? "UHOH"]?.name} ${COUNTRY_DATA[connectedKyc?.nationality ?? "your Nationality"]?.flag}`;
+    // : `Someone from ${connectedKyc?.nationality} ${COUNTRY_DATA[connectedKyc?.nationality ?? "UHOH"].name} ${COUNTRY_DATA[connectedKyc?.nationality ?? "your Nationality"]?.flag}`;
 
   const welcomeMessage = `
     Sign in with passport to anonymously post as "Someone from KYC (country, gender, age)".
