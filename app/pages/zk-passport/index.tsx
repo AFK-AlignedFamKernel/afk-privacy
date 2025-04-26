@@ -142,7 +142,7 @@ function RegistrationForm() {
     <div className="registration-form">
       <h2>Create an Account</h2>
       <form onSubmit={handleSubmit}>
-        <div>
+        {/* <div>
           <label>Email</label>
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
@@ -154,7 +154,7 @@ function RegistrationForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
+        </div> */}
 
         {verificationStatus === "idle" ? (
           <button type="submit">Verify with ZKPassport</button>
