@@ -35,10 +35,24 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
 
     const { data, error } = await supabase
       .from("messages")
-      .select(
-        /* eslint-disable-next-line max-len */
-        "id, group_id, group_provider, text, timestamp, signature, pubkey, internal, likes, memberships(proof, pubkey_expiry, proof_args)"
-      )
+      .select(`
+        id,
+        group_id,
+        group_provider,
+        text,
+        timestamp,
+        signature,
+        pubkey,
+        internal,
+        likes,
+        reply_count,
+        parent_id,
+        memberships!fk_message_membership (
+          proof,
+          pubkey_expiry,
+          proof_args
+        )
+      `)
       .eq("id", id)
       .single();
 
@@ -85,13 +99,12 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       timestamp: data.timestamp,
       signature: data.signature,
       ephemeralPubkey: data.pubkey,
-      // @ts-expect-error memberships is not array
       ephemeralPubkeyExpiry: data.memberships.pubkey_expiry,
       internal: data.internal,
       likes: data.likes,
-      // @ts-expect-error memberships is not array
+      replyCount: data.reply_count,
+      parentId: data.parent_id,
       proof: JSON.parse(data.memberships.proof),
-      // @ts-expect-error memberships is not array
       proofArgs: JSON.parse(data.memberships.proof_args),
     };
 

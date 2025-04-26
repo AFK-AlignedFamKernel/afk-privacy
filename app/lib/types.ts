@@ -87,6 +87,10 @@ export interface Message {
   internal: boolean;
   /** Number of likes message received */
   likes: number;
+  /** Number of replies to the message */
+  replyCount?: number;
+  /** ID of the parent message (if this message is a reply) */
+  parentId?: string | null;
 }
 
 export interface SignedMessage extends Message {
