@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocalStorage } from "@uidotdev/usehooks";
 import IonIcon from "@reacticons/ionicons";
-import { LocalStorageKeys, PassportRegistration } from "../../lib/types";
+import { LocalStorageKeys, PassportRegistration, SignedMessage } from "../../lib/types";
 import Dialog from "../dialog";
 import SelfXyzRegistration from "../zkdid/self-xyz";
 import { signMessageSelfXyz } from '@/lib/zk-did';
@@ -54,10 +54,10 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isRegistered) {
-            setIsDialogOpen(true);
-            return;
-        }
+        // if (!isRegistered) {
+        //     setIsDialogOpen(true);
+        //     return;
+        // }
 
         setIsPosting(true);
         setError("");
@@ -71,21 +71,35 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 internal: false,
                 anonGroupId: 'self-xyz',
                 anonGroupProvider: 'self-xyz',
-                likes: 0
+                likes: 0,
+                replyCount: 0,
+                parentId: null,
             }
-            const signedMessage = await signMessageSelfXyz(message);
+            const {signature, ephemeralPubkey, ephemeralPubkeyExpiry} = await signMessageSelfXyz(message);
+
+            const signedMessage: SignedMessage = {
+                ...message,
+                signature: signature,
+                ephemeralPubkey: ephemeralPubkey,
+                ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+              };
+            
             console.log("review-poll-form signedMessage", signedMessage);
             const pollData = {
-                id: crypto.randomUUID(),
                 title,
                 description,
                 is_yes_no: isYesNo,
-                max_options: maxOptions,
-                min_options: minOptions,
+                isYesNo: isYesNo, 
+                answersOptions:isYesNo ? ['Yes', 'No'] : options.filter(opt => opt.trim()),
+                answerOptions:isYesNo ? ['Yes', 'No'] : options.filter(opt => opt.trim()),
+                maxOptions: isYesNo ? 2 : maxOptions,
+                minOptions: isYesNo ? 2 : minOptions,
                 answer_options: isYesNo ? ['Yes', 'No'] : options.filter(opt => opt.trim()),
                 multiselect,
                 ends_at: new Date(endDate).toISOString(),
+                endsAt: new Date(endDate).toISOString(),
                 show_results_publicly: showResultsPublicly,
+                showResultsPublicly: showResultsPublicly,
                 is_only_organizations: isOnlyOrganizations,
                 is_only_kyc_verified: isOnlyKycVerified,
                 group_id: 'self-xyz',
@@ -108,6 +122,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${signedMessage.signature}`,
                 },
                 body: JSON.stringify({
                     ...pollData,

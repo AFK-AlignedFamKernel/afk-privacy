@@ -31,6 +31,8 @@ function SelfXyzRegistration() {
 
     const loadEphemeralKeySelfXyz = async () => {
       const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
+      console.log("ephemeralKey", ephemeralKey);
+      console.log("uuid", uuid);
       // setUserId(`0x${ephemeralKey?.publicKey?.toString()}`);
 
       const messageObj = {

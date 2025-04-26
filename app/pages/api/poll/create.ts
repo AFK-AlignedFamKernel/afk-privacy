@@ -51,7 +51,7 @@ export async function createReview(
     }
     console.log("createReview signedMessage", signedMessage);
     const reviewData = {
-      is_yes_no: body.isYesNo,
+      // is_yes_no: body.isYesNo,
       max_options: body.maxOptions,
       min_options: body.minOptions,
       answer_options: body.answerOptions,
@@ -63,20 +63,30 @@ export async function createReview(
       show_results_publicly: body.showResultsPublicly,
       group_id: signedMessage.anonGroupId,
       group_provider: signedMessage.anonGroupProvider,
-      pubkey: signedMessage.ephemeralPubkey.toString(),
-      
+      // pubkey: signedMessage.ephemeralPubkey.toString(),
+
     }
     console.log("createReview reviewData", reviewData);
 
+    
+
     // Verify pubkey is registered and check membership
     const { data, error } = await supabase
-      .from("memberships")
+      .from("ephemeral_keys")
       .select(`
-        *,
-        passport_registrations!inner(*)
-      `)
+        *`)
       .eq("pubkey", signedMessage.ephemeralPubkey.toString())
       .single();
+
+    console.log("ephemeral_keys data", data);
+
+
+    const authHeader = request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).json({ error: "Authorization required for internal messages" });
+      res.end();
+      return;
+    }
 
     if (error) {
       throw error;
@@ -106,15 +116,15 @@ export async function createReview(
     const nationality = passportData?.nationality;
     const gender = passportData?.gender;
     const dateOfBirth = passportData?.date_of_birth;
-    const { error: insertError } = await supabase.from("country_messages").insert([
+    const { error: insertError, data: createdPoll } = await supabase.from("polls").insert([
       {
         id: signedMessage.id,
-        text: signedMessage.text,
-        timestamp: signedMessage.timestamp.toISOString(),
-        signature: signedMessage.signature.toString(),
-        pubkey: signedMessage.ephemeralPubkey.toString(),
-        internal: signedMessage.internal,
-        parent_id: signedMessage?.parentId,
+        // text: signedMessage.text,
+        // timestamp: signedMessage.timestamp.toISOString(),
+        // signature: signedMessage.signature.toString(),
+        // pubkey: signedMessage.ephemeralPubkey.toString(),
+        // internal: signedMessage.internal,
+        // parent_id: signedMessage?.parentId,
         ...reviewData
       },
     ]);
@@ -126,11 +136,7 @@ export async function createReview(
     // Return the created message
     const { data: createdMessage, error: fetchError } = await supabase
       .from("polls")
-      .select(`
-        id,
-     
-
-      `)
+      .select(`*, poll_options(*)`)
       .eq("id", signedMessage.id)
       .single();
 
