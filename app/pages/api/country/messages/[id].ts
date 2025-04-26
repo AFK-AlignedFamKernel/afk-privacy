@@ -99,13 +99,13 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       timestamp: data.timestamp,
       signature: data.signature,
       ephemeralPubkey: data.pubkey,
-      ephemeralPubkeyExpiry: data.memberships.pubkey_expiry,
+      ephemeralPubkeyExpiry: data.memberships[0].pubkey_expiry,
       internal: data.internal,
       likes: data.likes,
       replyCount: data.reply_count,
       parentId: data.parent_id,
-      proof: JSON.parse(data.memberships.proof),
-      proofArgs: JSON.parse(data.memberships.proof_args),
+      proof: JSON.parse(data.memberships[0].proof),
+      proofArgs: JSON.parse(data.memberships[0].proof_args),
     };
 
     res.json(message);

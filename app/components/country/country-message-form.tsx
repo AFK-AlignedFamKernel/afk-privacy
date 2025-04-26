@@ -30,10 +30,7 @@ const prompts = (companyName: string, nationality: string) => [
 const randomPromptIndex = Math.floor(Math.random() * prompts("","your Nationality").length);
 
 const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc }) => {
-  const [currentGroupId, setCurrentGroupId] = useLocalStorage<string | null>(
-    "currentGroupId",
-    null
-  );
+
   const [currentKYCProvider, setCurrentKYCProvider] = useLocalStorage<string | null>(
     "currentKYCProvider",
     null
@@ -53,9 +50,6 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   );
 
   const provider = currentProvider ? Providers[currentProvider] : null;
-  const anonGroup =
-    provider && currentGroupId ? provider.getAnonGroup(currentGroupId) : null;
-
   // const isRegistered = !!connectedKyc;
   const isRegistered = useMemo(() => {
     return !!connectedKyc;
@@ -84,13 +78,13 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   async function handleSignIn(providerName: string) {
     try {
       setIsRegistering(providerName);
-      setStatus(`Generating cryptographic proof of your membership without revealing your identity.
-        This will take about 20 seconds...`);
+      // setStatus(`Generating cryptographic proof of your membership without revealing your identity.
+      //   This will take about 20 seconds...`);
 
-      const { anonGroup } = await generateKeyPairAndRegister(providerName);
+      // const { anonGroup } = await generateKeyPairAndRegister(providerName);
 
-      setCurrentGroupId(anonGroup.id);
-      setCurrentProvider(providerName);
+      // setCurrentGroupId(anonGroup.id);
+      // setCurrentProvider(providerName);
       setStatus("");
     } catch (error) {
       console.error("Error:", error);
@@ -101,7 +95,6 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   }
 
   async function resetIdentity() {
-    setCurrentGroupId(null);
     setCurrentProvider(null);
     setStatus(welcomeMessage);
   }
@@ -113,6 +106,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
     setIsPosting(true);
 
     try {
+      const pubkey = getEphemeralPubkey()?.toString() ?? "";
       const messageObj: Message = {
         // id: crypto.randomUUID().split("-").slice(0, 2).join(""),
         id: crypto.randomUUID(),
@@ -120,8 +114,8 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
         text: message,
         internal: !!isInternal,
         likes: 0,
-        anonGroupId: currentGroupId as string,
-        anonGroupProvider: currentProvider as string,
+        anonGroupId: "self-xyz", // TODO: change to provider zkdid
+        anonGroupProvider: "self-xyz", // TODO: change to provider zkdid
       };
 
       const signedMessage = await postMessageCountry(messageObj);

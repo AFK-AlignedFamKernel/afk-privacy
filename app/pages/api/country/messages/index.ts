@@ -17,16 +17,16 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
-    fetchMessages(req, res);
+    fetchMessagesCountry(req, res);
   } else if (req.method === "POST") {
-    postMessage(req, res);
+    postMessageCountry(req, res);
   } else {
     res.setHeader("Allow", ["GET", "POST"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
 
-export async function postMessage(
+export async function postMessageCountry(
   request: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -53,8 +53,8 @@ export async function postMessage(
       .from("ephemeral_keys")
       .select("*")
       .eq("pubkey", signedMessage.ephemeralPubkey.toString())
-      .eq("group_id", signedMessage.anonGroupId)
-      .eq("provider", signedMessage.anonGroupProvider)
+      // .eq("group_id", signedMessage.anonGroupId)
+      // .eq("provider", signedMessage.anonGroupProvider)
       .single();
 
     if (error) {
@@ -109,11 +109,10 @@ export async function postMessage(
         likes,
         reply_count,
         parent_id,
-        memberships!fk_message_membership (
-          proof,
-          pubkey_expiry,
-          proof_args
-        )
+        nationality,
+        gender,
+        date_of_birth
+
       `)
       .eq("id", signedMessage.id)
       .single();
@@ -131,7 +130,7 @@ export async function postMessage(
   }
 }
 
-export async function fetchMessages(
+export async function fetchMessagesCountry(
   request: NextApiRequest,
   res: NextApiResponse
 ) {
