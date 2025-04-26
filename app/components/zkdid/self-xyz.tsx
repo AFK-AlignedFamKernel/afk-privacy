@@ -1,11 +1,13 @@
 'use client';
 
+import { postLinkSelfXyz } from '@/lib/self-xyz';
 import { loadOrInitializeEphemeralKey } from '@/lib/zk-did';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 function SelfXyzRegistration() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [pubkey, setPubkey] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [SelfComponents, setSelfComponents] = useState<any>(null);
 
@@ -23,13 +25,35 @@ function SelfXyzRegistration() {
 
   useEffect(() => {
 
-    const loadEphemeralKey = async () => {
+    const loadEphemeralKeySelfXyz = async () => {
       const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
+      // setUserId(`0x${ephemeralKey?.publicKey?.toString()}`);
+
+      const messageObj = {
+        id: crypto.randomUUID(),
+        timestamp: new Date(),
+        text: `link-selfxyz:${uuid}`,
+        internal: false,
+        likes: 0,
+        replyCount: 0,
+        parentId: null,
+        anonGroupId: "selfxyz",
+        anonGroupProvider: "selfxyz",
+      };
+
+
+      const signedMessage = await postLinkSelfXyz(messageObj, uuid);
+      // onCommentAdded(signedMessage as SignedMessageWithProof);
+
+      if(!signedMessage) {
+        throw new Error("Failed to post link-selfxyz");
+      }
       setUserId(uuid);
+      setPubkey(ephemeralKey?.publicKey?.toString());
     }
 
     if (!userId) {
-      loadEphemeralKey();
+      loadEphemeralKeySelfXyz();
       setIsClient(true);
 
     }
@@ -44,8 +68,16 @@ function SelfXyzRegistration() {
   const selfApp = new SelfComponents.SelfAppBuilder({
     appName: "AFK Privacy",
     scope: process.env.NEXT_PUBLIC_SELF_SCOPE_URL as string ?? "scope-verify-afk-privacy",
-    endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL as string ?? "https://privacy-afk-community.xyz/api/register/self-xyz",
+    endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL as string
+      ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}/api/register/self-xyz`
+      : `https://privacy-afk-community.xyz/api/register/self-xyz`,
+
+      // ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}/api/register/self-xyz?pubkey=${pubkey}`
+      // : `https://privacy-afk-community.xyz/api/register/self-xyz?pubkey=${pubkey}`,
+      // : `https://privacy-afk-community.xyz/api/register/self-xyz?pubkey=${pubkey}`,
+    header:pubkey,
     userId,
+    // userIdType: "hex",
     endpointType: "https",
     disclosures: {
       nationality: true,
@@ -75,6 +107,10 @@ function SelfXyzRegistration() {
 
       <p className="text-sm text-gray-500">
         User ID: {userId.substring(0, 8)}...
+      </p>
+
+      <p className="text-sm text-gray-500">
+        Public Key: {pubkey}
       </p>
     </div>
   );

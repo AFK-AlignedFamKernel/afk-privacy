@@ -172,3 +172,27 @@ export async function toggleLike(messageId: string, like: boolean) {
     throw error;
   }
 }
+
+
+export async function createLinkSelfXyz(signedMessage: SignedMessage, uuid: string) {
+  const response = await fetch("/api/register/self-xyz/link-uuid", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...signedMessage,
+      pubkey: signedMessage.ephemeralPubkey.toString(),
+      ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+      signature: signedMessage.signature.toString(),
+
+      uuid: uuid,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    console.error(`Call to /messages API failed: ${errorMessage}`);
+    throw new Error("Call to /messages API failed");
+  }
+}

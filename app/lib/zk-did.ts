@@ -7,7 +7,7 @@ import { bytesToBigInt, bigIntToBytes } from "./utils";
 
 ed25519.etc.sha512Sync = (...m) => sha512(ed25519.etc.concatBytes(...m));
 
-export async function generateEphemeralKeySelfXyz(): Promise<{ephemeralKey: EphemeralKey, uuid: string}> {
+export async function generateEphemeralKeySelfXyz(): Promise<{ ephemeralKey: EphemeralKey, uuid: string }> {
   const privKey = ed25519.utils.randomPrivateKey();
   const privKeyBigInt = bytesToBigInt(privKey);
 
@@ -39,17 +39,17 @@ export async function generateEphemeralKeySelfXyz(): Promise<{ephemeralKey: Ephe
 
   saveEphemeralKeySelfXyz(ephemeralKey, uuid);
 
-  return { ephemeralKey: ephemeralKey, uuid: uuid}; // no need to expose private key outside this file
+  return { ephemeralKey: ephemeralKey, uuid: uuid }; // no need to expose private key outside this file
 }
 
 function saveEphemeralKeySelfXyz(ephemeralKey: EphemeralKey, uuid: string) {
   localStorage.setItem(LocalStorageKeys.SelfKeyPassportRegistration, JSON.stringify({
     ephemeralKey: {
-      privateKey: ephemeralKey.privateKey.toString(),
-      publicKey: ephemeralKey.publicKey.toString(),
-      salt: ephemeralKey.salt.toString(),
-      expiry: ephemeralKey.expiry,
-      ephemeralPubkeyHash: ephemeralKey.ephemeralPubkeyHash.toString(), 
+      privateKey: ephemeralKey?.privateKey?.toString(),
+      publicKey: ephemeralKey?.publicKey?.toString(),
+      salt: ephemeralKey?.salt?.toString(),
+      expiry: ephemeralKey?.expiry,
+      ephemeralPubkeyHash: ephemeralKey?.ephemeralPubkeyHash?.toString(),
     },
     uuid: uuid,
   }));
@@ -74,12 +74,15 @@ function loadEphemeralKeySelfXyz() {
 export async function loadOrInitializeEphemeralKey() {
   const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.SelfKeyPassportRegistration);
   if (!ephemeralKeyString) {
-    return await generateEphemeralKeySelfXyz();
+    const { ephemeralKey, uuid } = await generateEphemeralKeySelfXyz();
+    return {
+      ephemeralKey,
+      uuid: uuid,
+    };
   }
-
   const resEphemeralKey = JSON.parse(ephemeralKeyString);
   return {
-    ephemeralKey: resEphemeralKey.ephemeralKey,
+    ephemeralKey: resEphemeralKey.ephemeralKey as EphemeralKey,
     uuid: resEphemeralKey.uuid,
   };
 }
@@ -107,19 +110,20 @@ export function getEphemeralPubkey() {
   return ephemeralKey.publicKey;
 }
 
-export async function signMessage(message: Message) {
-  const ephemeralKey = loadEphemeralKeySelfXyz();
+export async function signMessageSelfXyz(message: Message) {
+  const { ephemeralKey } = await loadOrInitializeEphemeralKey();
   if (!ephemeralKey) {
     throw new Error("No ephemeralKey found");
   }
 
+
   const messageHash = await hashMessage(message);
 
-  const signature = await ed25519.signAsync(messageHash, bigIntToBytes(ephemeralKey.privateKey, 32));
+  const signature = await ed25519.signAsync(messageHash, bigIntToBytes(BigInt(ephemeralKey.privateKey), 32));
   const signatureBigInt = bytesToBigInt(signature);
 
   return {
-    ephemeralPubkey: ephemeralKey.publicKey,
+    ephemeralPubkey: BigInt(ephemeralKey.publicKey),
     ephemeralPubkeyExpiry: ephemeralKey.expiry,
     signature: signatureBigInt,
   };
