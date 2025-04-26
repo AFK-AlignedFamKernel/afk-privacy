@@ -34,9 +34,8 @@ function SelfXyzRegistration() {
     endpointType: "https",
     disclosures:{
       nationality: true,
-      // country: true,
       gender: true,
-      // expiry_date: true,
+      expiry_date: true,
       // date_of_birth: true,
     },
     devMode: true,
