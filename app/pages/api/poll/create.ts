@@ -33,6 +33,8 @@ export async function createReview(
   try {
     const body = (await request.body);
 
+    console.log("createReview body", body);
+
     const signedMessage: SignedMessage = {
       id: body.id,
       anonGroupId: body.anonGroupId,
@@ -47,6 +49,7 @@ export async function createReview(
       parentId: body?.parentId || null,
       replyCount: 0
     }
+    console.log("createReview signedMessage", signedMessage);
     const reviewData = {
       is_yes_no: body.isYesNo,
       max_options: body.maxOptions,
@@ -60,16 +63,19 @@ export async function createReview(
       show_results_publicly: body.showResultsPublicly,
       group_id: signedMessage.anonGroupId,
       group_provider: signedMessage.anonGroupProvider,
+      pubkey: signedMessage.ephemeralPubkey.toString(),
       
     }
+    console.log("createReview reviewData", reviewData);
 
-    // Verify pubkey is registered
+    // Verify pubkey is registered and check membership
     const { data, error } = await supabase
-      .from("ephemeral_keys")
-      .select("*")
+      .from("memberships")
+      .select(`
+        *,
+        passport_registrations!inner(*)
+      `)
       .eq("pubkey", signedMessage.ephemeralPubkey.toString())
-      // .eq("group_id", signedMessage.anonGroupId)
-      // .eq("provider", signedMessage.anonGroupProvider)
       .single();
 
     if (error) {

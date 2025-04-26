@@ -93,6 +93,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Country
               </Link>
               <Link
+                onClick={() => setIsSidebarOpen(false)}
+                href="/poll"
+                className="sidebar-nav-item"
+              >
+                Poll
+              </Link>
+              <Link
               onClick={() => setIsSidebarOpen(false)}
               href="/zk-passport"
               className="sidebar-nav-item"

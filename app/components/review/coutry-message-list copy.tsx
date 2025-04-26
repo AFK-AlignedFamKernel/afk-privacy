@@ -3,9 +3,9 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
-import CountryMessageCard from "./country-message-card";
+import CountryMessageCard from "../country/country-message-card";
 import { Message, SignedMessageWithProof } from "../../lib/types";
-import CountryMessageForm from "./country-message-form";
+import CountryMessageForm from "../country/country-message-form";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds

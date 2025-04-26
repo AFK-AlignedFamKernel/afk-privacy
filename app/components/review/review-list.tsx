@@ -6,6 +6,7 @@ import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } fro
 import CountryMessageCard from "../country/country-message-card";
 import { Message, SignedMessageWithProof } from "../../lib/types";
 import CountryMessageForm from "../country/country-message-form";
+import ReviewPollForm from "./review-poll-form";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds
@@ -205,8 +206,17 @@ const ReviewList: React.FC<MessageListProps> = ({
     );
   }
 
+  // In your component:
+const handlePollCreated = (poll: any) => {
+  // Handle the newly created poll
+  console.log('Poll created:', poll);
+};
+
+
   return (
     <>
+
+      <ReviewPollForm onSubmit={handlePollCreated} connectedKyc={myData} />
       {showMessageForm && (
         <CountryMessageForm
 
@@ -215,7 +225,7 @@ const ReviewList: React.FC<MessageListProps> = ({
       )}
 
       <div className="message-list" ref={messageListRef}>
-        {messages.map((message, index) => {
+        {/* {messages.map((message, index) => {
           // console.log("message", message);
           return (
             <div
@@ -228,7 +238,7 @@ const ReviewList: React.FC<MessageListProps> = ({
               />
             </div>
           )
-        })}
+        })} */}
         {loading && renderLoading()}
         {!loading && !error && messages.length === 0 && renderNoMessages()}
       </div>
