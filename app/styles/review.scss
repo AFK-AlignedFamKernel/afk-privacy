@@ -1,0 +1,383 @@
+/* Review List Container */
+.review-list-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Create Poll Button */
+.create-poll-button {
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  display: inline-block;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Polls List */
+.polls-list {
+  margin-bottom: 32px;
+}
+
+.poll-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    color: var(--shade-900);
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0 0 16px 0;
+    color: var(--shade-600);
+    font-size: 0.95rem;
+  }
+}
+
+.poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.poll-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-500);
+  }
+
+  label {
+    color: var(--shade-600);
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--shade-900);
+    }
+  }
+}
+
+/* Review List */
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Review Card */
+.review-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.review-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.review-card-header-sender {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-author {
+  font-weight: 600;
+  color: var(--shade-900);
+}
+
+.review-timestamp {
+  font-size: 0.875rem;
+  color: var(--shade-600);
+}
+
+.review-card-content {
+  margin-bottom: 16px;
+}
+
+.review-text {
+  color: var(--shade-700);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.review-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.rating-star {
+  color: #fbbf24;
+  font-size: 1.25rem;
+}
+
+.review-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.like-button-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  color: var(--shade-600);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    background: var(--shade-100);
+    color: #ef4444;
+  }
+
+  &.liked {
+    color: #ef4444;
+  }
+}
+
+.like-count {
+  font-size: 0.875rem;
+  color: var(--shade-600);
+}
+
+/* Loading States */
+.skeleton-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-card-skeleton {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.review-card-skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.skeleton-text {
+  background: linear-gradient(90deg, var(--shade-100) 25%, var(--shade-200) 50%, var(--shade-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-short {
+  width: 120px;
+  height: 16px;
+}
+
+.skeleton-long {
+  width: 100%;
+  height: 16px;
+}
+
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mt-05 {
+  margin-top: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dialog/Modal */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.dialog-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dialog-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.dialog-close:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Error Message */
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 0.875rem;
+}
+
+/* No Reviews Message */
+.article.text-center {
+  text-align: center;
+  padding: 32px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--shade-900);
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--shade-600);
+    margin: 0;
+  }
+}
+
+.mb-05 {
+  margin-bottom: 4px;
+}
+
+.poll-results {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--shade-200);
+}
+
+.poll-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.poll-result-label {
+  min-width: 100px;
+  color: var(--shade-600);
+  font-size: 0.875rem;
+}
+
+.poll-result-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--shade-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.poll-result-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.poll-result-count {
+  min-width: 40px;
+  text-align: right;
+  color: var(--shade-600);
+  font-size: 0.875rem;
+} 

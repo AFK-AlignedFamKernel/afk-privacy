@@ -2,45 +2,44 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
-import CountryMessageCard from "../country/country-message-card";
+import { fetchMessagesCountry, getMyDataMessageCountry } from "../../lib/country/index";
 import { Message, SignedMessageWithProof } from "../../lib/types";
-import CountryMessageForm from "../country/country-message-form";
 import ReviewPollForm from "./review-poll-form";
+import ReviewCard from "./review-card";
+import Dialog from "../dialog";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds
 const MAX_POLL_INTERVAL = 100000; // 100 seconds
 
-type MessageListProps = {
+type ReviewListProps = {
   isInternal?: boolean;
-  showMessageForm?: boolean;
   groupId?: string;
 };
 
-const ReviewList: React.FC<MessageListProps> = ({
+const ReviewList: React.FC<ReviewListProps> = ({
   isInternal,
-  showMessageForm,
   groupId,
 }) => {
   // State
-  const [messages, setMessages] = useState<SignedMessageWithProof[]>([]);
+  const [reviews, setReviews] = useState<SignedMessageWithProof[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState("");
   const [pollInterval, setPollInterval] = useState(INITIAL_POLL_INTERVAL);
+  const [showPollForm, setShowPollForm] = useState(false);
+  const [polls, setPolls] = useState<any[]>([]);
+  const [selectedPoll, setSelectedPoll] = useState<string | null>(null);
 
   // Refs
   const observer = useRef<IntersectionObserver | null>(null);
-  const messageListRef = useRef<HTMLDivElement>(null);
-
+  const reviewListRef = useRef<HTMLDivElement>(null);
 
   const [myData, setMyData] = useState<any>(null);
   useEffect(() => {
     const fetchMyData = async () => {
       const message = "getMyData";
       const messageObj: Message = {
-        // id: crypto.randomUUID().split("-").slice(0, 2).join(""),
         id: crypto.randomUUID(),
         timestamp: new Date(),
         text: message,
@@ -50,82 +49,90 @@ const ReviewList: React.FC<MessageListProps> = ({
         anonGroupProvider: "selfxyz",
       };
 
-      console.log("messageObj", messageObj);
       const res = await getMyDataMessageCountry(messageObj);
-
       const myData = res?.credentialSubject;
-      console.log("myData", myData);
       setMyData(myData);
-      console.log("myData", myData);
     };
     fetchMyData();
   }, []);
 
-  // Ref to keep track of the last message element (to load more messages on scroll)
-  const lastMessageElementRef = useCallback(
+  // Fetch polls
+  const fetchPolls = useCallback(async () => {
+    try {
+      const response = await fetch('/api/poll/list');
+      if (!response.ok) {
+        throw new Error('Failed to fetch polls');
+      }
+      const data = await response.json();
+      setPolls(data);
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPolls();
+  }, [fetchPolls]);
+
+  // Ref to keep track of the last review element (to load more reviews on scroll)
+  const lastReviewElementRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (loading) return;
       if (observer.current) observer.current.disconnect();
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
-          loadMessages(messages[messages.length - 1]?.timestamp.getTime());
+          loadReviews(reviews[reviews.length - 1]?.timestamp.getTime());
         }
       });
       if (node) observer.current.observe(node);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [messages, loading, hasMore]
+    [reviews, loading, hasMore]
   );
 
   // Cached helpers
-  const loadMessages = useCallback(
+  const loadReviews = useCallback(
     async (beforeTimestamp: number | null = null) => {
       if (isInternal && !groupId) return;
       setLoading(true);
 
       try {
-        const fetchedMessages = await fetchMessagesCountry({
-          isInternal: !!isInternal,
-          limit: MESSAGES_PER_PAGE,
-          beforeTimestamp,
-          groupId,
-        });
+        const response = await fetch(`/api/poll/list?isInternal=${!!isInternal}&limit=${MESSAGES_PER_PAGE}&beforeTimestamp=${beforeTimestamp}&groupId=${groupId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch polls');
+        }
+        const fetchedReviews = await response.json();
 
-        console.log("fetchedMessages", fetchedMessages);
-
-        const existingMessageIds: Record<string, boolean> = {};
-        messages.forEach((m) => {
-          existingMessageIds[m.id!] = true;
+        const existingReviewIds: Record<string, boolean> = {};
+        reviews.forEach((r) => {
+          existingReviewIds[r.id!] = true;
         });
-        const cleanedMessages = fetchedMessages.filter(
-          (m: SignedMessageWithProof) => !existingMessageIds[m.id!]
+        const cleanedReviews = fetchedReviews.filter(
+          (r: SignedMessageWithProof) => !existingReviewIds[r.id!]
         );
 
-        setMessages((prevMessages) => [...prevMessages, ...cleanedMessages]);
-        setHasMore(fetchedMessages.length === MESSAGES_PER_PAGE);
+        setReviews((prevReviews) => [...prevReviews, ...cleanedReviews]);
+        setHasMore(fetchedReviews.length === MESSAGES_PER_PAGE);
       } catch (error) {
         setError((error as Error)?.message);
       } finally {
         setLoading(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [groupId, isInternal]
   );
 
-  const checkForNewMessages = useCallback(async () => {
+  const checkForNewReviews = useCallback(async () => {
     if (isInternal && !groupId) return;
 
     try {
-      const newMessages = await fetchMessagesCountry({
-        groupId,
-        isInternal: !!isInternal,
-        limit: MESSAGES_PER_PAGE,
-        afterTimestamp: messages[0]?.timestamp.getTime(),
-      });
+      const response = await fetch(`/api/poll/list?isInternal=${!!isInternal}&limit=${MESSAGES_PER_PAGE}&afterTimestamp=${reviews[0]?.timestamp.getTime()}&groupId=${groupId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch polls');
+      }
+      const newReviews = await response.json();
 
-      if (newMessages.length > 0) {
-        setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+      if (newReviews.length > 0) {
+        setReviews((prevReviews) => [...newReviews, ...prevReviews]);
         setPollInterval(INITIAL_POLL_INTERVAL);
       } else {
         setPollInterval((prevInterval) =>
@@ -133,9 +140,9 @@ const ReviewList: React.FC<MessageListProps> = ({
         );
       }
     } catch (error) {
-      console.error("Error checking for new messages:", error);
+      console.error("Error checking for new reviews:", error);
     }
-  }, [groupId, isInternal, messages]);
+  }, [groupId, isInternal, reviews]);
 
   // Effects
   useEffect(() => {
@@ -143,8 +150,8 @@ const ReviewList: React.FC<MessageListProps> = ({
 
     const startPolling = () => {
       intervalId = setInterval(() => {
-        if (messageListRef.current && messageListRef.current.scrollTop === 0) {
-          checkForNewMessages();
+        if (reviewListRef.current && reviewListRef.current.scrollTop === 0) {
+          checkForNewReviews();
         }
       }, pollInterval);
     };
@@ -154,24 +161,67 @@ const ReviewList: React.FC<MessageListProps> = ({
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [pollInterval, checkForNewMessages]);
+  }, [pollInterval, checkForNewReviews]);
 
   useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
+    loadReviews();
+  }, [loadReviews]);
 
   // Handlers
-  function onNewMessageSubmit(signedMessage: SignedMessageWithProof) {
-    setMessages((prevMessages) => [signedMessage, ...prevMessages]);
-  }
+  const handlePollCreated = async (poll: any) => {
+    try {
+      const response = await fetch('/api/poll/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(poll),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create poll');
+      }
+
+      const createdPoll = await response.json();
+      setPolls(prevPolls => [createdPoll, ...prevPolls]);
+      setShowPollForm(false);
+    } catch (error) {
+      console.error('Error creating poll:', error);
+    }
+  };
+
+  const handleVote = async (pollId: string, option: string) => {
+    try {
+      const response = await fetch('/api/poll/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pollId,
+          option,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to vote');
+      }
+
+      setSelectedPoll(pollId);
+      // Refresh polls to show updated results
+      fetchPolls();
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
 
   // Render helpers
   function renderLoading() {
     return (
       <div className="skeleton-loader">
         {[...Array(4)].map((_, index) => (
-          <div key={index} className="message-card-skeleton">
-            <div className="message-card-skeleton-header">
+          <div key={index} className="review-card-skeleton">
+            <div className="review-card-skeleton-header">
               <div className="skeleton-text skeleton-short"></div>
             </div>
             <div className="skeleton-text skeleton-long mt-1"></div>
@@ -182,69 +232,97 @@ const ReviewList: React.FC<MessageListProps> = ({
     );
   }
 
-  function renderNoMessages() {
+  function renderNoReviews() {
     if (!groupId) return null;
 
     return (
       <div className="article text-center">
-        <p className="title">No messages yet</p>
+        <p className="title">No reviews yet</p>
         <p className="mb-05">
-          Are you a member of <span>{groupId}</span>?
+          Be the first to leave a review!
         </p>
-        {!isInternal ? (
-          <p>
-            Head over to the <Link href="/">homepage</Link> to send an anonymous
-            message by proving you are a member of <span>{groupId}</span>!
-          </p>
-        ) : (
-          <p>
-            No messages yet. Be the first one to send anonymous messages to your
-            teammates.
-          </p>
-        )}
       </div>
     );
   }
 
-  // In your component:
-const handlePollCreated = (poll: any) => {
-  // Handle the newly created poll
-  console.log('Poll created:', poll);
-};
-
-
   return (
-    <>
+    <div className="review-list-container">
+      <button 
+        className="create-poll-button"
+        onClick={() => setShowPollForm(true)}
+      >
+        Create Review Poll
+      </button>
 
-      <ReviewPollForm onSubmit={handlePollCreated} connectedKyc={myData} />
-      {showMessageForm && (
-        <CountryMessageForm
-
-          connectedKyc={myData}
-          isInternal={isInternal} onSubmit={onNewMessageSubmit} />
+      {showPollForm && (
+        <Dialog 
+          title="Create Review Poll" 
+          onClose={() => setShowPollForm(false)}
+        >
+          <ReviewPollForm 
+            onSubmit={handlePollCreated} 
+            connectedKyc={myData} 
+          />
+        </Dialog>
       )}
 
-      <div className="message-list" ref={messageListRef}>
-        {/* {messages.map((message, index) => {
-          // console.log("message", message);
-          return (
-            <div
-              key={message.id || index}
-              ref={index === messages.length - 1 ? lastMessageElementRef : null}
-            >
-              <CountryMessageCard
-                message={message as SignedMessageWithProof}
-                isInternal={isInternal}
-              />
+      <div className="polls-list">
+        {polls.map((poll) => (
+          <div key={poll.id} className="poll-card">
+            <h3>{poll.title}</h3>
+            <p>{poll.description}</p>
+            <div className="poll-options">
+              {poll?.answer_options?.map((option: string, index: number) => (
+                <div key={index} className="poll-option">
+                  <input 
+                    type="radio" 
+                    name={`poll-${poll.id}`} 
+                    id={`option-${poll.id}-${index}`}
+                    checked={selectedPoll === poll.id}
+                    onChange={() => handleVote(poll.id, option)}
+                  />
+                  <label htmlFor={`option-${poll.id}-${index}`}>{option}</label>
+                </div>
+              ))}
             </div>
-          )
-        })} */}
+            {poll.results && (
+              <div className="poll-results">
+                {Object.entries(poll.results).map(([option, count]: [string, any]) => (
+                  <div key={option} className="poll-result">
+                    <div className="poll-result-label">{option}</div>
+                    <div className="poll-result-bar">
+                      <div 
+                        className="poll-result-fill"
+                        style={{ width: `${(count / poll.total_votes) * 100}%` }}
+                      />
+                    </div>
+                    <div className="poll-result-count">{count}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="review-list" ref={reviewListRef}>
+        {reviews.map((review, index) => (
+          <div
+            key={review.id || index}
+            ref={index === reviews.length - 1 ? lastReviewElementRef : null}
+          >
+            <ReviewCard
+              review={review}
+              isInternal={isInternal}
+            />
+          </div>
+        ))}
         {loading && renderLoading()}
-        {!loading && !error && messages.length === 0 && renderNoMessages()}
+        {!loading && !error && reviews.length === 0 && renderNoReviews()}
       </div>
 
       {error && <div className="error-message">{error}</div>}
-    </>
+    </div>
   );
 };
 
