@@ -55,30 +55,46 @@ function saveEphemeralKey(ephemeralKey: EphemeralKey, uuid: string) {
 }
 
 function loadEphemeralKey() {
-  const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.EphemeralKey);
-  if (!ephemeralKeyString) {
+  try {
+    const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.EphemeralKey);
+    if (!ephemeralKeyString) {
+      return {
+        ephemeralKey: null,
+        uuid: null,
+      };
+    }
 
+    const result = JSON.parse(ephemeralKeyString);
+    if (!result?.ephemeralKey) {
+      return {
+        ephemeralKey: null,
+        uuid: null,
+      };
+    }
+    // console.log("ephemeralKey", result?.ephemeralKey);
+
+    const ephemeralKey = result?.ephemeralKey;
+    return {
+      ephemeralKey: {
+        privateKey: BigInt(ephemeralKey?.privateKey),
+        publicKey: BigInt(ephemeralKey?.publicKey),
+        salt: BigInt(ephemeralKey?.salt),
+        expiry: ephemeralKey?.expiry,
+        ephemeralPubkeyHash: ephemeralKey?.ephemeralKey?.ephemeralPubkeyHash ? BigInt(ephemeralKey?.ephemeralKey?.ephemeralPubkeyHash) : null,
+      },
+      uuid: result?.uuid,
+    };
+  } catch (error) {
+    console.error("Error loading ephemeral key", error);
     return {
       ephemeralKey: null,
       uuid: null,
     };
   }
-
-  const ephemeralKey = JSON.parse(ephemeralKeyString);
-  return {
-    ephemeralKey: {
-      privateKey: BigInt(ephemeralKey?.privateKey),
-      publicKey: BigInt(ephemeralKey?.publicKey),
-      salt: BigInt(ephemeralKey?.salt),
-      expiry: ephemeralKey?.expiry,
-      ephemeralPubkeyHash: ephemeralKey?.ephemeralPubkeyHash ? BigInt(ephemeralKey?.ephemeralPubkeyHash) : null,
-    },
-    uuid: ephemeralKey.uuid,
-  };
 }
-
 export function hasEphemeralKey() {
-  const {ephemeralKey} = loadEphemeralKey();
+  const { ephemeralKey } = loadEphemeralKey();
+  // console.log("ephemeralKey", ephemeralKey);
   if (!ephemeralKey) {
     return false;
   }
@@ -93,7 +109,7 @@ export function hasEphemeralKey() {
 }
 
 export function getEphemeralPubkey() {
-  const {ephemeralKey} = loadEphemeralKey();
+  const { ephemeralKey } = loadEphemeralKey();
   if (!ephemeralKey) {
     return null;
   }
@@ -101,7 +117,8 @@ export function getEphemeralPubkey() {
 }
 
 export async function signMessage(message: Message) {
-  const {ephemeralKey} = loadEphemeralKey();
+  const { ephemeralKey } = loadEphemeralKey();
+  // console.log("ephemeralKey", ephemeralKey);
   if (!ephemeralKey) {
     throw new Error("No ephemeralKey found");
   }
@@ -127,6 +144,7 @@ export async function verifyMessageSignature(message: SignedMessage) {
     messageHash,
     pubkey
   );
+  console.log("isValid", isValid);
 
   if (!isValid) {
     console.error("Signature verification failed for the message");

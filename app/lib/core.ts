@@ -3,6 +3,7 @@ import { createMembership, createMessage } from "./api";
 import { generateEphemeralKey, signMessage, verifyMessageSignature } from "./ephemeral-key";
 import { initProver } from "./lazy-modules";
 import { Providers } from "./providers";
+import { k12 } from "@noble/hashes/sha3-addons";
 
 export async function generateKeyPairAndRegister(
   providerName: keyof typeof Providers
@@ -56,13 +57,17 @@ export async function verifyMessage(message: SignedMessageWithProof) {
     }
 
     // Verify the message signature (signed with sender's ephemeral pubkey)
+    console.log("message", message);
     let isValid = await verifyMessageSignature(message);
+    console.log("isValid", isValid);
     if (!isValid) {
       throw new Error("Signature verification failed for the message");
     }
 
     // Verify the proof that the sender (their ephemeral pubkey) belongs to the AnonGroup
     const provider = Providers[message.anonGroupProvider];
+    console.log("message.anonGroupProvider", message.anonGroupProvider);
+    console.log("provider", provider);
     isValid = await provider.verifyProof(
       message.proof,
       message.anonGroupId,
@@ -70,9 +75,10 @@ export async function verifyMessage(message: SignedMessageWithProof) {
       message.ephemeralPubkeyExpiry,
       message.proofArgs
     );
-
+    console.log("isValid by provider", isValid);
     return isValid;
   } catch (error) {
+    console.log("error", error);
     // @ts-expect-error - error is an unknown type
     alert(error.message);
     // @ts-expect-error - error is an unknown type

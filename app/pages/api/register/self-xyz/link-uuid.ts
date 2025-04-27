@@ -78,8 +78,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await supabase
           .from("ephemeral_keys")
           .insert({
-            pubkey: signedMessage.ephemeralPubkey.toString(),
-            signature: signedMessage.signature.toString(),
+            pubkey: signedMessage?.ephemeralPubkey?.toString(),
+            signature: signedMessage?.signature?.toString(),
             uuid: uuid,
           })
 
@@ -128,9 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           message: 'Ephemeral key registered'
         });
 
-
       }
-
 
       return res.status(200).json({
         status: 'success',

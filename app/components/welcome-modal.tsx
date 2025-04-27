@@ -20,10 +20,15 @@ export const WelcomeModal = () => {
         <button className={'modal-close-button'} onClick={handleClose}>
           <IonIcon name="close" />
         </button>
-        <h2 className={'modal-title'}>Welcome to StealthNote!</h2>
+        <h2 className={'modal-title'}>Welcome to AFK!</h2>
         <div className={'modal-content'}>
+        <p>
+            The messages you post cannot be linked to you (except for some edge cases).
+            Read more about how it works {' '}
+            <a href="https://saleel.xyz/blog/stealthnote/" target="_blank" rel="noopener noreferrer">here</a>.
+          </p>
           <p>
-            StealthNote is a platform to anonymously post messages while proving you belong to an organization -
+            AFK is a platform to anonymously post messages while proving you belong to an organization -
             without revealing who you are.
           </p>
           <p>
@@ -35,13 +40,9 @@ export const WelcomeModal = () => {
               Zero Knowledge Proofs
             </a>
             , which allows you to prove you have a valid Google Workspace account from your 
-            organization, while keeping your email address and other details private.
+            organization or a zkIdentity, while keeping your data (email or identity) private.
           </p>
-          <p>
-            The messages you post cannot be linked to you (except for some edge cases).
-            Read more about how it works {' '}
-            <a href="https://saleel.xyz/blog/stealthnote/" target="_blank" rel="noopener noreferrer">here</a>.
-          </p>
+ 
         </div>
       </div>
     </div>

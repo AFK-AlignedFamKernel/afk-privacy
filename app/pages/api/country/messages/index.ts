@@ -82,6 +82,11 @@ export async function postMessageCountry(
       console.error("Passport data not found", passportError);
       throw new Error("Passport data not found");
     }
+
+
+    if(!passportData?.nationality) {    
+      throw new Error("Passport data not found");
+    }
     const nationality = passportData?.nationality;
     const gender = passportData?.gender;
     const dateOfBirth = passportData?.date_of_birth;
@@ -98,8 +103,8 @@ export async function postMessageCountry(
         parent_id: signedMessage?.parentId,
         reply_count: 0,
         nationality: nationality,
-        gender: gender,
-        date_of_birth: dateOfBirth,
+        // gender: gender,
+        // date_of_birth: dateOfBirth,
       },
     ]);
 
