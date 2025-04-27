@@ -104,6 +104,8 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
 
     console.log("data", data);
 
+    console.log("passportCreation", passportCreation);
+
     const message: SignedMessageWithProof = {
       id: data.id,
       anonGroupId: data.group_id,
