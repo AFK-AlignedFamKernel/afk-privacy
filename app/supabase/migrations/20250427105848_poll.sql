@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS polls (
     title TEXT NOT NULL,
     description TEXT,
     is_yes_no BOOLEAN NOT NULL DEFAULT false,
+    internal BOOLEAN NOT NULL DEFAULT false,
     max_options INTEGER NOT NULL DEFAULT 1,
     min_options INTEGER NOT NULL DEFAULT 1,
     answer_options TEXT[] NOT NULL DEFAULT '{}',
