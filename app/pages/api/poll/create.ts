@@ -70,17 +70,16 @@ export async function createReview(
     }
     console.log("createReview reviewData", reviewData);
 
-    
+
 
     // Verify pubkey is registered and check membership
     const { data, error } = await supabase
       .from("ephemeral_keys")
       .select(`
         *`)
-      .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+      .eq("pubkey", signedMessage?.ephemeralPubkey?.toString())
       .single();
 
-    console.log("ephemeral_keys data", data);
 
 
     // const authHeader = request.headers.authorization;
@@ -90,12 +89,25 @@ export async function createReview(
     //   return;
     // }
 
-    if (error) {
-      throw error;
-    }
+    // if (error) {
+    //   throw error;
+    // }
 
-    if (!data.pubkey) {
-      throw new Error("Pubkey not registered");
+
+    let ephemeralData: any;
+    if (!data?.pubkey || error) {
+      console.log("Ephemeral data not found, creating new ephemeral key");
+      const { data: ephemeralDataResult , error: ephemeralError } = await supabase.from("ephemeral_keys").upsert({
+        pubkey: signedMessage?.ephemeralPubkey?.toString(),
+        // ephemeralPubkeyExpiry: signedMessage?.ephemeralPubkeyExpiry,
+        // salt: signedMessage.ephemeralPubkeySalt,
+        signature: signedMessage?.signature?.toString(),
+      }).select("*").single();
+      ephemeralData = ephemeralDataResult;
+      if (!ephemeralDataResult || ephemeralError) {
+        console.error("Ephemeral data not found", ephemeralError);
+        throw new Error("Pubkey not registered");
+      }
     }
 
     if (signedMessage.ephemeralPubkeyExpiry < new Date()) {
@@ -111,10 +123,14 @@ export async function createReview(
     const { data: passportData, error: passportError } = await supabase.from("passport_registrations").select("*").eq("pubkey", signedMessage.ephemeralPubkey.toString()).single();
 
 
-    if (!passportData || passportError) {
-      console.error("Passport data not found", passportError);
-      throw new Error("Passport data not found");
-    }
+    // if (!passportData || passportError) {
+    //   console.error("Passport data not found", passportError);
+    //   throw new Error("Passport data not found");
+    // }
+
+    // if(!passportData?.nationality || typeof passportData?.nationality !== "string" || passportData?.nationality?.length !== 2) {
+    //   throw new Error("Invalid nationality");
+    // }
     const nationality = passportData?.nationality;
     const gender = passportData?.gender;
     const dateOfBirth = passportData?.date_of_birth;

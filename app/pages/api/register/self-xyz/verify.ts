@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
+import { ZKPassport } from "@zkpassport/sdk";
 import { getUserIdentifier, SelfBackendVerifier, countryCodes } from '@selfxyz/core';
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -15,24 +16,16 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const {pubkey} = req.query;
-  console.log("pubkey:", pubkey);
-
-
   const header = req.headers;
-  console.log("Header:", header);
-
 
   if (req.method === 'POST') {
     try {
       const { proof, publicSignals, publicKey, ephemeralKey } = req.body;
 
-
-      console.log("Proof:", proof);
-      console.log("PublicSignals:", publicSignals);
-      console.log("PublicKey:", publicKey);
-      console.log("EphemeralKey:", ephemeralKey);
-
+      console.log("proof", proof);
+      console.log("publicSignals", publicSignals);
+      console.log("publicKey", publicKey);
+      console.log("ephemeralKey", ephemeralKey);
       if (!proof || !publicSignals) {
         return res.status(400).json({ message: 'Proof and publicSignals are required' });
       }
@@ -53,22 +46,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log("Result:", result);
       if (result.isValid) {
 
-        const { error: insertError } = await supabase.from("passport_registrations").update({
-          is_verified: true,
-          proof: proof,
-          proof_args: publicSignals,
-          nationality: result.credentialSubject.nationality,
-          date_of_birth: result.credentialSubject.date_of_birth,
-          gender: result.credentialSubject.gender,
-        }).eq("id_register", userId);
 
-        console.log("Inserted passport registration:", insertError);
         // Return successful verification response
         return res.status(200).json({
           status: 'success',
           result: true,
-          credentialSubject: result.credentialSubject,
-          proof: proof,
+          message: 'Verification successful',
         });
       } else {
         // Return failed verification response

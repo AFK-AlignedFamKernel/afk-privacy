@@ -1,16 +1,16 @@
-import { JWTCircuitHelper  } from "../circuits/jwt";
+import { JWTCircuitHelper } from "../circuits/jwt";
 import { AnonGroupProvider, EphemeralKey, LocalStorageKeys } from "../types";
 import { pubkeyModulusFromJWK } from "../utils";
 
 
 /**
- * GoogleOAuth AnonGroupProvider for people in a company (using company domain in Google Workspace account)
+ * SelfXyz AnonGroupProvider for people in a company (using company domain in Google Workspace account)
  */
-export const GoogleOAuthProvider: AnonGroupProvider = {
+export const SelfXyzProvider: AnonGroupProvider = {
   //
-  name: () => "google-oauth",
+  name: () => "self-xyz",
   //
-  getSlug: () => "domain",
+  getSlug: () => "self-xyz",
   //
   generateProof: async (ephemeralKey: EphemeralKey) => {
     // Load Google OAuth script
@@ -54,7 +54,7 @@ export const GoogleOAuthProvider: AnonGroupProvider = {
       ephemeralPubkeyExpiry: ephemeralKey.expiry,
     }));
 
-    const anonGroup = GoogleOAuthProvider.getAnonGroup(domain);
+    const anonGroup = SelfXyzProvider.getAnonGroup(domain);
     console.log("anonGroup", anonGroup);
     const proofArgs = {
       keyId,
@@ -73,30 +73,41 @@ export const GoogleOAuthProvider: AnonGroupProvider = {
     anonGroupId: string,
     ephemeralPubkey: bigint,
     ephemeralPubkeyExpiry: Date,
-    proofArgs: { keyId: string, jwtCircuitVersion: string }
+    proofArgs: { keyId: string, jwtCircuitVersion: string },
+    options?: {
+      proof?: any,
+      proofArgs?: any
+    }
   ) => {
-    if (proofArgs.jwtCircuitVersion !== JWTCircuitHelper.version) {
-      throw new Error(
-        'This proof was generated with an older version of AFK JWT circuit and ' +
-        'cannot be verified at this time. You can run an older version of the app to verify this proof.'
-      );
-    }
 
-    // Verify the pubkey belongs to Google
-    const googlePubkeyJWK = await fetchGooglePublicKey(proofArgs.keyId);
-    if (!googlePubkeyJWK) {
-      throw new Error(
-        "[Google OAuth] Proof verification failed: could not validate Google public key."
-      );
-    }
-    const googleJWTPubkeyModulus = await pubkeyModulusFromJWK(googlePubkeyJWK);
+    try {
 
-    return await JWTCircuitHelper.verifyProof(proof, {
-      domain: anonGroupId,
-      jwtPubKey: googleJWTPubkeyModulus,
-      ephemeralPubkey: ephemeralPubkey,
-      ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
-    });
+      const res = await fetch(`/api/register/self-xyz/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          proof: options?.proof || Array.from(proof),
+          publicSignals: options?.proofArgs || proofArgs,
+          publicKey: ephemeralPubkey.toString(),
+          ephemeralKey: {
+            publicKey: ephemeralPubkey.toString(),
+            expiry: ephemeralPubkeyExpiry
+          }
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to verify proof');
+      }
+      console.log("res", res);
+
+      return res.json();
+    } catch (error) {
+      console.error("Error verifying proof", error);
+      return false;
+    }
   },
   //
   getAnonGroup: (anonGroupId: string) => {

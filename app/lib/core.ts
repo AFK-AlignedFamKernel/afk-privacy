@@ -47,7 +47,10 @@ export async function postMessage(message: Message) {
   return signedMessage;
 }
 
-export async function verifyMessage(message: SignedMessageWithProof) {
+export async function verifyMessage(message: SignedMessageWithProof, options?: {
+  proof?:any,
+  proofArgs?:any
+}) {
   try {
     if (new Date(message.timestamp).getTime() < new Date("2025-02-23").getTime()) {
       throw new Error(
@@ -68,12 +71,14 @@ export async function verifyMessage(message: SignedMessageWithProof) {
     const provider = Providers[message.anonGroupProvider];
     console.log("message.anonGroupProvider", message.anonGroupProvider);
     console.log("provider", provider);
+    console.log("message.proof", message.proof);
+    console.log("options?.proof", options?.proof);
     isValid = await provider.verifyProof(
-      message.proof,
+      options?.proof|| message.proof,
       message.anonGroupId,
       message.ephemeralPubkey,
       message.ephemeralPubkeyExpiry,
-      message.proofArgs
+      options?.proofArgs || message.proofArgs
     );
     console.log("isValid by provider", isValid);
     return isValid;

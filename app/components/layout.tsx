@@ -9,6 +9,8 @@ import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys } from "../lib/types";
 import { Providers } from "../lib/providers";
 import { WelcomeModal } from './welcome-modal';
+import Loading from './loading';
+import { usePathname } from 'next/navigation';
 import logo from "@/assets/logo192.png";
 import logoAfk from "@/assets/afk_logo_circle.png";
 // import logo from "@/assets/logo.png";
@@ -29,6 +31,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [consoleShown, setConsoleShown] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const pathname = usePathname();
 
   let slug = null;
   if (currentProvider && currentGroupId) {
@@ -41,14 +45,46 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
+  // Handle route changes
+  React.useEffect(() => {
+    const handleRouteChange = () => {
+      setIsLoading(true);
+    };
+
+    const handleRouteComplete = () => {
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    };
+
+    // Listen for route changes
+    window.addEventListener('beforeunload', handleRouteChange);
+    window.addEventListener('load', handleRouteComplete);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleRouteChange);
+      window.removeEventListener('load', handleRouteComplete);
+    };
+  }, []);
+
+  // Also handle pathname changes
+  React.useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
   React.useEffect(() => {
     if (consoleShown) {
       return;
     }
 
     console.log(
-      '%c📝 If you run in to any errors, please create an issue at https://github.com/saleel/stealthnote/issues\n' +
-      '🐦 You can also reach out to me on Twitter at https://twitter.com/_saleel',
+      '%c📝 If you run in to any errors, please create an issue at https://github.com/AFK-AlignedFamKernel/afk-privacy/issues\n' +
+      '🐦 You can also reach out to me on Twitter at https://twitter.com/AFK_AlignedFamK or https://x.com/MSG_Encrypted',
       'background: #efefef; color: black; font-size: 16px; padding: 10px; border-radius: 3px;'
     );
     setConsoleShown(true);
@@ -81,25 +117,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <>
       <div className="page">
         <div className="mobile-header">
-          <button
-            className={`sidebar-toggle ${isSidebarOpen ? "open" : ""}`}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            ☰
-          </button>
           <div
             className="mobile-header-logo"
             style={isSidebarOpen ? { display: "none" } : { display: "flex", alignItems: "center", gap: "10px" }}
           >
 
+            <Link href="/">
 
-            <div className="mobile-header-logo-text"
-            >
-              AFK
-              {randomEmojis.map((emoji, index) => (
-                <span key={index}>{emoji}</span>
-              ))}
-            </div>
+              <div className="mobile-header-logo-text"
+              >
+
+                AFK
+                {randomEmojis.map((emoji, index) => (
+                  <span key={index}>{emoji}</span>
+                ))}
+              </div>
+            </Link>
+
             {/* <Image src={logo} alt="Bro"
               width={50}
               height={50}
@@ -109,6 +143,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               height={50}
             /> */}
           </div>
+          <button
+            className={`sidebar-toggle ${isSidebarOpen ? "open" : ""}`}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            ☰
+          </button>
+
         </div>
         <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -206,7 +247,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 target="_blank"
                 title="Source Code"
                 rel="noopener noreferrer"
-                href="hhttps://github.com/AFK-AlignedFamKernel/afk-privacy"
+                href="https://github.com/AFK-AlignedFamKernel/afk-privacy"
               >
                 <IonIcon name="logo-github" />
               </Link>
@@ -254,6 +295,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
 
       <WelcomeModal />
+      {isLoading && <Loading />}
     </>
   );
 };

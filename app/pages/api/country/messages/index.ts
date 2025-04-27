@@ -82,14 +82,22 @@ export async function postMessageCountry(
       console.error("Passport data not found", passportError);
       throw new Error("Passport data not found");
     }
-
-
-    if(!passportData?.nationality) {    
-      throw new Error("Passport data not found");
-    }
     const nationality = passportData?.nationality;
     const gender = passportData?.gender;
     const dateOfBirth = passportData?.date_of_birth;
+
+    if(!passportData?.nationality || typeof passportData?.nationality !== "string") {    
+      throw new Error("Passport data not found");
+    }
+
+    if(passportData?.nationality?.length <= 2) {
+      throw new Error("Invalid nationality");
+    }
+
+    if(!passportData?.is_verified) {
+      throw new Error("Passport not verified");
+    }
+
     const { error: insertError } = await supabase.from("country_messages").insert([
       {
         id: signedMessage.id,
@@ -245,8 +253,8 @@ export async function fetchMessagesCountry(
     replyCount: message.reply_count,
     parentId: message.parent_id,
     nationality: message.nationality,
-    gender: message.gender,
-    dateOfBirth: message.date_of_birth
+    // gender: message.gender,
+    // dateOfBirth: message.date_of_birth
   }));
 
   res.json(messages);

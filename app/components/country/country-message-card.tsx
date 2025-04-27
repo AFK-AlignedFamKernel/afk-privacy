@@ -12,7 +12,7 @@ import { verifyMessage } from "../../lib/core";
 import { Providers } from "../../lib/providers";
 import Dialog from "../dialog";
 import CommentForm from "../comment-form";
-import { fetchMessageCountry } from "@/lib/country";
+import { fetchMessageCountry, fetchMessageCountryVerify } from "@/lib/country";
 import COUNTRY_DATA from "@/assets/country";
 
 interface MessageCardProps {
@@ -73,8 +73,12 @@ const CountryMessageCard: React.FC<MessageCardProps> = ({ message, isInternal })
     setVerificationStatus("verifying");
 
     try {
-      const fullMessage = await fetchMessageCountry(message.id, message.internal);
-      const isValid = await verifyMessage(fullMessage);
+      const fullMessage = await fetchMessageCountryVerify(message.id, message.internal);
+      console.log("fullMessage", fullMessage);
+      const isValid = await verifyMessage(fullMessage, {
+        proof: JSON.parse(fullMessage?.proofString || "{}"),
+        proofArgs: JSON.parse(fullMessage?.proofArgsString || "{}")
+      });
 
       setVerificationStatus(isValid ? "valid" : "invalid");
     } catch (error) {
