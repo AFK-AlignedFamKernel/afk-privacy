@@ -354,11 +354,12 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           <div className="poll-title-section">
             <h3 className="poll-title">{review.title}</h3>
             <h4 className="poll-subtitle">{review.description}</h4>
+            <div className="poll-meta poll-author">
+              <IonIcon name="person-outline" />
+              <span>{getAnonymousName()}</span>
+            </div>
             <div className="poll-meta">
-              <div className="poll-author">
-                <IonIcon name="person-outline" />
-                <span>{getAnonymousName()}</span>
-              </div>
+
               <div className="poll-date">
                 <IonIcon name="time-outline" />
                 <span>{review?.created_at ? new Date(review?.created_at).toLocaleDateString() : ''}</span>
@@ -374,19 +375,30 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
             </div>
           </div>
           <div className="poll-actions">
-            <button
+            <div className="poll-meta poll-author">
+              <IonIcon name="person-outline" />
+              <span>{getAnonymousName()}</span>
+            </div>
+            {/* <button
               className={`expand-button ${isExpanded ? 'expanded' : ''}`}
               onClick={() => setIsExpanded(!isExpanded)}
             >
               <IonIcon name="chevron-down-outline" />
               <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
-            </button>
+            </button> */}
           </div>
 
         </div>
+
         {renderPollRequirements()}
 
-
+        <button
+          className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <IonIcon name="chevron-down-outline" />
+          <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
+        </button>
       </div>
 
 

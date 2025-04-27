@@ -89,14 +89,15 @@ export async function voteToReview(
 
 
     const { data: passport, error: passportError } = await supabase
-    .from("passport_registrations")
-    .select("*")
-    .eq("pubkey", signedMessage.ephemeralPubkey.toString())
-    .single();
+      .from("passport_registrations")
+      .select("*")
+      .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+      .single();
 
+    console.log("passport", passport);
     // Check KYC requirements if needed
     if (poll.is_only_kyc_verified) {
- 
+
       if (passportError || !passport) {
         throw new Error("KYC verification required to vote in this poll");
       }
@@ -107,10 +108,16 @@ export async function voteToReview(
       // if (!membership) {
       //   throw new Error("Only organizations can vote in this poll");
       // }
+      if (poll?.selected_organizations && poll?.selected_organizations?.length > 0) {
+        if (!membership?.anon_group_id || !poll?.selected_organizations?.includes(membership?.anon_group_id)) {
+          throw new Error("You are not a member of an organization that can vote in this poll");
+        }
+      }
     }
 
     // Check country requirements if needed
 
+    // Todo add check
     if (poll?.selected_countries && poll?.selected_countries?.length > 0) {
       console.log("poll?.selected_countries", poll?.selected_countries);
       // const { data: passport, error: passportError } = await supabase
@@ -132,8 +139,20 @@ export async function voteToReview(
 
       // Check if user's country is in excluded countries list
       if (poll.countries_excluded && poll.countries_excluded.length > 0) {
-        if (passport.country && poll.countries_excluded.includes(passport.country)) {
+        if (passport.nationality && poll.countries_excluded.includes(passport.nationality)) {
           throw new Error("Your country is excluded from voting in this poll");
+        }
+      }
+
+      const nationality = passport?.nationality;
+      const isNationalityEligible = poll.selected_countries?.find((country: string) => country === nationality);
+      // Check if user's country is in excluded countries list
+      if (poll.selected_countries && poll.selected_countries.length > 0) {
+        if (!passport.nationality) {
+          throw new Error("Your nationality is not eligible to vote in this poll");
+        }
+        if (!poll.selected_countries.includes(passport?.nationality) || !isNationalityEligible) {
+          throw new Error("Your nationality is not eligible to vote in this poll");
         }
       }
     }
