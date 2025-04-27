@@ -64,24 +64,25 @@ function loadEphemeralKey() {
       };
     }
 
-    const ephemeralKey = JSON.parse(ephemeralKeyString);
-
-    if (!ephemeralKey) {
+    const result = JSON.parse(ephemeralKeyString);
+    if (!result?.ephemeralKey) {
       return {
         ephemeralKey: null,
         uuid: null,
       };
     }
+    // console.log("ephemeralKey", result?.ephemeralKey);
 
+    const ephemeralKey = result?.ephemeralKey;
     return {
       ephemeralKey: {
         privateKey: BigInt(ephemeralKey?.privateKey),
         publicKey: BigInt(ephemeralKey?.publicKey),
         salt: BigInt(ephemeralKey?.salt),
         expiry: ephemeralKey?.expiry,
-        ephemeralPubkeyHash: ephemeralKey?.ephemeralPubkeyHash ? BigInt(ephemeralKey?.ephemeralPubkeyHash) : null,
+        ephemeralPubkeyHash: ephemeralKey?.ephemeralKey?.ephemeralPubkeyHash ? BigInt(ephemeralKey?.ephemeralKey?.ephemeralPubkeyHash) : null,
       },
-      uuid: ephemeralKey.uuid,
+      uuid: result?.uuid,
     };
   } catch (error) {
     console.error("Error loading ephemeral key", error);
@@ -93,6 +94,7 @@ function loadEphemeralKey() {
 }
 export function hasEphemeralKey() {
   const { ephemeralKey } = loadEphemeralKey();
+  // console.log("ephemeralKey", ephemeralKey);
   if (!ephemeralKey) {
     return false;
   }
@@ -116,6 +118,7 @@ export function getEphemeralPubkey() {
 
 export async function signMessage(message: Message) {
   const { ephemeralKey } = loadEphemeralKey();
+  // console.log("ephemeralKey", ephemeralKey);
   if (!ephemeralKey) {
     throw new Error("No ephemeralKey found");
   }

@@ -3,6 +3,7 @@ import { createMembership, createMessage } from "./api";
 import { generateEphemeralKey, signMessage, verifyMessageSignature } from "./ephemeral-key";
 import { initProver } from "./lazy-modules";
 import { Providers } from "./providers";
+import { k12 } from "@noble/hashes/sha3-addons";
 
 export async function generateKeyPairAndRegister(
   providerName: keyof typeof Providers

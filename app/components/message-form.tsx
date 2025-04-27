@@ -98,6 +98,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
       };
 
       const signedMessage = await postMessage(messageObj);
+      console.log("signedMessage", signedMessage);
 
       setMessage("");
       onSubmit(signedMessage as SignedMessageWithProof);
