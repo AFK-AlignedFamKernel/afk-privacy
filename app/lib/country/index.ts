@@ -200,6 +200,11 @@ export async function createLinkSelfXyz(signedMessage: SignedMessage, uuid: stri
 export async function postMessageCountry(message: Message) {
   // Sign the message with the ephemeral key pair
   const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+  if(!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+    return null;
+  }
+
   const signedMessage: SignedMessage = {
     ...message,
     signature: signature,
@@ -240,6 +245,11 @@ export async function fetchMyDataMessageCountry(signedMessage: SignedMessage) {
 export async function getMyDataMessageCountry(message: Message) {
   // Sign the message with the ephemeral key pair
   const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+  if(!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+    return null;
+  }
+
   const signedMessage: SignedMessage = {
     ...message,
     signature: signature,

@@ -113,7 +113,12 @@ export function getEphemeralPubkey() {
 export async function signMessageSelfXyz(message: Message) {
   const { ephemeralKey } = await loadOrInitializeEphemeralKey();
   if (!ephemeralKey) {
-    throw new Error("No ephemeralKey found");
+    // throw new Error("No ephemeralKey found");
+    return {
+      ephemeralPubkey: null,
+      ephemeralPubkeyExpiry: null,
+      signature: null,
+    }
   }
 
   const messageHash = await hashMessage(message);

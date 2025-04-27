@@ -24,7 +24,7 @@ type VerificationStatus = "idle" | "verifying" | "valid" | "invalid" | "error";
 const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
   const timeAgo = useRef(new TimeAgo("en-US")).current;
 
-  const provider = Providers[message.anonGroupProvider];
+  const provider = Providers[message?.anonGroupProvider];
   const anonGroup = provider.getAnonGroup(message.anonGroupId);
 
   // States
