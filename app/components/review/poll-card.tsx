@@ -18,18 +18,79 @@ type Review = SignedMessageWithProof & {
   show_results_publicly?: boolean;
   is_only_organizations?: boolean;
   is_only_kyc_verified?: boolean;
+  title?: string;
+  description?: string;
+  about?: string;
 };
 
 type ReviewCardProps = {
   review: Review;
   isInternal?: boolean;
   onVote?: (pollId: string, option: string) => Promise<void>;
+  handleOnVote?: () => Promise<void>;
 };
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => {
+const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => {
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
+
+  const handleOnVote = async (pollId: string, option: string) => {
+    try {
+      // Create a signed message for the vote
+      const message = {
+        id: crypto.randomUUID(),
+        text: `Vote for ${option} in poll ${pollId}`,
+        timestamp: new Date(),
+        internal: false,
+        anonGroupId: 'self-xyz',
+        anonGroupProvider: 'self-xyz',
+        likes: 0,
+        replyCount: 0,
+        parentId: null,
+      };
+
+      const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+      const signedMessage: SignedMessage = {
+        ...message,
+        signature,
+        ephemeralPubkey,
+        ephemeralPubkeyExpiry,
+      };
+
+      const response = await fetch('/api/poll/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pollId,
+          option,
+          signedMessage: {
+            ...signedMessage,
+            pubkey: signedMessage.ephemeralPubkey.toString(),
+            ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+            signature: signedMessage.signature.toString(),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to vote');
+      }
+
+      // setSelectedPoll(pollId);
+      // // Refresh polls to show updated results
+      // fetchPolls();
+    } catch (error) {
+      console.error('Error voting:', error);
+      // Show error message to user
+      setError((error as Error).message);
+    }
+  };
+
 
   const getAnonymousName = () => {
     if (!review.ephemeralPubkey) return 'Anonymous';
@@ -75,7 +136,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) =
   };
 
   const handleSubmitVote = async () => {
-    if (!onVote || !review.id) return;
+    // if (!onVote || !review.id) return;
+    if (!review.id) return;
     
     if (selectedOptions.size === 0) {
       setError("Please select at least one option");
@@ -93,7 +155,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) =
       
       // For multiple selections, submit each vote
       for (const option of selectedOptions) {
-        await onVote(review.id, option);
+        await handleOnVote(review.id, option);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -162,7 +224,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) =
       </header>
 
       <main className="review-card-content">
-        <div className="review-text">{review.text}</div>
+        <div className="review-text">{review.title}</div>
         {renderRating()}
         {renderPollOptions()}
         {renderPollRequirements()}
@@ -181,4 +243,4 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) =
   );
 };
 
-export default ReviewCard; 
+export default PollCard; 

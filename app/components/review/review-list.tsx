@@ -6,8 +6,9 @@ import { fetchMessagesCountry, getMyDataMessageCountry } from "../../lib/country
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { Message, SignedMessageWithProof, SignedMessage } from "../../lib/types";
 import ReviewPollForm from "./review-poll-form";
-import ReviewCard from "./review-card";
+import ReviewCard from "./poll-card";
 import Dialog from "../dialog";
+import PollCard from "./poll-card";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds
@@ -298,60 +299,21 @@ const ReviewList: React.FC<ReviewListProps> = ({
         </Dialog>
       )}
 
-      <div className="polls-list">
-        {polls.map((poll) => (
-          <div key={poll.id} className="poll-card">
-            <h3>{poll.title}</h3>
-            <p>{poll.description}</p>
-            <div className="poll-options">
-              {poll?.answer_options?.map((option: string, index: number) => (
-                <div key={index} className="poll-option">
-                  <input 
-                    type="radio" 
-                    name={`poll-${poll.id}`} 
-                    id={`option-${poll.id}-${index}`}
-                    checked={selectedPoll === poll.id}
-                    onChange={() => handleVote(poll.id, option)}
-                  />
-                  <label htmlFor={`option-${poll.id}-${index}`}>{option}</label>
-                </div>
-              ))}
-            </div>
-            {poll.results && (
-              <div className="poll-results">
-                {Object.entries(poll.results).map(([option, count]: [string, any]) => (
-                  <div key={option} className="poll-result">
-                    <div className="poll-result-label">{option}</div>
-                    <div className="poll-result-bar">
-                      <div 
-                        className="poll-result-fill"
-                        style={{ width: `${(count / poll.total_votes) * 100}%` }}
-                      />
-                    </div>
-                    <div className="poll-result-count">{count}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
       <div className="review-list" ref={reviewListRef}>
-        {reviews.map((review, index) => (
+        {polls.map((poll, index) => (
           <div
-            key={review.id || index}
-            ref={index === reviews.length - 1 ? lastReviewElementRef : null}
+            key={poll.id || index}
+            ref={index === polls.length - 1 ? lastReviewElementRef : null}
           >
-            <ReviewCard
-              review={review}
+            <PollCard
+              review={poll}
               isInternal={isInternal}
-              onVote={handleVote}
+              // onVote={handleVote}
             />
           </div>
         ))}
         {loading && renderLoading()}
-        {!loading && !error && reviews.length === 0 && renderNoReviews()}
+        {!loading && !error && polls.length === 0 && renderNoReviews()}
       </div>
 
       {error && <div className="error-message">{error}</div>}

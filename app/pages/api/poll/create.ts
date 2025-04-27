@@ -144,6 +144,17 @@ export async function createReview(
       throw fetchError;
     }
 
+
+    const pollOptionsToInsert = body.answerOptions.map((option: string) => ({
+      poll_id: signedMessage.id,
+      option_text: option,
+    }));
+
+    const { data: createdPollOptions, error: createPollOptionsError } = await supabase
+      .from("poll_options")
+      .insert(pollOptionsToInsert);
+
+
     console.log("createdMessage", createdMessage);
     res.status(201).json(createdMessage);
     res.end();

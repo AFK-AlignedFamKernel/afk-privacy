@@ -32,8 +32,20 @@ export async function voteToReview(
     const body = await request.body;
     const { pollId, option, signedMessage } = body;
 
+
+    console.log("voteToReview body", body);
+
+    const signedMessageFormatted = {
+      ...signedMessage,
+      ephemeralPubkey: BigInt(signedMessage.ephemeralPubkey),
+      ephemeralPubkeyExpiry: new Date(signedMessage.ephemeralPubkeyExpiry),
+      signature: BigInt(signedMessage.signature),
+      timestamp: new Date(signedMessage.timestamp),
+    }
+
+    console.log("voteToReview signedMessageFormatted", signedMessageFormatted);
     // Verify the signed message
-    const isValid = await verifyMessageSignature(signedMessage);
+    const isValid = await verifyMessageSignature(signedMessageFormatted);
     if (!isValid) {
       throw new Error("Invalid message signature");
     }
@@ -55,16 +67,22 @@ export async function voteToReview(
     }
 
     // Get voter's membership and passport data
-    const { data: membership, error: membershipError } = await supabase
-      .from("memberships")
+    const { data: ephemeralKey, error: ephemeralKeyError } = await supabase
+      .from("ephemeral_keys")
       .select("*")
-      .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+      .eq("pubkey", signedMessageFormatted.ephemeralPubkey.toString())
       .single();
 
-    if (membershipError || !membership) {
+    if (ephemeralKeyError || !ephemeralKey) {
       throw new Error("Voter is not a member");
     }
 
+    // Get voter's membership and passport data
+    const { data: membership, error: membershipError } = await supabase
+      .from("memberships")
+      .select("*")
+      .eq("pubkey", signedMessageFormatted.ephemeralPubkey.toString())
+      .single();
     // Check KYC requirements if needed
     if (poll.is_only_kyc_verified) {
       const { data: passport, error: passportError } = await supabase
@@ -80,7 +98,7 @@ export async function voteToReview(
 
     // Check organization requirements if needed
     if (poll.is_only_organizations) {
-      if (!membership.is_organization) {
+      if (!membership) {
         throw new Error("Only organizations can vote in this poll");
       }
     }
@@ -104,20 +122,21 @@ export async function voteToReview(
     // Get the option ID
     const { data: pollOption, error: optionError } = await supabase
       .from("poll_options")
-      .select("id")
+      .select("id, option_text, poll_id, poll_option_id")
       .eq("poll_id", pollId)
       .eq("option_text", option)
-      .single();
+    // .single();
+    console.log("voteToReview pollOption", pollOption);
 
     if (optionError || !pollOption) {
-      throw new Error("Invalid poll option");
+      // throw new Error("Invalid poll option");
     }
 
     // Create the vote
     const { error: insertError } = await supabase.from("poll_votes").insert([
       {
         poll_id: pollId,
-        option_id: pollOption.id,
+        // option_id: pollOption.id,
         voter_pubkey: signedMessage.ephemeralPubkey.toString(),
         group_id: poll.group_id,
         group_provider: poll.group_provider,
