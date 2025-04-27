@@ -67,22 +67,26 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
     }
     const authHeader = req.headers.authorization;
 
+    
+    console.log("data", data);
     const { data: membershipData, error: membershipError } = await supabase
       .from("memberships")
       .select("*")
-      .eq("pubkey", data?.memberships?.[0]?.pubkey_expiry)
+      .eq("pubkey", data?.pubkey)
       .eq("group_id", data.group_id)
       .single();
+
+    console.log("membershipData", membershipData);
 
 
 
     // TODO add check verification
     if (data.internal) {
-      const pubkey = authHeader?.split(" ")[1];
+      const pubkeyBearer= authHeader?.split(" ")[1];
       const { data: membershipData, error: membershipError } = await supabase
         .from("memberships")
         .select("*")
-        .eq("pubkey", pubkey)
+        .eq("pubkey", pubkeyBearer)
         .eq("group_id", data.group_id)
         .single();
   
@@ -102,6 +106,8 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       }
 
     }
+
+    console.log(membershipData?.proofs_args  );
 
     const message: SignedMessageWithProof = {
       id: data.id,
