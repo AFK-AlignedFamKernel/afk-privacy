@@ -38,10 +38,33 @@ export async function fetchPolls(
 
   let query = supabase
     .from("polls")
-    .select(
-      "id, title, description, pubkey, is_yes_no, answer_options, max_options, min_options, multiselect, ends_at, show_results_publicly, is_only_organizations, is_only_kyc_verified, age_required, is_specific_countries, countries_accepted, countries_excluded, passport_registration_id"
-      // "id, title, about, timestamp, group_id, group_provider, pubkey, is_yes_no, answer_options, max_options, min_options, multiselect, ends_at, show_results_publicly, is_only_organizations, is_only_kyc_verified, age_required, is_specific_countries, countries_accepted, countries_excluded, passport_registration_id"
-    )
+    .select(`
+      id,
+      title,
+      description,
+      is_yes_no,
+      answer_options,
+      max_options,
+      min_options,
+      multiselect,
+      created_at,
+      ends_at,
+      creator_pubkey,
+      show_results_publicly,
+      is_only_organizations,
+      is_only_kyc_verified,
+      age_required,
+      is_specific_countries,
+      countries_accepted,
+      countries_excluded,
+      nationality,
+      date_of_birth,
+      gender,
+      organization_name,
+      pubkey,
+      group_id,
+      group_provider
+    `)
     .order("created_at", { ascending: false })
     .limit(limit);
 

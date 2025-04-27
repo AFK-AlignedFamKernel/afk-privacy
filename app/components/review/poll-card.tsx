@@ -18,22 +18,32 @@ type Review = SignedMessageWithProof & {
   show_results_publicly?: boolean;
   is_only_organizations?: boolean;
   is_only_kyc_verified?: boolean;
+  age_required?: number;
+  is_specific_countries?: boolean;
+  countries_accepted?: string[];
+  countries_excluded?: string[];
+  nationality?: string;
+  date_of_birth?: string;
+  gender?: string;
+  organization_name?: string;
   title?: string;
   description?: string;
-  about?: string;
+  total_votes?: number;
+  option_votes?: Record<string, number>;
+  has_voted?: boolean;
 };
 
 type ReviewCardProps = {
   review: Review;
   isInternal?: boolean;
   onVote?: (pollId: string, option: string) => Promise<void>;
-  handleOnVote?: () => Promise<void>;
 };
 
 const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => {
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleOnVote = async (pollId: string, option: string) => {
     try {
@@ -81,38 +91,18 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         throw new Error(error.error || 'Failed to vote');
       }
 
-      // setSelectedPoll(pollId);
-      // // Refresh polls to show updated results
-      // fetchPolls();
+      // Refresh polls to show updated results
+      window.location.reload();
     } catch (error) {
       console.error('Error voting:', error);
-      // Show error message to user
       setError((error as Error).message);
     }
   };
-
 
   const getAnonymousName = () => {
     if (!review.ephemeralPubkey) return 'Anonymous';
     const pubkeyStr = review.ephemeralPubkey.toString();
     return `Anonymous User ${pubkeyStr.slice(0, 6)}`;
-  };
-
-  const renderRating = () => {
-    if (!review.metadata?.rating) return null;
-    const rating = review.metadata.rating;
-    
-    return (
-      <div className="review-rating">
-        {[...Array(5)].map((_, i) => (
-          <IonIcon
-            key={i}
-            name={i < rating ? "star" : "star-outline"}
-            className="rating-star"
-          />
-        ))}
-      </div>
-    );
   };
 
   const handleOptionSelect = (option: string) => {
@@ -136,23 +126,22 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const handleSubmitVote = async () => {
-    // if (!onVote || !review.id) return;
     if (!review.id) return;
-    
+
     if (selectedOptions.size === 0) {
       setError("Please select at least one option");
       return;
     }
 
-    // if (review.min_options && selectedOptions.size < review.min_options) {
-    //   setError(`Please select at least ${review.min_options} options`);
-    //   return;
-    // }
+    if (review.min_options && selectedOptions.size < review.min_options) {
+      setError(`Please select at least ${review.min_options} options`);
+      return;
+    }
 
     try {
       setIsVoting(true);
       setError(null);
-      
+
       // For multiple selections, submit each vote
       for (const option of selectedOptions) {
         await handleOnVote(review.id, option);
@@ -168,39 +157,72 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     if (!review.answer_options?.length) return null;
 
     return (
-      <div className="poll-options">
-        {review.answer_options.map((option, index) => (
-          <div key={index} className="poll-option">
-            <input 
-              type={review.multiselect ? "checkbox" : "radio"}
-              name={`poll-${review.id}`}
-              id={`option-${review.id}-${index}`}
-              checked={selectedOptions.has(option)}
-              onChange={() => handleOptionSelect(option)}
-              disabled={isVoting}
-            />
-            <label htmlFor={`option-${review.id}-${index}`}>{option}</label>
-          </div>
-        ))}
-        <button 
+      <div className="poll-options-container">
+        <div className="poll-options">
+          {review.answer_options.map((option, index) => (
+            <div key={index} className="poll-option">
+              <input
+                type={review.multiselect ? "checkbox" : "radio"}
+                name={`poll-${review.id}`}
+                id={`option-${review.id}-${index}`}
+                checked={selectedOptions.has(option)}
+                onChange={() => handleOptionSelect(option)}
+                disabled={isVoting || review.has_voted}
+              />
+              <label htmlFor={`option-${review.id}-${index}`}>
+                {option}
+                {review.show_results_publicly && review.option_votes && (
+                  <span className="option-vote-count">
+                    ({review.option_votes[option] || 0})
+                  </span>
+                )}
+              </label>
+            </div>
+          ))}
+
+        </div>
+        <button
           className="submit-vote-button"
           onClick={handleSubmitVote}
-          disabled={isVoting || selectedOptions.size === 0}
+          disabled={isVoting || selectedOptions.size === 0 || review.has_voted}
         >
-          {isVoting ? "Submitting..." : "Submit Vote"}
+          {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
         </button>
       </div>
+
     );
   };
 
   const renderPollRequirements = () => {
     const requirements = [];
+
     if (review.is_only_kyc_verified) {
       requirements.push("KYC Verified Users Only");
     }
     if (review.is_only_organizations) {
       requirements.push("Organizations Only");
     }
+    if (review.age_required) {
+      requirements.push(`Age ${review.age_required}+`);
+    }
+    if (review.is_specific_countries) {
+      if (review.countries_accepted?.length) {
+        requirements.push(`Countries: ${review.countries_accepted.join(", ")}`);
+      }
+      if (review.countries_excluded?.length) {
+        requirements.push(`Excluded: ${review.countries_excluded.join(", ")}`);
+      }
+    }
+    if (review.nationality) {
+      requirements.push(`Nationality: ${review.nationality}`);
+    }
+    if (review.gender) {
+      requirements.push(`Gender: ${review.gender}`);
+    }
+    if (review.organization_name) {
+      requirements.push(`Organization: ${review.organization_name}`);
+    }
+
     if (requirements.length === 0) return null;
 
     return (
@@ -210,33 +232,100 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     );
   };
 
-  return (
-    <div className="review-card">
-      <header className="review-card-header">
-        <div className="review-card-header-sender">
-          <span className="review-author">
-            {getAnonymousName()}
-          </span>
-          <span className="review-timestamp">
-            {new Date(review.timestamp).toLocaleDateString()}
-          </span>
+  const renderPollStats = () => {
+    if (!review.show_results_publicly) return null;
+
+    const totalVotes = review.total_votes || 0;
+    const optionVotes = review.option_votes || {};
+
+    return (
+      <div className="poll-stats">
+        <div className="poll-stats-header">
+          <h4>Poll Results</h4>
+          <span className="total-votes">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
         </div>
-      </header>
 
-      <main className="review-card-content">
-        <div className="review-text">{review.title}</div>
-        {renderRating()}
-        {renderPollOptions()}
-        {renderPollRequirements()}
-        {error && <div className="error-message">{error}</div>}
-      </main>
+        <div className="poll-stats-options">
+          {review.answer_options?.map((option, index) => {
+            const votes = optionVotes[option] || 0;
+            const percentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 
-      <div className="review-card-footer">
-        <div className="like-button-container">
-          <button className="like-button">
-            <IonIcon name="heart-outline" />
-            <span className="like-count">{review.likes || 0}</span>
+            return (
+              <div key={index} className="poll-stats-option">
+                <div className="poll-stats-option-header">
+                  <span className="option-text">{option}</span>
+                  <span className="option-votes">{votes} votes ({percentage.toFixed(1)}%)</span>
+                </div>
+                <div className="poll-stats-bar">
+                  <div
+                    className="poll-stats-fill"
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="poll-card">
+      <div className="poll-header">
+        <div className="poll-title-section">
+          <h3 className="poll-title">{review.title}</h3>
+          <div className="poll-meta">
+            <div className="poll-author">
+              <IonIcon name="person-outline" />
+              <span>{getAnonymousName()}</span>
+            </div>
+            <div className="poll-date">
+              <IonIcon name="time-outline" />
+              <span>{new Date(review.timestamp).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+        <div className="poll-actions">
+          <button
+            className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            <IonIcon name="chevron-down-outline" />
+            <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
           </button>
+        </div>
+      </div>
+
+      <div className="poll-content">
+        {review.description && (
+          <p className="poll-description">{review.description}</p>
+        )}
+        {renderPollOptions()}
+      </div>
+
+      <div className="poll-footer">
+        <div className="poll-stats">
+          <div className="stat-item total-votes">
+            <IonIcon name="bar-chart-outline" />
+            <span>{review.total_votes || 0} votes</span>
+          </div>
+          <div className="stat-item">
+            <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+            <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+          </div>
+          <div className="stat-item">
+            <IonIcon name="time-outline" />
+            <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={`poll-details ${isExpanded ? 'expanded' : ''}`}>
+        <div className="details-content">
+          {renderPollRequirements()}
+          {renderPollStats()}
+          {error && <div className="error-message">{error}</div>}
         </div>
       </div>
     </div>

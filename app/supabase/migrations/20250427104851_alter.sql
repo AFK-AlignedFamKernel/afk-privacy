@@ -41,7 +41,10 @@ CREATE TABLE IF NOT EXISTS polls (
     date_of_birth TEXT,
     gender TEXT,
     organization_name TEXT,
-    pubkey TEXT
+    pubkey TEXT,
+    selected_countries TEXT[],
+    selected_organizations TEXT[],
+    is_nationality BOOLEAN NOT NULL DEFAULT false
    
 );
 
