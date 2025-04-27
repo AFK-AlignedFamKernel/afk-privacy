@@ -35,6 +35,7 @@ type Review = SignedMessageWithProof & {
   selected_organizations?: string[];
   internal?: boolean;
   created_at?: Date;
+  selected_countries?: string[];
 };
 
 type ReviewCardProps = {
@@ -49,8 +50,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [isVoting, setIsVoting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleOnVote = async (pollId: string, option: string, options?:string) => {
-  console.log("handleOnVote")
+  const handleOnVote = async (pollId: string, option: string, options?: string) => {
+    console.log("handleOnVote")
     try {
       // Create a signed message for the vote
       const message = {
@@ -243,7 +244,15 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       requirements.push(`Selected Organizations: ${orgNames}`);
     }
 
-    if (requirements.length === 0) return null;
+    if (review.is_specific_countries) {
+      requirements.push(`Countries: ${review.countries_accepted?.length ? review.countries_accepted.map(code => countryNames[code] || code).join(", ") : 'All'}`);
+    }
+
+    if (review?.selected_countries?.length) {
+      requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => countryNames[code] || code).join(", ") : 'All'}`);
+    }
+
+    // if (requirements.length === 0) return null;
 
     return (
       <div className="poll-requirements">
@@ -329,37 +338,54 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         </div>
       </div>
 
+
+      {/* <div className={`poll-details ${isExpanded ? 'expanded' : ''}`}> */}
+      {/* <div className={`poll-details`}> */}
+      {/* <div className="details-content">
+        {renderPollRequirements()}
+        {renderPollStats()}
+      </div> */}
+      {/* </div> */}
+
+      {isExpanded &&
+
+        <>
+          <div className="details-content">
+            {renderPollRequirements()}
+            {renderPollStats()}
+          </div>
+          <div className="poll-footer">
+
+            <div className="poll-stats">
+              <div className="stat-item total-votes">
+                <IonIcon name="bar-chart-outline" />
+                <span>{review.total_votes || 0} votes</span>
+              </div>
+              <div className="stat-item">
+                <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+                <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+              </div>
+              <div className="stat-item">
+                <IonIcon name="time-outline" />
+                <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </>}
+
+
+
       <div className="poll-content">
         {review.description && (
           <p className="poll-description">{review.description}</p>
         )}
         {renderPollOptions()}
+        {error && <div className="error-message">{error}</div>}
+
       </div>
 
-      <div className="poll-footer">
-        <div className="poll-stats">
-          <div className="stat-item total-votes">
-            <IonIcon name="bar-chart-outline" />
-            <span>{review.total_votes || 0} votes</span>
-          </div>
-          <div className="stat-item">
-            <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
-            <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
-          </div>
-          <div className="stat-item">
-            <IonIcon name="time-outline" />
-            <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
 
-      <div className={`poll-details ${isExpanded ? 'expanded' : ''}`}>
-        <div className="details-content">
-          {renderPollRequirements()}
-          {renderPollStats()}
-          {error && <div className="error-message">{error}</div>}
-        </div>
-      </div>
+
     </div>
   );
 };

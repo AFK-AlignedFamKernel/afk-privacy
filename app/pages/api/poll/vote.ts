@@ -112,6 +112,7 @@ export async function voteToReview(
     // Check country requirements if needed
 
     if (poll?.selected_countries && poll?.selected_countries?.length > 0) {
+      console.log("poll?.selected_countries", poll?.selected_countries);
       // const { data: passport, error: passportError } = await supabase
       //   .from("passport_registrations")
       //   .select("*")
