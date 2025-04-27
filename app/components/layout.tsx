@@ -64,7 +64,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     "🧑‍💻",
     "🔒",
     "🔑",
-    "🔐",
     "🌐",
     "👻",
     "👁️‍🗨️",
@@ -92,6 +91,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             className="mobile-header-logo"
             style={isSidebarOpen ? { display: "none" } : { display: "flex", alignItems: "center", gap: "10px" }}
           >
+
+
             <div className="mobile-header-logo-text"
             >
               AFK
@@ -111,11 +112,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
         <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <p style={{fontWeight: "bold", fontStyle: "italic", fontFamily: "monospace" }}>AFK
-              {randomEmojisSidebar.map((emoji, index) => (
-                <span key={index}>{emoji}</span>
-              ))}
-            </p>
+            <div className="logo">
+              <p style={{ fontWeight: "bold", fontStyle: "italic", fontFamily: "monospace" }}>AFK
+                {randomEmojisSidebar.map((emoji, index) => (
+                  <span key={index}>{emoji}</span>
+                ))}
+              </p>
+            </div>
 
             {/* <div className="logo">
 
