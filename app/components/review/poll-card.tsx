@@ -33,6 +33,8 @@ type Review = SignedMessageWithProof & {
   option_votes?: Record<string, number>;
   has_voted?: boolean;
   selected_organizations?: string[];
+  internal?: boolean;
+  created_at?: Date;
 };
 
 type ReviewCardProps = {
@@ -197,7 +199,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
   const renderPollRequirements = () => {
     const requirements = [];
-    
+
     if (review.is_only_kyc_verified) {
       requirements.push("KYC Verified Users Only");
     }
@@ -304,7 +306,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
             </div>
             <div className="poll-date">
               <IonIcon name="time-outline" />
-              <span>{new Date(review.timestamp).toLocaleDateString()}</span>
+              <span>{new Date(review?.created_at!).toLocaleDateString()}</span>
+            </div>
+            <div className="poll-date">
+              <IonIcon name="time-outline" />
+              <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
             </div>
           </div>
         </div>
