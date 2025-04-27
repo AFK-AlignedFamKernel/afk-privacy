@@ -90,6 +90,10 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
 
             const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
 
+            if(!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+                throw new Error("Failed to sign message");
+            }   
+
             const signedMessage: SignedMessage = {
                 ...message,
                 signature,

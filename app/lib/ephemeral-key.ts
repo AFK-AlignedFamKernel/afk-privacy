@@ -67,11 +67,11 @@ function loadEphemeralKey() {
   const ephemeralKey = JSON.parse(ephemeralKeyString);
   return {
     ephemeralKey: {
-      privateKey: BigInt(ephemeralKey.ephemeralKey.privateKey),
-      publicKey: BigInt(ephemeralKey.ephemeralKey.publicKey),
-      salt: BigInt(ephemeralKey.ephemeralKey.salt),
-      expiry: ephemeralKey.ephemeralKey.expiry,
-      ephemeralPubkeyHash: ephemeralKey.ephemeralKey.ephemeralPubkeyHash ? BigInt(ephemeralKey.ephemeralKey.ephemeralPubkeyHash) : null,
+      privateKey: BigInt(ephemeralKey?.privateKey),
+      publicKey: BigInt(ephemeralKey?.publicKey),
+      salt: BigInt(ephemeralKey?.salt),
+      expiry: ephemeralKey?.expiry,
+      ephemeralPubkeyHash: ephemeralKey?.ephemeralPubkeyHash ? BigInt(ephemeralKey?.ephemeralPubkeyHash) : null,
     },
     uuid: ephemeralKey.uuid,
   };
@@ -83,7 +83,7 @@ export function hasEphemeralKey() {
     return false;
   }
 
-  const isExpired = new Date(Number(ephemeralKey.expiry) * 1000) < new Date();
+  const isExpired = new Date(Number(ephemeralKey?.expiry) * 1000) < new Date();
   if (isExpired) {
     localStorage.removeItem(LocalStorageKeys.EphemeralKey);
     return false;
@@ -97,7 +97,7 @@ export function getEphemeralPubkey() {
   if (!ephemeralKey) {
     return null;
   }
-  return ephemeralKey.publicKey;
+  return ephemeralKey?.publicKey;
 }
 
 export async function signMessage(message: Message) {

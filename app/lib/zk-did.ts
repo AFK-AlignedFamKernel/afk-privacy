@@ -113,7 +113,12 @@ export function getEphemeralPubkey() {
 export async function signMessageSelfXyz(message: Message) {
   const { ephemeralKey } = await loadOrInitializeEphemeralKey();
   if (!ephemeralKey) {
-    throw new Error("No ephemeralKey found");
+    // throw new Error("No ephemeralKey found");
+    return {
+      ephemeralPubkey: null,
+      ephemeralPubkeyExpiry: null,
+      signature: null,
+    }
   }
 
   const messageHash = await hashMessage(message);
@@ -151,3 +156,16 @@ async function hashMessage(message: Message) {
   return new Uint8Array(messageHash);
 }
 
+
+function savePassportVerified(passportVerified: boolean) {
+  localStorage.setItem(LocalStorageKeys.PassportVerified, JSON.stringify({
+    passportVerified: passportVerified,
+  }));
+}
+
+function loadPassportVerified() {
+  const passportVerifiedString = localStorage.getItem(LocalStorageKeys.PassportVerified);
+  if (!passportVerifiedString) {
+    return false;
+  }
+}

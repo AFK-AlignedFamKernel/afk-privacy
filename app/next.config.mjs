@@ -47,6 +47,9 @@ const nextConfig = {
     };
     return config
   },
+  eslint: {
+    ignoreDuringBuilds: false,
+  },
   // async headers() {
   //   return [
   //     {

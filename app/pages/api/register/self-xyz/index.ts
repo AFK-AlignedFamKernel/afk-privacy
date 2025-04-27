@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   console.log("pubkey:", pubkey);
 
 
-  let header = req.headers;
+  const header = req.headers;
   console.log("Header:", header);
 
 

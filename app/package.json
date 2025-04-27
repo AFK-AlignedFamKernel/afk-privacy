@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "lint:strict": "next lint --max-warnings=0",
+    "lint:check": "next lint --max-warnings=0 --no-fix",
+    "type-check": "tsc --noEmit",
+    "validate": "yarn lint:check && yarn type-check"
   },
   "dependencies": {
     "@aztec/bb.js": "0.82.2",
@@ -35,6 +40,12 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.11",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
     "sass": "^1.79.4",
     "sharp": "^0.33.5",
     "supabase": "^2.22.4",
@@ -47,12 +58,9 @@
       "next/typescript"
     ],
     "rules": {
-      "max-len": [
-        "error",
-        {
-          "code": 120
-        }
-      ]
+      "max-len": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off"
     }
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

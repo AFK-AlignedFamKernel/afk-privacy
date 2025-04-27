@@ -68,6 +68,10 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
 
+      if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+        throw new Error("Failed to sign message");
+      }
+
       const signedMessage: SignedMessage = {
         ...message,
         signature,
@@ -357,7 +361,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div>
               <div className="poll-date">
                 <IonIcon name="time-outline" />
-                <span>{new Date(review?.created_at!).toLocaleDateString()}</span>
+                <span>{review?.created_at ? new Date(review?.created_at).toLocaleDateString() : ''}</span>
               </div>
               <div className="poll-date">
                 <IonIcon name="time-outline" />
