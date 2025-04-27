@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { fetchMessagesCountry, getMyDataMessageCountry } from "../../lib/country/index";
-import { Message, SignedMessageWithProof } from "../../lib/types";
+import { signMessageSelfXyz } from "../../lib/zk-did";
+import { Message, SignedMessageWithProof, SignedMessage } from "../../lib/types";
 import ReviewPollForm from "./review-poll-form";
 import ReviewCard from "./review-card";
 import Dialog from "../dialog";
@@ -192,6 +193,28 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
   const handleVote = async (pollId: string, option: string) => {
     try {
+      // Create a signed message for the vote
+      const message = {
+        id: crypto.randomUUID(),
+        text: `Vote for ${option} in poll ${pollId}`,
+        timestamp: new Date(),
+        internal: false,
+        anonGroupId: 'self-xyz',
+        anonGroupProvider: 'self-xyz',
+        likes: 0,
+        replyCount: 0,
+        parentId: null,
+      };
+
+      const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+      const signedMessage: SignedMessage = {
+        ...message,
+        signature,
+        ephemeralPubkey,
+        ephemeralPubkeyExpiry,
+      };
+
       const response = await fetch('/api/poll/vote', {
         method: 'POST',
         headers: {
@@ -200,11 +223,18 @@ const ReviewList: React.FC<ReviewListProps> = ({
         body: JSON.stringify({
           pollId,
           option,
+          signedMessage: {
+            ...signedMessage,
+            pubkey: signedMessage.ephemeralPubkey.toString(),
+            ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+            signature: signedMessage.signature.toString(),
+          },
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to vote');
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to vote');
       }
 
       setSelectedPoll(pollId);
@@ -212,6 +242,8 @@ const ReviewList: React.FC<ReviewListProps> = ({
       fetchPolls();
     } catch (error) {
       console.error('Error voting:', error);
+      // Show error message to user
+      setError((error as Error).message);
     }
   };
 
@@ -314,6 +346,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
             <ReviewCard
               review={review}
               isInternal={isInternal}
+              onVote={handleVote}
             />
           </div>
         ))}
