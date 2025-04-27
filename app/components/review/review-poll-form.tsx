@@ -125,7 +125,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(pollData),
+                body: JSON.stringify({ ...pollData, ...pollData?.signedMessage, signedMessage: pollData?.signedMessage }),
             });
 
             if (!response.ok) {
@@ -133,7 +133,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
             }
 
             const createdPoll = await response.json();
-            onSubmit(createdPoll);
+            // onSubmit(createdPoll);
 
             // Reset form
             setTitle("");

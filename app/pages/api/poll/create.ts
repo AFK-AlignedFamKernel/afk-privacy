@@ -52,15 +52,15 @@ export async function createReview(
     console.log("createReview signedMessage", signedMessage);
     const reviewData = {
       // is_yes_no: body.isYesNo,
-      max_options: body.maxOptions,
-      min_options: body.minOptions,
-      answer_options: body.answerOptions,
+      max_options: body.max_options,
+      min_options: body.min_options,
+      answer_options: body.answer_options,
       multiselect: body.multiselect,
       creator_pubkey: signedMessage.ephemeralPubkey.toString(),
       title: body.title,
       description: body.description,
-      ends_at: new Date(body.endsAt),
-      show_results_publicly: body.showResultsPublicly,
+      ends_at: new Date(body.ends_at),
+      show_results_publicly: body.show_results_publicly,
       group_id: signedMessage.anonGroupId,
       group_provider: signedMessage.anonGroupProvider,
       // pubkey: signedMessage.ephemeralPubkey.toString(),
@@ -81,12 +81,12 @@ export async function createReview(
     console.log("ephemeral_keys data", data);
 
 
-    const authHeader = request.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({ error: "Authorization required for internal messages" });
-      res.end();
-      return;
-    }
+    // const authHeader = request.headers.authorization;
+    // if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    //   res.status(401).json({ error: "Authorization required for internal messages" });
+    //   res.end();
+    //   return;
+    // }
 
     if (error) {
       throw error;
@@ -145,7 +145,7 @@ export async function createReview(
     }
 
 
-    const pollOptionsToInsert = body.answerOptions.map((option: string) => ({
+    const pollOptionsToInsert = body.answer_options?.map((option: string) => ({
       poll_id: signedMessage.id,
       option_text: option,
     }));

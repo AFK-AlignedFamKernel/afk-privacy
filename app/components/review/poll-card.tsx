@@ -49,7 +49,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [isVoting, setIsVoting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleOnVote = async (pollId: string, option: string) => {
+  const handleOnVote = async (pollId: string, option: string, options?:string) => {
+  console.log("handleOnVote")
     try {
       // Create a signed message for the vote
       const message = {
@@ -130,17 +131,19 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const handleSubmitVote = async () => {
-    if (!review.id) return;
+    console.log("handleSubmitVote",);
+    console.log("handleSubmitVote", review);
+    // if (!review.id) return;
 
     if (selectedOptions.size === 0) {
       setError("Please select at least one option");
       return;
     }
 
-    if (review.min_options && selectedOptions.size < review.min_options) {
-      setError(`Please select at least ${review.min_options} options`);
-      return;
-    }
+    // if (review.min_options && selectedOptions.size < review.min_options) {
+    //   setError(`Please select at least ${review.min_options} options`);
+    //   return;
+    // }
 
     try {
       setIsVoting(true);
@@ -148,6 +151,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       // For multiple selections, submit each vote
       for (const option of selectedOptions) {
+        console.log("handleOnVote", option);
         await handleOnVote(review.id, option);
       }
     } catch (err) {

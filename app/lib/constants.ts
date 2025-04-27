@@ -1,10 +1,10 @@
 export const countryNames: Record<string, string> = {
+  'FR': 'France',
   'US': 'United States',
   'GB': 'United Kingdom',
   'CA': 'Canada',
   'AU': 'Australia',
   'DE': 'Germany',
-  'FR': 'France',
   'IT': 'Italy',
   'ES': 'Spain',
   'JP': 'Japan',
