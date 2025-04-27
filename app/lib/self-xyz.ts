@@ -8,6 +8,9 @@ import { Providers } from "./providers";
 export async function postLinkSelfXyz(message: Message, uuid: string) {
     // Sign the message with the ephemeral key pair
     const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+    if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+      throw new Error("Failed to sign message");
+    }
     const signedMessage: SignedMessage = {
       ...message,
       signature: signature,

@@ -68,6 +68,10 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
 
+      if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+        throw new Error("Failed to sign message");
+      }
+
       const signedMessage: SignedMessage = {
         ...message,
         signature,

@@ -10,7 +10,7 @@ export default function PollPage() {
       </Head>
 
       <div className="home-page">
-        <ReviewList showMessageForm />
+        <ReviewList isInternal={true} showMessageForm={true} />
       </div>
     </>
   );

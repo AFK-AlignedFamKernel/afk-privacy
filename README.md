@@ -9,8 +9,12 @@ We build from a Fork of StealthNote for privacy social network:
 Thank you for the amazing work on Public good and Privacy!
 
 # Description
-Anon all-in-one platform.
-Starting with Social and governance usecases.
+Anon all-in-one platform using zkDID for Identity stuff.
+
+Starting with Social and governance usecases:
+- Organizations.
+- Country
+- Age 
 
 # Done
 -

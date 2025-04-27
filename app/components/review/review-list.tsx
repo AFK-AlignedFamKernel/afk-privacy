@@ -17,11 +17,13 @@ const MAX_POLL_INTERVAL = 100000; // 100 seconds
 type ReviewListProps = {
   isInternal?: boolean;
   groupId?: string;
+  showMessageForm?: boolean;
 };
 
 const ReviewList: React.FC<ReviewListProps> = ({
   isInternal,
   groupId,
+  showMessageForm = false,
 }) => {
   // State
   const [reviews, setReviews] = useState<SignedMessageWithProof[]>([]);
@@ -208,6 +210,10 @@ const ReviewList: React.FC<ReviewListProps> = ({
       };
 
       const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+      if(!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+        throw new Error("Failed to sign message");
+      }
 
       const signedMessage: SignedMessage = {
         ...message,

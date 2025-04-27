@@ -65,30 +65,32 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       res.end();
       return;
     }
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res
+        .status(401)
+        .json({ error: "Authorization required for internal messages" });
+      res.end();
+      return;
+    }
 
+    const pubkey = authHeader.split(" ")[1];
+    const { data: membershipData, error: membershipError } = await supabase
+      .from("memberships")
+      .select("*")
+      .eq("pubkey", pubkey)
+      .eq("group_id", data.group_id)
+      .single();
+
+    if (membershipError || !membershipData) {
+      res.status(401).json({ error: "Invalid public key for this group" });
+      res.end();
+      return;
+    }
+
+    // TODO add check verification
     if (data.internal) {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        res
-          .status(401)
-          .json({ error: "Authorization required for internal messages" });
-        res.end();
-        return;
-      }
-
-      const pubkey = authHeader.split(" ")[1];
-      const { data: membershipData, error: membershipError } = await supabase
-        .from("memberships")
-        .select("*")
-        .eq("pubkey", pubkey)
-        .eq("group_id", data.group_id)
-        .single();
-
-      if (membershipError || !membershipData) {
-        res.status(401).json({ error: "Invalid public key for this group" });
-        res.end();
-        return;
-      }
+  
     }
 
     const message: SignedMessageWithProof = {
@@ -99,13 +101,13 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       timestamp: data.timestamp,
       signature: data.signature,
       ephemeralPubkey: data.pubkey,
-      ephemeralPubkeyExpiry: data.memberships.pubkey_expiry,
+      ephemeralPubkeyExpiry: membershipData.pubkey_expiry,
       internal: data.internal,
       likes: data.likes,
       replyCount: data.reply_count,
       parentId: data.parent_id,
-      proof: JSON.parse(data.memberships.proof),
-      proofArgs: JSON.parse(data.memberships.proof_args),
+      proof: JSON.parse(membershipData.proof),
+      proofArgs: JSON.parse(membershipData.proof_args),
     };
 
     res.json(message);

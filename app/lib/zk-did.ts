@@ -156,3 +156,16 @@ async function hashMessage(message: Message) {
   return new Uint8Array(messageHash);
 }
 
+
+function savePassportVerified(passportVerified: boolean) {
+  localStorage.setItem(LocalStorageKeys.PassportVerified, JSON.stringify({
+    passportVerified: passportVerified,
+  }));
+}
+
+function loadPassportVerified() {
+  const passportVerifiedString = localStorage.getItem(LocalStorageKeys.PassportVerified);
+  if (!passportVerifiedString) {
+    return false;
+  }
+}

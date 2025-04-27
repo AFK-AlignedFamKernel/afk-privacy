@@ -120,6 +120,7 @@ export const LocalStorageKeys = {
   EphemeralKeyPassportRegistration: "ephemeralKeyPassportRegistration",
   SelfKeyPassportRegistration: "selfKeyPassportRegistration",
   CurrentKYCProvider: "currentKYCProvider",
+  PassportVerified: "passportVerified",
 
 };
 

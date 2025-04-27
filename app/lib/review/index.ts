@@ -123,7 +123,7 @@ export async function createMembershipCountry({
     throw new Error("Call to /memberships API failed");
   }
 }
-  
+
 export async function createMessageReview(signedMessage: SignedMessage) {
   const response = await fetch("/api/country/messages", {
     method: "POST",
@@ -198,19 +198,30 @@ export async function createLinkSelfXyz(signedMessage: SignedMessage, uuid: stri
   }
 }
 export async function postMessageCountry(message: Message) {
-  // Sign the message with the ephemeral key pair
-  const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
-  const signedMessage: SignedMessage = {
-    ...message,
-    signature: signature,
-    ephemeralPubkey: ephemeralPubkey,
-    ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
-  };
+  try {
+    // Sign the message with the ephemeral key pair
+    const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
 
-  // Send the signed message to the server
-  await createMessageReview(signedMessage);
+    if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+      throw new Error("Failed to sign message");
+    }
 
-  return signedMessage;
+    const signedMessage: SignedMessage = {
+      ...message,
+      signature: signature,
+      ephemeralPubkey: ephemeralPubkey,
+      ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+    };
+
+    // Send the signed message to the server
+    await createMessageReview(signedMessage);
+
+    return signedMessage;
+  } catch (error) {
+    console.error("Error posting message:", error);
+    throw error;
+  }
+
 }
 
 export async function fetchMyDataMessageCountry(signedMessage: SignedMessage) {
@@ -238,20 +249,28 @@ export async function fetchMyDataMessageCountry(signedMessage: SignedMessage) {
 
 
 export async function getMyDataMessageCountry(message: Message) {
-  // Sign the message with the ephemeral key pair
-  const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
-  const signedMessage: SignedMessage = {
-    ...message,
-    signature: signature,
-    ephemeralPubkey: ephemeralPubkey,
-    ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
-  };
+  try {
+    // Sign the message with the ephemeral key pair
+    const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+    if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+      throw new Error("Failed to sign message");
+    }
+    const signedMessage: SignedMessage = {
+      ...message,
+      signature: signature,
+      ephemeralPubkey: ephemeralPubkey,
+      ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+    };
 
-  // Send the signed message to the server
-  const response = await fetchMyDataMessageCountry(signedMessage);
+    // Send the signed message to the server
+    const response = await fetchMyDataMessageCountry(signedMessage);
 
-  console.log("response", response);
-  return response;
+    console.log("response", response);
+    return response;
+  } catch (error) {
+    console.error("Error getting my data message country:", error);
+    throw error;
+  }
 }
 
 
@@ -276,17 +295,25 @@ export async function createReview(signedMessage: SignedMessage) {
 }
 
 export async function handleCreateReview(message: Message) {
-  // Sign the message with the ephemeral key pair
-  const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
-  const signedMessage: SignedMessage = {
-    ...message,
-    signature: signature,
-    ephemeralPubkey: ephemeralPubkey,
-    ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
-  };
+  try {
+    // Sign the message with the ephemeral key pair
+    const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+    if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+      throw new Error("Failed to sign message");
+    }
+    const signedMessage: SignedMessage = {
+      ...message,
+      signature: signature,
+      ephemeralPubkey: ephemeralPubkey,
+      ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+    };
 
-  // Send the signed message to the server
-  await createReview(signedMessage);
+    // Send the signed message to the server
+    await createReview(signedMessage);
 
-  return signedMessage;
+    return signedMessage;
+  } catch (error) {
+    console.error("Error creating review:", error);
+    throw error;
+  }
 }
