@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix"
+    "lint:fix": "next lint --fix",
+    "lint:strict": "next lint --max-warnings=0",
+    "lint:check": "next lint --max-warnings=0 --no-fix",
+    "type-check": "tsc --noEmit",
+    "validate": "yarn lint:check && yarn type-check"
   },
   "dependencies": {
     "@aztec/bb.js": "0.82.2",
@@ -36,6 +40,12 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.11",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
     "sass": "^1.79.4",
     "sharp": "^0.33.5",
     "supabase": "^2.22.4",
