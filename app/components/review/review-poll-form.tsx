@@ -112,6 +112,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 is_specific_countries: isSpecificCountries,
                 countries_accepted: selectedCountries,
                 selected_organizations: selectedOrganizations,
+                selected_countries: selectedCountries,
                 signedMessage: {
                     ...signedMessage,
                     pubkey: signedMessage.ephemeralPubkey.toString(),
@@ -119,6 +120,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                     signature: signedMessage.signature.toString(),
                 },
             };
+            console.log("pollData", pollData);
 
             const response = await fetch('/api/poll/create', {
                 method: 'POST',

@@ -203,7 +203,12 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const renderPollRequirements = () => {
+    console.log("review",review);
     const requirements = [];
+
+    if(review?.selected_countries?.length) {
+      requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => countryNames[code] || code).join(", ") : 'All'}`);
+    }
 
     if (review.is_only_kyc_verified) {
       requirements.push("KYC Verified Users Only");

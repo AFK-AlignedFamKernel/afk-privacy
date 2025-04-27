@@ -63,7 +63,9 @@ export async function fetchPolls(
       organization_name,
       pubkey,
       group_id,
-      group_provider
+      group_provider,
+      selected_countries,
+      selected_organizations
     `)
     .order("created_at", { ascending: false })
     .limit(limit);
