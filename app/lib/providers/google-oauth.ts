@@ -77,7 +77,7 @@ export const GoogleOAuthProvider: AnonGroupProvider = {
   ) => {
     if (proofArgs.jwtCircuitVersion !== JWTCircuitHelper.version) {
       throw new Error(
-        'This proof was generated with an older version of StealthNote JWT circuit and ' +
+        'This proof was generated with an older version of AFK JWT circuit and ' +
         'cannot be verified at this time. You can run an older version of the app to verify this proof.'
       );
     }

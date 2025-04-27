@@ -47,8 +47,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
 
     console.log(
-      '%c📝 If you run in to any errors, please create an issue at https://github.com/saleel/stealthnote/issues\n' +
-      '🐦 You can also reach out to me on Twitter at https://twitter.com/_saleel',
+      '%c📝 If you run in to any errors, please create an issue at https://github.com/AFK-AlignedFamKernel/afk-privacy/issues\n' +
+      '🐦 You can also reach out to me on Twitter at https://twitter.com/AFK_AlignedFamK or https://x.com/MSG_Encrypted',
       'background: #efefef; color: black; font-size: 16px; padding: 10px; border-radius: 3px;'
     );
     setConsoleShown(true);
