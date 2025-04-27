@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import IonIcon from "@reacticons/ionicons";
 import { SignedMessageWithProof, SignedMessage } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
+import { countryNames, domainNames } from "../../lib/constants";
 
 type ReviewMetadata = {
   rating?: number;
@@ -31,6 +32,7 @@ type Review = SignedMessageWithProof & {
   total_votes?: number;
   option_votes?: Record<string, number>;
   has_voted?: boolean;
+  selected_organizations?: string[];
 };
 
 type ReviewCardProps = {
@@ -195,7 +197,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
   const renderPollRequirements = () => {
     const requirements = [];
-
+    
     if (review.is_only_kyc_verified) {
       requirements.push("KYC Verified Users Only");
     }
@@ -207,10 +209,16 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     }
     if (review.is_specific_countries) {
       if (review.countries_accepted?.length) {
-        requirements.push(`Countries: ${review.countries_accepted.join(", ")}`);
+        const countryNamesList = review.countries_accepted
+          .map(code => countryNames[code] || code)
+          .join(", ");
+        requirements.push(`Countries: ${countryNamesList}`);
       }
       if (review.countries_excluded?.length) {
-        requirements.push(`Excluded: ${review.countries_excluded.join(", ")}`);
+        const excludedCountries = review.countries_excluded
+          .map(code => countryNames[code] || code)
+          .join(", ");
+        requirements.push(`Excluded: ${excludedCountries}`);
       }
     }
     if (review.nationality) {
@@ -222,12 +230,26 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     if (review.organization_name) {
       requirements.push(`Organization: ${review.organization_name}`);
     }
+    if (review.selected_organizations?.length) {
+      const orgNames = review.selected_organizations
+        .map(domain => domainNames[domain] || domain)
+        .join(", ");
+      requirements.push(`Selected Organizations: ${orgNames}`);
+    }
 
     if (requirements.length === 0) return null;
 
     return (
       <div className="poll-requirements">
-        <small>Requirements: {requirements.join(", ")}</small>
+        <h4>Requirements</h4>
+        <ul>
+          {requirements.map((req, index) => (
+            <li key={index}>
+              <IonIcon name="checkmark-circle-outline" />
+              <span>{req}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   };

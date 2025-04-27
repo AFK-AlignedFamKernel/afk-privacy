@@ -17,6 +17,8 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
     const [description, setDescription] = useState("");
     const [options, setOptions] = useState<string[]>(['', '']); // Minimum 2 options
     const [isYesNo, setIsYesNo] = useState(false);
+    const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+    const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>([]);
     const [multiselect, setMultiselect] = useState(false);
     const [maxOptions, setMaxOptions] = useState(1);
     const [minOptions, setMinOptions] = useState(1);
@@ -104,6 +106,9 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 is_only_kyc_verified: isOnlyKycVerified,
                 group_id: 'self-xyz',
                 group_provider: 'self-xyz',
+                selected_countries: [],
+                selected_organizations: [],
+                is_nationality: false,
                 signedMessage: {
                     ...signedMessage,
                     pubkey: signedMessage.ephemeralPubkey.toString(),
