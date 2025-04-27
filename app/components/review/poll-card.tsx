@@ -289,8 +289,14 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       <div className="poll-stats">
         <div className="poll-stats-header">
           <h4>Poll Results</h4>
-          <span className="total-votes">{totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+          <span className="bar-chart-outline total-votes">
+          <IonIcon name="bar-chart-outline" />
+          {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
         </div>
+        {/* <div className="stat-item total-votes">
+          <IonIcon name="bar-chart-outline" />
+          <span>{review.total_votes || 0} votes</span>
+        </div> */}
 
         <div className="poll-stats-options">
           {review.answer_options?.map((option, index) => {
@@ -327,18 +333,18 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       <div className="poll-voting-stats">
 
         <div className="poll-stats">
-          <div className="stat-item total-votes">
+          {/* <div className="stat-item total-votes">
             <IonIcon name="bar-chart-outline" />
             <span>{review.total_votes || 0} votes</span>
-          </div>
+          </div> */}
           <div className="stat-item">
             <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
             <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
           </div>
-          <div className="stat-item">
+          {/* <div className="stat-item">
             <IonIcon name="time-outline" />
             <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
-          </div>
+          </div> */}
         </div>
       </div>
     )
@@ -368,11 +374,25 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
                 <IonIcon name="time-outline" />
                 <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
               </div>
-              <div className="stat-item total-votes">
+
+              {/* <div className="stat-item">
+                <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+                <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+              </div> */}
+              {/* <div className="stat-item total-votes">
                 <IonIcon name="bar-chart-outline" />
                 <span>{review.total_votes || 0} votes</span>
-              </div>
+              </div> */}
             </div>
+
+            <div className="flex" style={{ gap: "10px", display: "flex", alignItems: "center" }}>
+              <div className="poll-date">
+                <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+                <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+              </div>
+
+            </div>
+
           </div>
           <div className="poll-actions">
             <div className="poll-meta poll-author">
@@ -416,7 +436,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
         <>
           <div className="details-content">
-            {renderPollOverview()}
+            {/* {renderPollOverview()} */}
 
             {renderPollStats()}
           </div>

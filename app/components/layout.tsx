@@ -122,14 +122,18 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             style={isSidebarOpen ? { display: "none" } : { display: "flex", alignItems: "center", gap: "10px" }}
           >
 
+            <Link href="/">
 
-            <div className="mobile-header-logo-text"
-            >
-              AFK
-              {randomEmojis.map((emoji, index) => (
-                <span key={index}>{emoji}</span>
-              ))}
-            </div>
+              <div className="mobile-header-logo-text"
+              >
+
+                AFK
+                {randomEmojis.map((emoji, index) => (
+                  <span key={index}>{emoji}</span>
+                ))}
+              </div>
+            </Link>
+
             {/* <Image src={logo} alt="Bro"
               width={50}
               height={50}
@@ -243,7 +247,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 target="_blank"
                 title="Source Code"
                 rel="noopener noreferrer"
-                href="hhttps://github.com/AFK-AlignedFamKernel/afk-privacy"
+                href="https://github.com/AFK-AlignedFamKernel/afk-privacy"
               >
                 <IonIcon name="logo-github" />
               </Link>

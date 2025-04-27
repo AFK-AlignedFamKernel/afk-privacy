@@ -90,7 +90,8 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
       const fetchedComments = await fetchMessages({
         limit: 50,
         isInternal: message.internal,
-        parentId: message.id
+        parentId: message.id,
+        groupId: message.anonGroupId
       });
       setComments(fetchedComments);
       setShowCommentDialog(true);
