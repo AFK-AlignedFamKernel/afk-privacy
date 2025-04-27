@@ -81,12 +81,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <>
       <div className="page">
         <div className="mobile-header">
-          <button
-            className={`sidebar-toggle ${isSidebarOpen ? "open" : ""}`}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            ☰
-          </button>
           <div
             className="mobile-header-logo"
             style={isSidebarOpen ? { display: "none" } : { display: "flex", alignItems: "center", gap: "10px" }}
@@ -109,6 +103,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               height={50}
             /> */}
           </div>
+          <button
+            className={`sidebar-toggle ${isSidebarOpen ? "open" : ""}`}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          >
+            ☰
+          </button>
+
         </div>
         <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
