@@ -357,7 +357,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div>
               <div className="poll-date">
                 <IonIcon name="time-outline" />
-                <span>{new Date(review?.created_at!).toLocaleDateString()}</span>
+                <span>{review?.created_at ? new Date(review?.created_at).toLocaleDateString() : ''}</span>
               </div>
               <div className="poll-date">
                 <IonIcon name="time-outline" />
