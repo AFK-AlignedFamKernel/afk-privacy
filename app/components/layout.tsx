@@ -9,6 +9,8 @@ import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys } from "../lib/types";
 import { Providers } from "../lib/providers";
 import { WelcomeModal } from './welcome-modal';
+import Loading from './loading';
+import { usePathname } from 'next/navigation';
 import logo from "@/assets/logo192.png";
 import logoAfk from "@/assets/afk_logo_circle.png";
 // import logo from "@/assets/logo.png";
@@ -29,6 +31,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [consoleShown, setConsoleShown] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const pathname = usePathname();
 
   let slug = null;
   if (currentProvider && currentGroupId) {
@@ -40,6 +44,38 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   React.useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  // Handle route changes
+  React.useEffect(() => {
+    const handleRouteChange = () => {
+      setIsLoading(true);
+    };
+
+    const handleRouteComplete = () => {
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    };
+
+    // Listen for route changes
+    window.addEventListener('beforeunload', handleRouteChange);
+    window.addEventListener('load', handleRouteComplete);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleRouteChange);
+      window.removeEventListener('load', handleRouteComplete);
+    };
+  }, []);
+
+  // Also handle pathname changes
+  React.useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
   React.useEffect(() => {
     if (consoleShown) {
@@ -255,6 +291,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </div>
 
       <WelcomeModal />
+      {isLoading && <Loading />}
     </>
   );
 };
