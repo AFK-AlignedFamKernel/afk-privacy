@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
-import { SignedMessageWithProof } from "../../../../lib/types";
+import { SignedMessageWithProof } from "../../../../../lib/types";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -34,7 +34,7 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const { data, error } = await supabase
-      .from("messages")
+      .from("country_messages")
       .select(`
         id,
         group_id,
@@ -46,12 +46,9 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
         internal,
         likes,
         reply_count,
+        internal,
         parent_id,
-        memberships!fk_message_membership (
-          proof,
-          pubkey_expiry,
-          proof_args
-        )
+        ephemeral_key_id
       `)
       .eq("id", id)
       .single();
@@ -60,30 +57,28 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       throw error;
     }
 
+    const { data: ephemeralData, error: ephemeralError } = await supabase
+      .from("ephemeral_memberships")
+      .select("*")
+      .eq("pubkey", data.pubkey)
+      // .eq("group_id", data.group_id)
+      .single();
+
+
+    const { data: passportCreation, error: passportCreationError } = await supabase
+      .from("passport_registrations")
+      .select("*")
+      .eq("pubkey", data.pubkey)
+      // .eq("group_id", data.group_id)
+      .single();
     if (!data) {
       res.status(404).json({ error: "Message not found" });
       res.end();
       return;
     }
-    const authHeader = req.headers.authorization;
 
-    const { data: membershipData, error: membershipError } = await supabase
-      .from("memberships")
-      .select("*")
-      .eq("pubkey", data?.pubkey)
-      .eq("group_id", data.group_id)
-      .single();
-
-    // TODO add check verification
     if (data.internal) {
-      const pubkeyBearer= authHeader?.split(" ")[1];
-      const { data: membershipData, error: membershipError } = await supabase
-        .from("memberships")
-        .select("*")
-        .eq("pubkey", pubkeyBearer)
-        .eq("group_id", data.group_id)
-        .single();
-  
+      const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res
           .status(401)
@@ -92,15 +87,22 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
         return;
       }
 
+      const pubkey = authHeader.split(" ")[1];
+      const { data: myMembership, error: myMembershipError } = await supabase
+        .from("memberships")
+        .select("*")
+        .eq("pubkey", pubkey)
+        .eq("group_id", data.group_id)
+        .single();
 
-      if (membershipError || !membershipData) {
+      if (myMembershipError || !myMembership) {
         res.status(401).json({ error: "Invalid public key for this group" });
         res.end();
         return;
       }
-
     }
 
+    console.log("data", data);
 
     const message: SignedMessageWithProof = {
       id: data.id,
@@ -110,13 +112,13 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       timestamp: data.timestamp,
       signature: data.signature,
       ephemeralPubkey: data.pubkey,
-      ephemeralPubkeyExpiry: membershipData?.pubkey_expiry,
+      ephemeralPubkeyExpiry: passportCreation?.pubkey_expiry,
       internal: data.internal,
       likes: data.likes,
       replyCount: data.reply_count,
       parentId: data.parent_id,
-      proof: JSON.parse(membershipData?.proof || "{}"),
-      proofArgs: JSON.parse(membershipData?.proof_args || "{}"),
+      proof: JSON.parse(passportCreation?.proof),
+      proofArgs: JSON.parse(passportCreation?.proof_args),
     };
 
     res.json(message);

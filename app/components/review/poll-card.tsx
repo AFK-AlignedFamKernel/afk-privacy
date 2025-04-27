@@ -207,7 +207,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const renderPollRequirements = () => {
-    console.log("review", review);
+    // console.log("review", review);
     const requirements = [];
 
     if (review?.selected_countries?.length) {
