@@ -36,7 +36,7 @@ export async function fetchPolls(
   const beforeTimestamp = request.query?.beforeTimestamp as string;
   const parentId = request.query?.parentId as string;
 
-  let query = supabase
+  const query = supabase
     .from("polls")
     .select(`
       id,
