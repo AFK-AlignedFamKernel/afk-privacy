@@ -87,14 +87,16 @@ export async function voteToReview(
     console.log("poll", poll);
 
 
+
+    const { data: passport, error: passportError } = await supabase
+    .from("passport_registrations")
+    .select("*")
+    .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+    .single();
+
     // Check KYC requirements if needed
     if (poll.is_only_kyc_verified) {
-      const { data: passport, error: passportError } = await supabase
-        .from("passport_registrations")
-        .select("*")
-        .eq("pubkey", signedMessage.ephemeralPubkey.toString())
-        .single();
-
+ 
       if (passportError || !passport) {
         throw new Error("KYC verification required to vote in this poll");
       }
@@ -105,6 +107,34 @@ export async function voteToReview(
       // if (!membership) {
       //   throw new Error("Only organizations can vote in this poll");
       // }
+    }
+
+    // Check country requirements if needed
+
+    if (poll?.selected_countries && poll?.selected_countries?.length > 0) {
+      // const { data: passport, error: passportError } = await supabase
+      //   .from("passport_registrations")
+      //   .select("*")
+      //   .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+      //   .single();
+
+      if (passportError || !passport) {
+        throw new Error("Passport verification required to vote in this poll");
+      }
+
+      // Check if user's country is in accepted countries list
+      if (poll.countries_accepted && poll.countries_accepted.length > 0) {
+        if (!passport.country || !poll.countries_accepted.includes(passport.country)) {
+          throw new Error("Your country is not eligible to vote in this poll");
+        }
+      }
+
+      // Check if user's country is in excluded countries list
+      if (poll.countries_excluded && poll.countries_excluded.length > 0) {
+        if (passport.country && poll.countries_excluded.includes(passport.country)) {
+          throw new Error("Your country is excluded from voting in this poll");
+        }
+      }
     }
 
     // Check if user has already voted
