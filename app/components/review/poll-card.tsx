@@ -203,12 +203,20 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const renderPollRequirements = () => {
-    console.log("review",review);
+    console.log("review", review);
     const requirements = [];
 
-    if(review?.selected_countries?.length) {
+    if (review?.selected_countries?.length) {
       requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => countryNames[code] || code).join(", ") : 'All'}`);
     }
+    // if (review.is_specific_countries) {
+    //   requirements.push(`Countries: ${review.countries_accepted?.length ? review.countries_accepted.map(code => countryNames[code] || code).join(", ") : 'All'}`);
+    // }
+
+    if (review?.selected_organizations?.length) {
+      requirements.push(`Organizations: ${review.selected_organizations?.length ? review.selected_organizations.map(code => domainNames[code] || code).join(", ") : 'All'}`);
+    }
+
 
     if (review.is_only_kyc_verified) {
       requirements.push("KYC Verified Users Only");
@@ -249,13 +257,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       requirements.push(`Selected Organizations: ${orgNames}`);
     }
 
-    if (review.is_specific_countries) {
-      requirements.push(`Countries: ${review.countries_accepted?.length ? review.countries_accepted.map(code => countryNames[code] || code).join(", ") : 'All'}`);
-    }
-
-    if (review?.selected_countries?.length) {
-      requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => countryNames[code] || code).join(", ") : 'All'}`);
-    }
 
     // if (requirements.length === 0) return null;
 
@@ -312,36 +313,78 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     );
   };
 
-  return (
-    <div className="poll-card">
-      <div className="poll-header">
-        <div className="poll-title-section">
-          <h3 className="poll-title">{review.title}</h3>
-          <div className="poll-meta">
-            <div className="poll-author">
-              <IonIcon name="person-outline" />
-              <span>{getAnonymousName()}</span>
-            </div>
-            <div className="poll-date">
-              <IonIcon name="time-outline" />
-              <span>{new Date(review?.created_at!).toLocaleDateString()}</span>
-            </div>
-            <div className="poll-date">
-              <IonIcon name="time-outline" />
-              <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
-            </div>
+  const renderPollOverview = () => {
+
+    const totalVotes = review.total_votes || 0;
+    const optionVotes = review.option_votes || {};
+
+
+    return (
+      <div className="poll-voting-stats">
+
+        <div className="poll-stats">
+          <div className="stat-item total-votes">
+            <IonIcon name="bar-chart-outline" />
+            <span>{review.total_votes || 0} votes</span>
+          </div>
+          <div className="stat-item">
+            <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+            <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+          </div>
+          <div className="stat-item">
+            <IonIcon name="time-outline" />
+            <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
           </div>
         </div>
-        <div className="poll-actions">
-          <button
-            className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            <IonIcon name="chevron-down-outline" />
-            <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
-          </button>
-        </div>
       </div>
+    )
+
+  }
+
+
+
+  return (
+    <div className="poll-card">
+      <div className="poll-header-container">
+        <div className="poll-header">
+          <div className="poll-title-section">
+            <h3 className="poll-title">{review.title}</h3>
+            <h4 className="poll-subtitle">{review.description}</h4>
+            <div className="poll-meta">
+              <div className="poll-author">
+                <IonIcon name="person-outline" />
+                <span>{getAnonymousName()}</span>
+              </div>
+              <div className="poll-date">
+                <IonIcon name="time-outline" />
+                <span>{new Date(review?.created_at!).toLocaleDateString()}</span>
+              </div>
+              <div className="poll-date">
+                <IonIcon name="time-outline" />
+                <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
+              </div>
+              <div className="stat-item total-votes">
+                <IonIcon name="bar-chart-outline" />
+                <span>{review.total_votes || 0} votes</span>
+              </div>
+            </div>
+          </div>
+          <div className="poll-actions">
+            <button
+              className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <IonIcon name="chevron-down-outline" />
+              <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
+            </button>
+          </div>
+
+        </div>
+        {renderPollRequirements()}
+
+
+      </div>
+
 
 
       {/* <div className={`poll-details ${isExpanded ? 'expanded' : ''}`}> */}
@@ -351,31 +394,17 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         {renderPollStats()}
       </div> */}
       {/* </div> */}
+      {/* {renderPollOverview()} */}
 
       {isExpanded &&
 
         <>
           <div className="details-content">
-            {renderPollRequirements()}
+            {renderPollOverview()}
+
             {renderPollStats()}
           </div>
-          <div className="poll-footer">
 
-            <div className="poll-stats">
-              <div className="stat-item total-votes">
-                <IonIcon name="bar-chart-outline" />
-                <span>{review.total_votes || 0} votes</span>
-              </div>
-              <div className="stat-item">
-                <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
-                <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
-              </div>
-              <div className="stat-item">
-                <IonIcon name="time-outline" />
-                <span>Ends: {new Date(review.ends_at!).toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
         </>}
 
 
