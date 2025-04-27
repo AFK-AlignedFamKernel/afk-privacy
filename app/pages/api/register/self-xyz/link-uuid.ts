@@ -122,6 +122,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // throw new Error("Failed to register passport registration");
         }
 
+        return res.status(200).json({
+          status: 'success',
+          result: true,
+          message: 'Ephemeral key registered'
+        });
+
 
       }
 

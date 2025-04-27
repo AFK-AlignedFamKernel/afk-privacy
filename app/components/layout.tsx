@@ -9,7 +9,9 @@ import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys } from "../lib/types";
 import { Providers } from "../lib/providers";
 import { WelcomeModal } from './welcome-modal';
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo192.png";
+import logoAfk from "@/assets/afk_logo_circle.png";
+// import logo from "@/assets/logo.png";
 
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -52,6 +54,29 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     setConsoleShown(true);
   }, [consoleShown]);
 
+
+  const emojisList = [
+    "👥",
+    "🤐",
+    "🔏",
+    "🪪",
+    "🕵️‍♂️",
+    "🧑‍💻",
+    "🔒",
+    "🔑",
+    "🌐",
+    "👻",
+    "👁️‍🗨️",
+    "👤"
+  ]
+
+  const getRandomEmojis = () => {
+    const shuffled = [...emojisList].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3); // Get first 3 unique emojis after shuffling
+  };
+
+  const [randomEmojis] = React.useState(getRandomEmojis());
+  const [randomEmojisSidebar] = React.useState(getRandomEmojis());
   return (
     <>
       <div className="page">
@@ -64,17 +89,52 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </button>
           <div
             className="mobile-header-logo"
-            style={isSidebarOpen ? { display: "none" } : {}}
+            style={isSidebarOpen ? { display: "none" } : { display: "flex", alignItems: "center", gap: "10px" }}
           >
-            <Link href="/">AFK</Link>
+
+
+            <div className="mobile-header-logo-text"
+            >
+              AFK
+              {randomEmojis.map((emoji, index) => (
+                <span key={index}>{emoji}</span>
+              ))}
+            </div>
+            {/* <Image src={logo} alt="Bro"
+              width={50}
+              height={50}
+            />
+            <Image src={logoAfk} alt="AFK"
+              width={50}
+              height={50}
+            /> */}
           </div>
         </div>
         <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
-          <div className="logo">
-            <Link href="/">
-              <Image src={logo} alt="AFK" width={150} height={50} />
-            </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div className="logo">
+              <p style={{ fontWeight: "bold", fontStyle: "italic", fontFamily: "monospace" }}>AFK
+                {randomEmojisSidebar.map((emoji, index) => (
+                  <span key={index}>{emoji}</span>
+                ))}
+              </p>
+            </div>
+
+            {/* <div className="logo">
+
+              <Link href="/">
+                <Image src={logo} alt="Bro"
+                  width={50}
+                  height={50}
+                />
+                <Image src={logoAfk} alt="AFK"
+                  width={50}
+                  height={50}
+                />
+              </Link>
+            </div> */}
           </div>
+
           <nav className="sidebar-nav">
             <div className="sidebar-nav-header">
               <Link
@@ -82,7 +142,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 href="/"
                 className="sidebar-nav-item"
               >
-                Home
+                👥 Home
               </Link>
 
               <Link
@@ -90,15 +150,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 href="/country"
                 className="sidebar-nav-item"
               >
-                Country
+                🤐Country
               </Link>
               <Link
-              onClick={() => setIsSidebarOpen(false)}
-              href="/zk-passport"
-              className="sidebar-nav-item"
-            >
-              zkDID
-            </Link>
+                onClick={() => setIsSidebarOpen(false)}
+                href="/poll"
+                className="sidebar-nav-item"
+              >
+                🔏 Poll
+              </Link>
+              <Link
+                onClick={() => setIsSidebarOpen(false)}
+                href="/zk-passport"
+                className="sidebar-nav-item"
+              >
+                🪪 zkDID
+              </Link>
 
 
               {slug && (
@@ -112,7 +179,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               )}
             </div>
 
-        
+
             <div className="sidebar-nav-footer">
               <button
                 onClick={() => {

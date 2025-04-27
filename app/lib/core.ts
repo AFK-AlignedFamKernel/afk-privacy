@@ -11,7 +11,7 @@ export async function generateKeyPairAndRegister(
   initProver();
 
   // Generate ephemeral key pair and a random salt
-  const ephemeralKey = await generateEphemeralKey();
+  const {ephemeralKey, uuid} = await generateEphemeralKey();
 
   // Ask the AnonGroup provider to generate a proof
   const provider = Providers[providerName];
@@ -27,7 +27,7 @@ export async function generateKeyPairAndRegister(
     proofArgs,
   });
 
-  return { anonGroup, ephemeralPubkey: ephemeralKey.publicKey.toString(), proofArgs };
+  return { anonGroup, ephemeralPubkey: ephemeralKey.publicKey.toString(), proofArgs, uuid };
 }
 
 export async function postMessage(message: Message) {

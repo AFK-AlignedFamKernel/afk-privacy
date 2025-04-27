@@ -43,7 +43,7 @@ export async function generateEphemeralKeySelfXyz(): Promise<{ ephemeralKey: Eph
 }
 
 function saveEphemeralKeySelfXyz(ephemeralKey: EphemeralKey, uuid: string) {
-  localStorage.setItem(LocalStorageKeys.SelfKeyPassportRegistration, JSON.stringify({
+  localStorage.setItem(LocalStorageKeys.EphemeralKey, JSON.stringify({
     ephemeralKey: {
       privateKey: ephemeralKey?.privateKey?.toString(),
       publicKey: ephemeralKey?.publicKey?.toString(),
@@ -56,7 +56,7 @@ function saveEphemeralKeySelfXyz(ephemeralKey: EphemeralKey, uuid: string) {
 }
 
 function loadEphemeralKeySelfXyz() {
-  const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.SelfKeyPassportRegistration);
+  const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.EphemeralKey);
   if (!ephemeralKeyString) {
     return null;
   }
@@ -72,7 +72,7 @@ function loadEphemeralKeySelfXyz() {
 }
 
 export async function loadOrInitializeEphemeralKey() {
-  const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.SelfKeyPassportRegistration);
+  const ephemeralKeyString = localStorage.getItem(LocalStorageKeys.EphemeralKey);
   if (!ephemeralKeyString) {
     const { ephemeralKey, uuid } = await generateEphemeralKeySelfXyz();
     return {
@@ -95,7 +95,7 @@ export function hasEphemeralKey() {
 
   const isExpired = new Date(Number(ephemeralKey.expiry) * 1000) < new Date();
   if (isExpired) {
-    localStorage.removeItem(LocalStorageKeys.SelfKeyPassportRegistration);
+    localStorage.removeItem(LocalStorageKeys.EphemeralKey);
     return false;
   }
 
@@ -115,7 +115,6 @@ export async function signMessageSelfXyz(message: Message) {
   if (!ephemeralKey) {
     throw new Error("No ephemeralKey found");
   }
-
 
   const messageHash = await hashMessage(message);
 
