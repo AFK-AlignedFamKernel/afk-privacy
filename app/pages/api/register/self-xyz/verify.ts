@@ -22,6 +22,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { proof, publicSignals, publicKey, ephemeralKey } = req.body;
 
+      console.log("proof", proof);
+      console.log("publicSignals", publicSignals);
+      console.log("publicKey", publicKey);
+      console.log("ephemeralKey", ephemeralKey);
       if (!proof || !publicSignals) {
         return res.status(400).json({ message: 'Proof and publicSignals are required' });
       }

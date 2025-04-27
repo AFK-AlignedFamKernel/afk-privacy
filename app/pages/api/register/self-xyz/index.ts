@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
-import { ZKPassport } from "@zkpassport/sdk";
 import { getUserIdentifier, SelfBackendVerifier, countryCodes } from '@selfxyz/core';
 
 const supabaseUrl = process.env.SUPABASE_URL;

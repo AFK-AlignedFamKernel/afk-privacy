@@ -75,7 +75,10 @@ const CountryMessageCard: React.FC<MessageCardProps> = ({ message, isInternal })
     try {
       const fullMessage = await fetchMessageCountryVerify(message.id, message.internal);
       console.log("fullMessage", fullMessage);
-      const isValid = await verifyMessage(fullMessage);
+      const isValid = await verifyMessage(fullMessage, {
+        proof: JSON.parse(fullMessage?.proofString || "{}"),
+        proofArgs: JSON.parse(fullMessage?.proofArgsString || "{}")
+      });
 
       setVerificationStatus(isValid ? "valid" : "invalid");
     } catch (error) {

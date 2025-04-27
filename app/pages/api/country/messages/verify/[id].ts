@@ -87,19 +87,20 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
         return;
       }
 
-      const pubkey = authHeader.split(" ")[1];
-      const { data: myMembership, error: myMembershipError } = await supabase
-        .from("memberships")
-        .select("*")
-        .eq("pubkey", pubkey)
-        .eq("group_id", data.group_id)
-        .single();
+      // fix todo
+      // const pubkey = authHeader.split(" ")[1];
+      // const { data: myMembership, error: myMembershipError } = await supabase
+      //   .from("memberships")
+      //   .select("*")
+      //   .eq("pubkey", pubkey)
+      //   .eq("group_id", data.group_id)
+      //   .single();
 
-      if (myMembershipError || !myMembership) {
-        res.status(401).json({ error: "Invalid public key for this group" });
-        res.end();
-        return;
-      }
+      // if (myMembershipError || !myMembership) {
+      //   res.status(401).json({ error: "Invalid public key for this group" });
+      //   res.end();
+      //   return;
+      // }
     }
 
     console.log("data", data);
@@ -119,8 +120,10 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
       likes: data.likes,
       replyCount: data.reply_count,
       parentId: data.parent_id,
-      proof: JSON.parse(passportCreation?.proof),
-      proofArgs: JSON.parse(passportCreation?.proof_args),
+      proof: JSON.parse(JSON.stringify(passportCreation?.proof)),
+      proofArgs: JSON.parse(JSON.stringify(passportCreation?.proof_args)),
+      proofString: JSON.stringify(passportCreation?.proof),
+      proofArgsString: JSON.stringify(passportCreation?.proof_args),
     };
 
     res.json(message);

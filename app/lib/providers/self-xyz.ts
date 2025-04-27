@@ -73,21 +73,34 @@ export const SelfXyzProvider: AnonGroupProvider = {
     anonGroupId: string,
     ephemeralPubkey: bigint,
     ephemeralPubkeyExpiry: Date,
-    proofArgs: { keyId: string, jwtCircuitVersion: string }
+    proofArgs: { keyId: string, jwtCircuitVersion: string },
+    options?: {
+      proof?: any,
+      proofArgs?: any
+    }
   ) => {
-
 
     try {
 
       const res = await fetch(`/api/register/self-xyz/verify`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          pubkey: ephemeralPubkey.toString(),
-          proof: proof.toString(),
-          proof_args: proofArgs,
-          publicSignals: proofArgs,
-        }),
+          proof: options?.proof || Array.from(proof),
+          publicSignals: options?.proofArgs || proofArgs,
+          publicKey: ephemeralPubkey.toString(),
+          ephemeralKey: {
+            publicKey: ephemeralPubkey.toString(),
+            expiry: ephemeralPubkeyExpiry
+          }
+        })
       });
+
+      if (!res.ok) {
+        throw new Error('Failed to verify proof');
+      }
       console.log("res", res);
 
       return res.json();

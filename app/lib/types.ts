@@ -107,6 +107,10 @@ export interface SignedMessageWithProof extends SignedMessage {
   proof: Uint8Array;
   /** Additional args that was returned when the proof was generated */
   proofArgs: object;
+  /** Proof in string format */
+  proofString?: string;
+  /** Proof args in string format */
+  proofArgsString?: string;
 }
 
 export const LocalStorageKeys = {
