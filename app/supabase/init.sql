@@ -620,12 +620,6 @@ ADD COLUMN is_verified BOOLEAN DEFAULT false;
 
 
 
-    -- Drop existing table
-DROP TABLE IF EXISTS polls;
-DROP TABLE IF EXISTS poll_options;
-DROP TABLE IF EXISTS poll_votes;
-
-
 -- Create polls table
 CREATE TABLE IF NOT EXISTS polls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -643,16 +637,20 @@ CREATE TABLE IF NOT EXISTS polls (
     creator_pubkey TEXT NOT NULL,
     show_results_publicly BOOLEAN NOT NULL DEFAULT false,
     membership_id UUID REFERENCES memberships(id) ON DELETE CASCADE,
+    passport_registration_id UUID REFERENCES passport_registrations(id) ON DELETE CASCADE,
+    ephemeral_key_id UUID REFERENCES ephemeral_keys(id) ON DELETE CASCADE,
     is_only_organizations BOOLEAN,
     is_only_kyc_verified BOOLEAN,
     age_required INTEGER,
     is_specific_countries BOOLEAN,
     countries_accepted TEXT[],
     countries_excluded TEXT[],
-    passport_registration_id UUID REFERENCES passport_registrations(id) ON DELETE CASCADE,
-    CONSTRAINT fk_poll_membership
-        FOREIGN KEY (creator_pubkey, group_id, group_provider) 
-        REFERENCES memberships(pubkey, group_id, provider)
+    nationality TEXT,
+    date_of_birth TEXT,
+    gender TEXT,
+    organization_name TEXT,
+    pubkey TEXT
+   
 );
 
 -- Create poll options/answers table
@@ -667,16 +665,14 @@ CREATE TABLE IF NOT EXISTS poll_options (
 CREATE TABLE IF NOT EXISTS poll_votes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     poll_id UUID NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
-    option_id UUID NOT NULL REFERENCES poll_options(id) ON DELETE CASCADE,
+    option_id UUID REFERENCES poll_options(id) ON DELETE CASCADE,
     voter_pubkey TEXT NOT NULL,
     group_id TEXT NOT NULL,
     group_provider TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     membership_id UUID REFERENCES memberships(id) ON DELETE CASCADE,
     passport_registration_id UUID REFERENCES passport_registrations(id) ON DELETE CASCADE,
-    CONSTRAINT fk_vote_membership
-        FOREIGN KEY (voter_pubkey, group_id, group_provider) 
-        REFERENCES memberships(pubkey, group_id, provider),
+    ephemeral_key_id UUID REFERENCES ephemeral_keys(id) ON DELETE CASCADE,
     -- Ensure one vote per user per poll
     UNIQUE(poll_id, voter_pubkey)
 );

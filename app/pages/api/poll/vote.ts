@@ -83,6 +83,10 @@ export async function voteToReview(
       .select("*")
       .eq("pubkey", signedMessageFormatted.ephemeralPubkey.toString())
       .single();
+    console.log("pollId", pollId);
+    console.log("poll", poll);
+
+
     // Check KYC requirements if needed
     if (poll.is_only_kyc_verified) {
       const { data: passport, error: passportError } = await supabase
@@ -97,10 +101,10 @@ export async function voteToReview(
     }
 
     // Check organization requirements if needed
-    if (poll.is_only_organizations) {
-      if (!membership) {
-        throw new Error("Only organizations can vote in this poll");
-      }
+    if (poll?.is_only_organizations) {
+      // if (!membership) {
+      //   throw new Error("Only organizations can vote in this poll");
+      // }
     }
 
     // Check if user has already voted
@@ -125,22 +129,23 @@ export async function voteToReview(
       .select("id, option_text, poll_id, poll_option_id")
       .eq("poll_id", pollId)
       .eq("option_text", option)
-    // .single();
+      .single();
     console.log("voteToReview pollOption", pollOption);
 
     if (optionError || !pollOption) {
       // throw new Error("Invalid poll option");
     }
 
+    console.log("pollOption", pollOption);
     // Create the vote
     const { error: insertError } = await supabase.from("poll_votes").insert([
       {
         poll_id: pollId,
-        // option_id: pollOption.id,
+        option_id: pollOption?.id,
         voter_pubkey: signedMessage.ephemeralPubkey.toString(),
         group_id: poll.group_id,
         group_provider: poll.group_provider,
-        membership_id: membership.id,
+        membership_id: membership?.id,
         passport_registration_id: poll.is_only_kyc_verified ? membership.passport_registration_id : null
       }
     ]);
