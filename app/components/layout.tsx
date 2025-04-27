@@ -206,13 +206,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 target="_blank"
                 title="Source Code"
                 rel="noopener noreferrer"
-                href="https://github.com/saleel/stealthnote"
+                href="hhttps://github.com/AFK-AlignedFamKernel/afk-privacy"
               >
                 <IonIcon name="logo-github" />
               </Link>
               <Link
                 onClick={() => setIsSidebarOpen(false)}
-                href="https://x.com/stealthnote_"
+                href="https://x.com/AFK_AlignedFamK"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Twitter"

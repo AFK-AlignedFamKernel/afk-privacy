@@ -30,32 +30,36 @@ function SelfXyzRegistration() {
   useEffect(() => {
 
     const loadEphemeralKeySelfXyz = async () => {
-      const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
-      console.log("ephemeralKey", ephemeralKey);
-      console.log("uuid", uuid);
-      // setUserId(`0x${ephemeralKey?.publicKey?.toString()}`);
+      try {
+        const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
+        console.log("ephemeralKey", ephemeralKey);
+        console.log("uuid", uuid);
+        // setUserId(`0x${ephemeralKey?.publicKey?.toString()}`);
 
-      const messageObj = {
-        id: crypto.randomUUID(),
-        timestamp: new Date(),
-        text: `link-selfxyz:${uuid}`,
-        internal: false,
-        likes: 0,
-        replyCount: 0,
-        parentId: null,
-        anonGroupId: "selfxyz",
-        anonGroupProvider: "selfxyz",
-      };
+        const messageObj = {
+          id: crypto.randomUUID(),
+          timestamp: new Date(),
+          text: `link-selfxyz:${uuid}`,
+          internal: false,
+          likes: 0,
+          replyCount: 0,
+          parentId: null,
+          anonGroupId: "selfxyz",
+          anonGroupProvider: "selfxyz",
+        };
 
 
-      const signedMessage = await postLinkSelfXyz(messageObj, uuid);
-      // onCommentAdded(signedMessage as SignedMessageWithProof);
+        const signedMessage = await postLinkSelfXyz(messageObj, uuid);
+        // onCommentAdded(signedMessage as SignedMessageWithProof);
 
-      if(!signedMessage) {
-        throw new Error("Failed to post link-selfxyz");
+        if (!signedMessage) {
+          throw new Error("Failed to post link-selfxyz");
+        }
+        setUserId(uuid);
+        setPubkey(ephemeralKey?.publicKey?.toString());
+      } catch (error) {
+        console.error("Error loading ephemeral key:", error);
       }
-      setUserId(uuid);
-      setPubkey(ephemeralKey?.publicKey?.toString());
     }
 
     if (!userId) {
@@ -77,7 +81,7 @@ function SelfXyzRegistration() {
     endpoint: process.env.NEXT_PUBLIC_SELF_VERIFY_URL as string
       ? `${process.env.NEXT_PUBLIC_SELF_VERIFY_URL}`
       : `https://localhost:3000/api/register/self-xyz`,
-    header:pubkey,
+    header: pubkey,
     userId,
     // userIdType: "hex",
     endpointType: "https",
@@ -95,6 +99,13 @@ function SelfXyzRegistration() {
       <h1>Verify Your Identity</h1>
       <p>Scan this QR code with the Self app to verify your identity</p>
 
+      <p className="text-sm text-gray-500">
+        User ID: {userId.substring(0, 8)}...
+      </p>
+
+      <p className="text-sm text-gray-500">
+        Public Key: {pubkey?.substring(0, 8)}...
+      </p>
       <SelfComponents.SelfQRcodeWrapper
         selfApp={selfApp}
         onSuccess={(e: any) => {
@@ -102,20 +113,13 @@ function SelfXyzRegistration() {
           console.log("Verification successful!");
           console.log("E:", e);
           setUsedPubkeySelfXyz(pubkey);
-          
+
           // Redirect or update UI
         }}
         // type="deeplink"
         size={350}
       />
 
-      <p className="text-sm text-gray-500">
-        User ID: {userId.substring(0, 8)}...
-      </p>
-
-      <p className="text-sm text-gray-500">
-        Public Key: {pubkey}
-      </p>
     </div>
   );
 }
