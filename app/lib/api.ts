@@ -229,16 +229,25 @@ export async function fetchMessageVerify(
   }
 
   const message = await response.json();
-  console.log("message", message);
-  try {
-    message.signature = BigInt(message.signature);
-    message.ephemeralPubkey = BigInt(message.ephemeralPubkey);
-    message.ephemeralPubkeyExpiry = new Date(message.ephemeralPubkeyExpiry);
-    message.timestamp = new Date(message.timestamp);
-    message.proof = Uint8Array.from(message.proof);
-  } catch (error) {
-    console.warn("Error parsing message:", error);
-  }
 
-  return message;
+
+  const signedMessage: SignedMessageWithProof = {
+    ...message,
+    signature: BigInt(message.signature),
+    ephemeralPubkey: BigInt(message.ephemeralPubkey),
+    ephemeralPubkeyExpiry: new Date(message.ephemeralPubkeyExpiry),
+    timestamp: new Date(message.timestamp),
+    proof: Uint8Array.from(message.proof),
+  }
+  // try {
+  //   message.signature = BigInt(message.signature);
+  //   message.ephemeralPubkey = BigInt(message.ephemeralPubkey);
+  //   message.ephemeralPubkeyExpiry = new Date(message.ephemeralPubkeyExpiry);
+  //   message.timestamp = new Date(message.timestamp);
+  //   message.proof = Uint8Array.from(message.proof);
+  // } catch (error) {
+  //   console.warn("Error parsing message:", error);
+  // }
+
+  return signedMessage;
 }

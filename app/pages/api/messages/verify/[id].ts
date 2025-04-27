@@ -67,11 +67,10 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
     }
     const authHeader = req.headers.authorization;
 
-    const pubkey = authHeader?.split(" ")[1];
     const { data: membershipData, error: membershipError } = await supabase
       .from("memberships")
       .select("*")
-      .eq("pubkey", pubkey)
+      .eq("pubkey", data?.memberships?.[0]?.pubkey_expiry)
       .eq("group_id", data.group_id)
       .single();
 
@@ -79,6 +78,14 @@ async function getSingleMessage(req: NextApiRequest, res: NextApiResponse) {
 
     // TODO add check verification
     if (data.internal) {
+      const pubkey = authHeader?.split(" ")[1];
+      const { data: membershipData, error: membershipError } = await supabase
+        .from("memberships")
+        .select("*")
+        .eq("pubkey", pubkey)
+        .eq("group_id", data.group_id)
+        .single();
+  
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         res
           .status(401)

@@ -141,6 +141,7 @@ export async function verifyMessageSignature(message: SignedMessage) {
     messageHash,
     pubkey
   );
+  console.log("isValid", isValid);
 
   if (!isValid) {
     console.error("Signature verification failed for the message");
