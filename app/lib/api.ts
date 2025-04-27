@@ -196,3 +196,49 @@ export async function createLinkSelfXyz(signedMessage: SignedMessage, uuid: stri
     throw new Error("Call to /messages API failed");
   }
 }
+
+
+export async function fetchMessageVerify(
+  id: string,
+  isInternal: boolean = false
+): Promise<SignedMessageWithProof> {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (isInternal) {
+    const pubkey = getEphemeralPubkey();
+    if (!pubkey) {
+      throw new Error("No public key found");
+    }
+    headers["Authorization"] = `Bearer ${pubkey}`;
+  }
+
+  const pubkey = getEphemeralPubkey();
+  if (!pubkey) {
+    // throw new Error("No public key found");
+  }
+  headers["Authorization"] = `Bearer ${pubkey}`;
+
+  const response = await fetch(`/api/messages/verify/${id}`, { headers });
+
+  console.log("response", response);
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    throw new Error(`Call to /messages/${id} API failed: ${errorMessage}`);
+  }
+
+  const message = await response.json();
+  console.log("message", message);
+  try {
+    message.signature = BigInt(message.signature);
+    message.ephemeralPubkey = BigInt(message.ephemeralPubkey);
+    message.ephemeralPubkeyExpiry = new Date(message.ephemeralPubkeyExpiry);
+    message.timestamp = new Date(message.timestamp);
+    message.proof = Uint8Array.from(message.proof);
+  } catch (error) {
+    console.warn("Error parsing message:", error);
+  }
+
+  return message;
+}

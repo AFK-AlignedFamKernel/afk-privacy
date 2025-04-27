@@ -6,7 +6,7 @@ import IonIcon from "@reacticons/ionicons";
 import type { SignedMessageWithProof } from "../lib/types";
 import { generateNameFromPubkey } from "../lib/utils";
 import { setMessageLiked, isMessageLiked } from "../lib/store";
-import { fetchMessage, toggleLike, fetchMessages } from "../lib/api";
+import { fetchMessageVerify, toggleLike, fetchMessages } from "../lib/api";
 import { hasEphemeralKey } from "../lib/ephemeral-key";
 import { verifyMessage } from "../lib/core";
 import { Providers } from "../lib/providers";
@@ -45,7 +45,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
   useEffect(() => {
     if (message.parentId) {
       setLoadingParent(true);
-      fetchMessage(message.parentId, isInternal)
+      fetchMessageVerify(message.parentId, isInternal)
         .then(setParentMessage)
         .catch(console.error)
         .finally(() => setLoadingParent(false));
@@ -73,7 +73,8 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
     setVerificationStatus("verifying");
 
     try {
-      const fullMessage = await fetchMessage(message.id, message.internal);
+      const fullMessage = await fetchMessageVerify(message.id, message.internal);
+      console.log("fullMessage", fullMessage);
       const isValid = await verifyMessage(fullMessage);
 
       setVerificationStatus(isValid ? "valid" : "invalid");
