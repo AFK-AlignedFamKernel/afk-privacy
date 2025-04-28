@@ -185,7 +185,34 @@ export async function fetchResultVote(
       .select('nationality')
       .eq('poll_id', pollId);
 
-    // Process the results
+    // Get vote counts per option
+    // Fix opti queries
+    // Get all options for the poll
+    const { data: options } = await supabase
+      .from('poll_options')
+      .select('id, option_text')
+      .eq('poll_id', pollId);
+
+    // Get all votes for the poll
+    const { data: votes } = await supabase
+      .from('poll_votes')
+      .select('option_id')
+      .eq('poll_id', pollId);
+
+    // Count votes per option
+    const voteCounts = options?.map(option => ({
+      option_text: option.option_text,
+      vote_count: votes?.filter(vote => vote.option_id === option.id).length
+    }));
+
+    console.log("voteCounts", voteCounts);
+    // const { data: optionVoteCounts, error } = await supabase
+    //   .from('poll_stats')
+    //   .select('option_text, vote_count')
+    //   .eq('poll_id', pollId);
+
+    // console.log("Vote counts per option:", optionVoteCounts);
+    // Process the results  
     const processedStats: PollStats = {
       ...pollStats,
       total_poll_votes: pollStats.total_votes || totalPollVotes || 0,

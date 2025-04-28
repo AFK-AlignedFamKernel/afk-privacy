@@ -473,8 +473,13 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div> */}
             </div>
 
-            <div className="flex" style={{ gap: "10px", display: "flex", alignItems: "center" }}>
+            <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
               <div className="poll-date">
+                <IonIcon name="eye-outline" />
+                <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
+              </div>
+
+              <div className="poll-select-type">
                 <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
                 <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
               </div>
@@ -524,7 +529,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       {/* </div> */}
       {/* {renderPollOverview()} */}
 
-      {isExpanded &&
+      {
+        isExpanded &&
 
         <>
           <div className="details-content">
@@ -533,7 +539,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
             {renderPollStats()}
           </div>
 
-        </>}
+        </>
+      }
 
 
 
@@ -548,7 +555,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
 
-    </div>
+    </div >
   );
 };
 
