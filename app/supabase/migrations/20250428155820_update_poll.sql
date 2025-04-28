@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS poll_votes;
 DROP TABLE IF EXISTS poll_options;
 DROP TABLE IF EXISTS polls;
 
+
 -- Create polls table
 CREATE TABLE IF NOT EXISTS polls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -42,7 +43,8 @@ CREATE TABLE IF NOT EXISTS polls (
     -- Vote statistics
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,
-    total_org_votes INTEGER DEFAULT 0
+    total_org_votes INTEGER DEFAULT 0,
+    total_org_user_votes INTEGER DEFAULT 0
 );
 
 -- Create poll options/answers table
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS poll_options (
 -- Create poll votes table with one vote per user constraint
 CREATE TABLE IF NOT EXISTS poll_votes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    option_text TEXT,
     poll_id UUID NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
     option_id UUID REFERENCES poll_options(id) ON DELETE CASCADE,
     voter_pubkey TEXT NOT NULL,
@@ -120,7 +123,7 @@ $$ LANGUAGE plpgsql;
 
 -- Create trigger for vote count updates
 CREATE TRIGGER update_vote_counts_trigger
-    AFTER INSERT OR DELETE ON poll_votes
+    AFTER INSERT OR DELETE OR UPDATE ON poll_votes
     FOR EACH ROW
     EXECUTE FUNCTION update_vote_counts();
 
@@ -133,6 +136,7 @@ SELECT
     p.total_votes,
     p.total_kyc_votes,
     p.total_org_votes,
+    p.total_org_user_votes,
     po.id as option_id,
     po.option_text,
     po.vote_count,
@@ -153,7 +157,10 @@ SELECT
 FROM polls p
 LEFT JOIN poll_options po ON po.poll_id = p.id
 LEFT JOIN poll_votes pv ON pv.option_id = po.id
-GROUP BY p.id, p.title, p.is_show_results_publicly, p.total_votes, p.total_kyc_votes, p.total_org_votes, po.id, po.option_text, po.vote_count;
+GROUP BY 
+    p.id, p.title, p.is_show_results_publicly, 
+    p.total_votes, p.total_kyc_votes, p.total_org_votes, p.total_org_user_votes,
+    po.id, po.option_text, po.vote_count;
 
 -- Create function to check if poll is still active
 CREATE OR REPLACE FUNCTION is_poll_active(poll_id UUID) 
