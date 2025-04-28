@@ -3,6 +3,7 @@ import IonIcon from "@reacticons/ionicons";
 import { SignedMessageWithProof, SignedMessage, Message, PollStats } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
+import Link from 'next/link';
 type ReviewMetadata = {
   rating?: number;
 };
@@ -197,13 +198,25 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           ))}
 
         </div>
-        <button
-          className="submit-vote-button"
-          onClick={handleSubmitVote}
-          disabled={isVoting || selectedOptions.size === 0 || review.has_voted}
-        >
-          {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
-        </button>
+
+
+        <div>
+
+          <button
+            className="submit-vote-button"
+            onClick={handleSubmitVote}
+            disabled={isVoting || selectedOptions.size === 0 || review.has_voted}
+          >
+            {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
+          </button>
+          <p
+            className="submit-vote-button"
+          >
+            <IonIcon name="close-outline" />
+            <Link href={`/poll/${review.id}`}>View poll</Link>
+          </p>
+        </div>
+
       </div>
 
     );
@@ -505,7 +518,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         <div className="poll-stats-container">
 
           <p>Details</p>
-          <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start", borderRadius: "8px", backgroundColor: "var(--background-secondary)", paddingTop: "10px", paddingBottom: "10px",}}>
+          <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start", borderRadius: "8px", backgroundColor: "var(--background-secondary)", paddingTop: "10px", paddingBottom: "10px", }}>
             <div className="poll-date">
               <IonIcon name="eye-outline" />
               <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>

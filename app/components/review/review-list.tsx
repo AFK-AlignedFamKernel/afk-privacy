@@ -9,6 +9,7 @@ import ReviewPollForm from "./review-poll-form";
 import ReviewCard from "./poll-card";
 import Dialog from "../dialog";
 import PollCard from "./poll-card";
+import CryptoLoading from "../small/crypto-loading";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds

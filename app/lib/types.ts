@@ -161,3 +161,37 @@ export interface PollStats {
     [gender: string]: number
   }
 }
+
+export type ReviewMetadata = {
+  rating?: number;
+};
+
+export type Review = SignedMessageWithProof & {
+  metadata?: ReviewMetadata;
+  is_yes_no?: boolean;
+  answer_options?: string[];
+  max_options?: number;
+  min_options?: number;
+  multiselect?: boolean;
+  ends_at?: Date;
+  is_show_results_publicly?: boolean;
+  is_only_organizations?: boolean;
+  is_only_kyc_verified?: boolean;
+  age_required?: number;
+  is_specific_countries?: boolean;
+  countries_accepted?: string[];
+  countries_excluded?: string[];
+  nationality?: string;
+  date_of_birth?: string;
+  gender?: string;
+  organization_name?: string;
+  title?: string;
+  description?: string;
+  total_votes?: number;
+  option_votes?: Record<string, number>;
+  has_voted?: boolean;
+  selected_organizations?: string[];
+  internal?: boolean;
+  created_at?: Date;
+  selected_countries?: string[];
+};

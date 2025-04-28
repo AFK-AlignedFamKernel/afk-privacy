@@ -9,12 +9,12 @@ import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys } from "../lib/types";
 import { Providers } from "../lib/providers";
 import { WelcomeModal } from './welcome-modal';
-import Loading from './loading';
+import Loading from './small/loading';
 import { usePathname } from 'next/navigation';
 import logo from "@/assets/logo192.png";
 import logoAfk from "@/assets/afk_logo_circle.png";
 // import logo from "@/assets/logo.png";
-
+import CryptoLoading from "./small/crypto-loading";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useLocalStorage<boolean>(
@@ -290,7 +290,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </aside>
         <main className="container">
-          <div className="content">{children}</div>
+          <div className="content">
+            {isLoading && <CryptoLoading />}
+            {children}</div>
         </main>
       </div>
 

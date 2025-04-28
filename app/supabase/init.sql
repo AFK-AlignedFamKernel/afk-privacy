@@ -286,6 +286,7 @@ CREATE TABLE IF NOT EXISTS polls (
     pubkey TEXT,
     selected_countries TEXT[],
     selected_organizations TEXT[],
+    internal BOOLEAN NOT NULL DEFAULT false,
     -- Vote statistics
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,
