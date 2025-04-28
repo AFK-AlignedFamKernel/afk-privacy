@@ -343,11 +343,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     }
 
 
-    // if (requirements.length === 0) return null;
+    if (requirements.length === 0) return null;
 
     return (
       <div className="poll-requirements">
-        <h4>Requirements</h4>
+        <p>Requirements</p>
         <ul>
           {requirements.map((req, index) => (
             <li key={index}>
@@ -472,7 +472,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div> */}
             </div>
 
-            <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
+            {/* <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
               <div className="poll-date">
                 <IonIcon name="eye-outline" />
                 <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
@@ -483,24 +483,42 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
                 <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
               </div>
 
-            </div>
+            </div> */}
 
           </div>
-          <div className="poll-actions">
+          {/* <div className="poll-actions">
+
             <div className="poll-meta poll-author">
               <IonIcon name="person-outline" />
               <span>{getAnonymousName()}</span>
-            </div>
-            {/* <button
+            </div> <button
               className={`expand-button ${isExpanded ? 'expanded' : ''}`}
               onClick={() => setIsExpanded(!isExpanded)}
             >
               <IonIcon name="chevron-down-outline" />
               <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
-            </button> */}
-          </div>
+            </button>
+          </div> */}
 
         </div>
+
+        <div className="poll-stats-container">
+
+          <p>Details</p>
+          <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start", borderRadius: "8px", backgroundColor: "var(--background-secondary)", paddingTop: "10px", paddingBottom: "10px",}}>
+            <div className="poll-date">
+              <IonIcon name="eye-outline" />
+              <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
+            </div>
+
+            <div className="poll-select-type">
+              <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+              <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+            </div>
+
+          </div>
+        </div>
+
 
         {renderPollRequirements()}
 
