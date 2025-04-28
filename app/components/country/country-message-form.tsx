@@ -17,7 +17,7 @@ import COUNTRY_DATA from "@/assets/country";
 type MessageFormProps = {
   isInternal?: boolean;
   onSubmit: (message: SignedMessageWithProof) => void;
-  connectedKyc?:PassportRegistration
+  connectedKyc?: PassportRegistration
 };
 
 const prompts = (companyName: string, nationality: string) => [
@@ -27,7 +27,7 @@ const prompts = (companyName: string, nationality: string) => [
   `What would you say if you weren’t being watched? ${COUNTRY_DATA[nationality]?.flag}`,
   `What’s the thing nobody’s admitting at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
 ];
-const randomPromptIndex = Math.floor(Math.random() * prompts("","your Nationality").length);
+const randomPromptIndex = Math.floor(Math.random() * prompts("", "your Nationality").length);
 
 const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc }) => {
 
@@ -52,13 +52,16 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   const provider = currentProvider ? Providers[currentProvider] : null;
   // const isRegistered = !!connectedKyc;
   const isRegistered = useMemo(() => {
-    return !!connectedKyc;
+    if (connectedKyc && connectedKyc?.is_verified && !connectedKyc?.nationality) {
+      return true;
+    }
+    return false;
   }, [connectedKyc]);
 
   const senderName = isInternal
     ? generateNameFromPubkey(getEphemeralPubkey()?.toString() ?? "")
     : `Someone from ${COUNTRY_DATA[connectedKyc?.nationality ?? "UHOH"]?.name} ${COUNTRY_DATA[connectedKyc?.nationality ?? "your Nationality"]?.flag}`;
-    // : `Someone from ${connectedKyc?.nationality} ${COUNTRY_DATA[connectedKyc?.nationality ?? "UHOH"].name} ${COUNTRY_DATA[connectedKyc?.nationality ?? "your Nationality"]?.flag}`;
+  // : `Someone from ${connectedKyc?.nationality} ${COUNTRY_DATA[connectedKyc?.nationality ?? "UHOH"].name} ${COUNTRY_DATA[connectedKyc?.nationality ?? "your Nationality"]?.flag}`;
 
   const welcomeMessage = `
     Sign in with passport to anonymously post as "Someone from KYC (country, gender, age)".
@@ -132,7 +135,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
 
   const isTextAreaDisabled = !!isRegistering || isPosting || !isRegistered;
 
-  const randomPrompt = prompts(connectedKyc?.nationality ?? "your Nationality", connectedKyc?.nationality ?? "your Nationality")[randomPromptIndex]
+  const randomPrompt = prompts(connectedKyc?.nationality ?? "FRA", connectedKyc?.nationality ?? "FRA")[randomPromptIndex]
 
   return (
     <div className="message-form">
@@ -140,7 +143,8 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={randomPrompt}
+          // placeholder={isRegistered ? randomPrompt : "Sign in with passport to anonymously post as 'Someone from KYC (country, gender, age)'"}
+          placeholder={randomPrompt }
           maxLength={280}
           disabled={isTextAreaDisabled}
         />

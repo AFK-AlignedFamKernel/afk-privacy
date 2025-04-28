@@ -60,12 +60,14 @@ export async function createReview(
       title: body.title,
       description: body.description,
       ends_at: new Date(body.ends_at),
-      show_results_publicly: body.show_results_publicly,
+      is_show_results_publicly: body.is_show_results_publicly ?? false,
       group_id: signedMessage.anonGroupId,
       group_provider: signedMessage.anonGroupProvider,
-      selected_countries: body.selected_countries,
       selected_organizations: body.selected_organizations,
-      // pubkey: signedMessage.ephemeralPubkey.toString(),
+      selected_countries: body.selected_countries,
+      is_only_organizations: body.is_only_organizations,
+      is_only_kyc_verified: body.is_only_kyc_verified,
+      pubkey: signedMessage.ephemeralPubkey.toString(),
 
     }
     console.log("createReview reviewData", reviewData);
@@ -145,11 +147,21 @@ export async function createReview(
         // parent_id: signedMessage?.parentId,
         ...reviewData
       },
+      
     ]);
 
     if (insertError) {
       throw insertError;
     }
+
+    const { data: pollStats, error: pollStatsError } = await supabase.from("poll_stats").insert({
+      poll_id: signedMessage.id,
+      total_votes: 0,
+      total_kyc_votes: 0,
+      total_org_votes: 0,
+      total_org_user_votes: 0
+    })
+
 
     // Return the created message
     const { data: createdMessage, error: fetchError } = await supabase

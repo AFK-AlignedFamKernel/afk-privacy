@@ -140,3 +140,24 @@ export interface PassportRegistration {
 export interface SignedMessageWithProofWithPassport extends PassportRegistration, SignedMessageWithProof {
 
 }
+
+export interface PollStats {
+  id: string,
+  title: string,
+  total_votes: number,
+  total_kyc_votes: number,
+  total_org_votes: number,
+  options: Array<{
+    id: string,
+    option_text: string,
+    vote_count: number,
+    kyc_votes: number,
+    org_votes: number
+  }>,
+  votes_by_country: {
+    [country: string]: number
+  },
+  votes_by_gender: {
+    [gender: string]: number
+  }
+}

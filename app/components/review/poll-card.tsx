@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import IonIcon from "@reacticons/ionicons";
-import { SignedMessageWithProof, SignedMessage } from "../../lib/types";
+import { SignedMessageWithProof, SignedMessage, Message, PollStats } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
-
 type ReviewMetadata = {
   rating?: number;
 };
@@ -16,7 +15,7 @@ type Review = SignedMessageWithProof & {
   min_options?: number;
   multiselect?: boolean;
   ends_at?: Date;
-  show_results_publicly?: boolean;
+  is_show_results_publicly?: boolean;
   is_only_organizations?: boolean;
   is_only_kyc_verified?: boolean;
   age_required?: number;
@@ -49,6 +48,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [error, setError] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isShowStats, setIsShowStats] = useState(false);
+
+  const [statsData, setStatsData] = useState<any | PollStats | undefined>(undefined);
+
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   const handleOnVote = async (pollId: string, option: string, options?: string) => {
     console.log("handleOnVote")
@@ -184,7 +188,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               />
               <label htmlFor={`option-${review.id}-${index}`}>
                 {option}
-                {review.show_results_publicly && review.option_votes && (
+                {review.is_show_results_publicly && review.option_votes && (
                   <span className="option-vote-count">
                     ({review.option_votes[option] || 0})
                   </span>
@@ -205,6 +209,84 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
     );
   };
+
+
+  const handleSignMessage = async () => {
+    try {
+      const message: Message = {
+        id: crypto.randomUUID(),
+        text: review.title ?? `View poll results for ${review.id}`,
+        timestamp: new Date(),
+        internal: false,
+        anonGroupId: 'self-xyz',
+        anonGroupProvider: 'self-xyz',
+        likes: 0,
+        replyCount: 0,
+        parentId: null,
+      };
+
+      const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+      if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+        throw new Error("Failed to sign message");
+      }
+
+      const signedMessageFormatted = {
+        ...message,
+        signature,
+        ephemeralPubkey,
+        ephemeralPubkeyExpiry,
+      };
+      return signedMessageFormatted;
+    } catch (error) {
+      console.error("Error signing message", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+
+
+    if (review.is_show_results_publicly) {
+      console.log("review.is_show_results_publicly", review.is_show_results_publicly);
+      handleResultStats();
+      setIsShowStats(true);
+    }
+  }, [review.is_show_results_publicly]);
+
+
+  const handleResultStats = async () => {
+
+    try {
+      console.log("handleResultStats", review);
+      const signedMessage = await handleSignMessage();
+      console.log("signedMessage", signedMessage);
+
+      if (!signedMessage) return;
+
+      const signedMessageFormatted = {
+        ...signedMessage,
+        ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+        signature: signedMessage.signature.toString(),
+      };
+
+      const res = await fetch('/api/poll/result-vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
+      });
+      console.log("res", res);
+
+      const data = await res.json();
+      console.log("data", data);
+      setStatsData(data);
+    } catch (error) {
+      console.error("Error fetching result stats", error);
+    }
+
+  }
 
   const renderPollRequirements = () => {
     // console.log("review", review);
@@ -280,18 +362,22 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const renderPollStats = () => {
-    if (!review.show_results_publicly) return null;
+    console.log("renderPollStats", review);
+    if (!review.is_show_results_publicly) return null;
 
-    const totalVotes = review.total_votes || 0;
-    const optionVotes = review.option_votes || {};
+    const totalVotes = statsData?.total_votes || 0;
+    const optionVotes = statsData?.option_votes || {};
+
+    // const totalVotes = review.total_votes || 0;
+    // const optionVotes = review.option_votes || {};
 
     return (
       <div className="poll-stats">
         <div className="poll-stats-header">
           <h4>Poll Results</h4>
           <span className="bar-chart-outline total-votes">
-          <IonIcon name="bar-chart-outline" />
-          {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+            <IonIcon name="bar-chart-outline" />
+            {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
         </div>
         {/* <div className="stat-item total-votes">
           <IonIcon name="bar-chart-outline" />
@@ -353,6 +439,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
 
+
+
   return (
     <div className="poll-card">
       <div className="poll-header-container">
@@ -385,8 +473,13 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div> */}
             </div>
 
-            <div className="flex" style={{ gap: "10px", display: "flex", alignItems: "center" }}>
+            <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
               <div className="poll-date">
+                <IonIcon name="eye-outline" />
+                <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
+              </div>
+
+              <div className="poll-select-type">
                 <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
                 <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
               </div>
@@ -414,7 +507,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
         <button
           className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            setIsExpanded(!isExpanded)
+            handleResultStats();
+            // setIsShowStats(false)
+          }}
         >
           <IonIcon name="chevron-down-outline" />
           <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
@@ -432,7 +529,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       {/* </div> */}
       {/* {renderPollOverview()} */}
 
-      {isExpanded &&
+      {
+        isExpanded &&
 
         <>
           <div className="details-content">
@@ -441,7 +539,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
             {renderPollStats()}
           </div>
 
-        </>}
+        </>
+      }
 
 
 
@@ -456,7 +555,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
 
-    </div>
+    </div >
   );
 };
 
