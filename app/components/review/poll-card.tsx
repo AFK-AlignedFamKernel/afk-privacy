@@ -50,6 +50,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isShowStats, setIsShowStats] = useState(false);
 
+  const [statsData, setStatsData] = useState<any>(null);
+
   const handleOnVote = async (pollId: string, option: string, options?: string) => {
     console.log("handleOnVote")
     try {
