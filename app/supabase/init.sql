@@ -292,6 +292,10 @@ CREATE TABLE IF NOT EXISTS polls (
     is_specific_countries BOOLEAN,
     countries_accepted TEXT[],
     countries_excluded TEXT[],
+    total_vote_organization INTEGER,
+    total_vote_membership INTEGER,
+    total_vote_kyc INTEGER,
+    total_vote_nationality INTEGER,
     passport_registration_id UUID REFERENCES passport_registrations(id) ON DELETE CASCADE,
     CONSTRAINT fk_poll_membership
         FOREIGN KEY (creator_pubkey, group_id, group_provider) 
