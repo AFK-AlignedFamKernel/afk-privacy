@@ -196,8 +196,10 @@ export async function fetchResultVote(
     // Get all votes for the poll
     const { data: votes } = await supabase
       .from('poll_votes')
-      .select('option_id')
+      .select('option_id, voter_pubkey')
       .eq('poll_id', pollId);
+
+    console.log("votes", votes);
 
     // Count votes per option
     const voteCounts = options?.map(option => ({
@@ -205,13 +207,14 @@ export async function fetchResultVote(
       vote_count: votes?.filter(vote => vote.option_id === option.id).length
     }));
 
-    console.log("voteCounts", voteCounts);
-    // const { data: optionVoteCounts, error } = await supabase
-    //   .from('poll_stats')
-    //   .select('option_text, vote_count')
-    //   .eq('poll_id', pollId);
 
-    // console.log("Vote counts per option:", optionVoteCounts);
+    console.log("voteCounts", voteCounts);
+    const { data: optionVoteCounts, error } = await supabase
+      .from('poll_stats')
+      .select('option_text, vote_count')
+      .eq('poll_id', pollId);
+
+    console.log("Vote counts per option:", optionVoteCounts);
     // Process the results  
     const processedStats: PollStats = {
       ...pollStats,

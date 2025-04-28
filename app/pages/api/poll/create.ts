@@ -147,11 +147,21 @@ export async function createReview(
         // parent_id: signedMessage?.parentId,
         ...reviewData
       },
+      
     ]);
 
     if (insertError) {
       throw insertError;
     }
+
+    const { data: pollStats, error: pollStatsError } = await supabase.from("poll_stats").insert({
+      poll_id: signedMessage.id,
+      total_votes: 0,
+      total_kyc_votes: 0,
+      total_org_votes: 0,
+      total_org_user_votes: 0
+    })
+
 
     // Return the created message
     const { data: createdMessage, error: fetchError } = await supabase
