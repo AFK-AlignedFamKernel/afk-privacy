@@ -60,13 +60,14 @@ export async function createReview(
       title: body.title,
       description: body.description,
       ends_at: new Date(body.ends_at),
-      show_results_publicly: body.show_results_publicly,
+      is_show_results_publicly: body.is_show_results_publicly ?? false,
       group_id: signedMessage.anonGroupId,
       group_provider: signedMessage.anonGroupProvider,
-      selected_countries: body.selected_countries,
       selected_organizations: body.selected_organizations,
-      is_public_result: body.is_public_result,
-      // pubkey: signedMessage.ephemeralPubkey.toString(),
+      selected_countries: body.selected_countries,
+      is_only_organizations: body.is_only_organizations,
+      is_only_kyc_verified: body.is_only_kyc_verified,
+      pubkey: signedMessage.ephemeralPubkey.toString(),
 
     }
     console.log("createReview reviewData", reviewData);

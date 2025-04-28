@@ -654,6 +654,8 @@ CREATE TABLE IF NOT EXISTS polls (
     gender TEXT,
     organization_name TEXT,
     pubkey TEXT,
+    selected_countries TEXT[],
+    selected_organizations TEXT[],
     -- Vote statistics
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,

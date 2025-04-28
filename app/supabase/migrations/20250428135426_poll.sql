@@ -1,3 +1,14 @@
+-- Drop existing objects in correct order
+DROP VIEW IF EXISTS poll_stats;
+DROP TRIGGER IF EXISTS enforce_active_poll_voting ON poll_votes;
+DROP TRIGGER IF EXISTS update_vote_counts_trigger ON poll_votes;
+DROP FUNCTION IF EXISTS check_poll_active();
+DROP FUNCTION IF EXISTS is_poll_active(UUID);
+DROP FUNCTION IF EXISTS update_vote_counts();
+DROP TABLE IF EXISTS poll_votes;
+DROP TABLE IF EXISTS poll_options;
+DROP TABLE IF EXISTS polls;
+
 -- Create polls table
 CREATE TABLE IF NOT EXISTS polls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -26,6 +37,8 @@ CREATE TABLE IF NOT EXISTS polls (
     gender TEXT,
     organization_name TEXT,
     pubkey TEXT,
+    selected_countries TEXT[],
+    selected_organizations TEXT[],
     -- Vote statistics
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,
