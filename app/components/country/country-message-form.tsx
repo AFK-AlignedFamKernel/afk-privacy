@@ -17,7 +17,8 @@ import COUNTRY_DATA from "@/assets/country";
 type MessageFormProps = {
   isInternal?: boolean;
   onSubmit: (message: SignedMessageWithProof) => void;
-  connectedKyc?: PassportRegistration
+  connectedKyc?: PassportRegistration;
+  isRegisteredProps?: boolean;
 };
 
 const prompts = (companyName: string, nationality: string) => [
@@ -29,7 +30,7 @@ const prompts = (companyName: string, nationality: string) => [
 ];
 const randomPromptIndex = Math.floor(Math.random() * prompts("", "your Nationality").length);
 
-const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc }) => {
+const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc, isRegisteredProps  }) => {
 
   const [currentKYCProvider, setCurrentKYCProvider] = useLocalStorage<string | null>(
     "currentKYCProvider",
@@ -52,11 +53,15 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   const provider = currentProvider ? Providers[currentProvider] : null;
   // const isRegistered = !!connectedKyc;
   const isRegistered = useMemo(() => {
-    if (connectedKyc && connectedKyc?.is_verified && !connectedKyc?.nationality) {
+    if (isRegisteredProps) {
+      return true;
+    }
+    if (connectedKyc && connectedKyc?.is_verified && connectedKyc?.nationality) {
       return true;
     }
     return false;
-  }, [connectedKyc]);
+  }, [connectedKyc, isRegisteredProps]);
+  console.log("isRegistered", isRegistered);
 
   const senderName = isInternal
     ? generateNameFromPubkey(getEphemeralPubkey()?.toString() ?? "")

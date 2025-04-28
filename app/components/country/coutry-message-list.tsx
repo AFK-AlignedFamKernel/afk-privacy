@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
 import CountryMessageCard from "./country-message-card";
@@ -35,6 +35,21 @@ const MessageListCountry: React.FC<MessageListProps> = ({
 
 
   const [myData, setMyData] = useState<any>(null);
+
+  const isRegistered = useMemo(() => {
+    if (myData && myData?.is_verified && myData?.nationality) {
+      return true;
+    }
+    return false;
+  }, [myData]);
+
+  const currentKyc = useMemo(() => {
+    if (myData && myData?.is_verified && myData?.nationality) {
+      return myData;
+    }
+    return null;
+  }, [myData]);
+
   useEffect(() => {
     const fetchMyData = async () => {
       const message = "getMyData";
@@ -53,9 +68,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
       const res = await getMyDataMessageCountry(messageObj);
 
       const myData = res?.credentialSubject;
-      console.log("myData", myData);
       setMyData(myData);
-      console.log("myData", myData);
     };
     fetchMyData();
   }, []);
@@ -209,8 +222,8 @@ const MessageListCountry: React.FC<MessageListProps> = ({
     <>
       {showMessageForm && (
         <CountryMessageForm
-
-          connectedKyc={myData}
+          isRegisteredProps={isRegistered}
+          connectedKyc={currentKyc}
           isInternal={isInternal} onSubmit={onNewMessageSubmit} />
       )}
 

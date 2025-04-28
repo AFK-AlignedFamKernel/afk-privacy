@@ -3,6 +3,7 @@ import IonIcon from "@reacticons/ionicons";
 import { SignedMessageWithProof, SignedMessage, Message, PollStats } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
+import Link from 'next/link';
 type ReviewMetadata = {
   rating?: number;
 };
@@ -105,8 +106,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         throw new Error(error.error || 'Failed to vote');
       }
 
+      // TODO
       // Refresh polls to show updated results
-      window.location.reload();
     } catch (error) {
       console.error('Error voting:', error);
       setError((error as Error).message);
@@ -141,7 +142,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
   const handleSubmitVote = async () => {
     console.log("handleSubmitVote",);
-    console.log("handleSubmitVote", review);
     // if (!review.id) return;
 
     if (selectedOptions.size === 0) {
@@ -160,7 +160,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       // For multiple selections, submit each vote
       for (const option of selectedOptions) {
-        console.log("handleOnVote", option);
+        // console.log("handleOnVote", option);
         await handleOnVote(review.id, option);
       }
     } catch (err) {
@@ -198,13 +198,25 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           ))}
 
         </div>
-        <button
-          className="submit-vote-button"
-          onClick={handleSubmitVote}
-          disabled={isVoting || selectedOptions.size === 0 || review.has_voted}
-        >
-          {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
-        </button>
+
+
+        <div>
+
+          <button
+            className="submit-vote-button"
+            onClick={handleSubmitVote}
+            disabled={isVoting || selectedOptions.size === 0 || review.has_voted}
+          >
+            {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
+          </button>
+          <p
+            className="submit-vote-button"
+          >
+            <IonIcon name="close-outline" />
+            <Link href={`/poll/${review.id}`}>View poll</Link>
+          </p>
+        </div>
+
       </div>
 
     );
@@ -258,9 +270,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const handleResultStats = async () => {
 
     try {
-      console.log("handleResultStats", review);
+      // console.log("handleResultStats", review);
       const signedMessage = await handleSignMessage();
-      console.log("signedMessage", signedMessage);
+      // console.log("signedMessage", signedMessage);
 
       if (!signedMessage) return;
 
@@ -277,10 +289,10 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         },
         body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
       });
-      console.log("res", res);
+      // console.log("res", res);
 
       const data = await res.json();
-      console.log("data", data);
+      // console.log("data", data);
       setStatsData(data);
     } catch (error) {
       console.error("Error fetching result stats", error);
@@ -344,11 +356,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     }
 
 
-    // if (requirements.length === 0) return null;
+    if (requirements.length === 0) return null;
 
     return (
       <div className="poll-requirements">
-        <h4>Requirements</h4>
+        <p>Requirements</p>
         <ul>
           {requirements.map((req, index) => (
             <li key={index}>
@@ -473,7 +485,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               </div> */}
             </div>
 
-            <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
+            {/* <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start" }}>
               <div className="poll-date">
                 <IonIcon name="eye-outline" />
                 <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
@@ -484,24 +496,42 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
                 <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
               </div>
 
-            </div>
+            </div> */}
 
           </div>
-          <div className="poll-actions">
+          {/* <div className="poll-actions">
+
             <div className="poll-meta poll-author">
               <IonIcon name="person-outline" />
               <span>{getAnonymousName()}</span>
-            </div>
-            {/* <button
+            </div> <button
               className={`expand-button ${isExpanded ? 'expanded' : ''}`}
               onClick={() => setIsExpanded(!isExpanded)}
             >
               <IonIcon name="chevron-down-outline" />
               <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
-            </button> */}
-          </div>
+            </button>
+          </div> */}
 
         </div>
+
+        <div className="poll-stats-container">
+
+          <p>Details</p>
+          <div className="poll-stats-container" style={{ gap: "10px", display: "flex", alignItems: "flex-start", borderRadius: "8px", backgroundColor: "var(--background-secondary)", paddingTop: "10px", paddingBottom: "10px", }}>
+            <div className="poll-date">
+              <IonIcon name="eye-outline" />
+              <span>{review?.is_show_results_publicly ? "Public" : "Private"}</span>
+            </div>
+
+            <div className="poll-select-type">
+              <IonIcon name={review.multiselect ? "checkbox-outline" : "radio-button-on-outline"} />
+              <span>{review.multiselect ? "Multiple choice" : "Single choice"}</span>
+            </div>
+
+          </div>
+        </div>
+
 
         {renderPollRequirements()}
 

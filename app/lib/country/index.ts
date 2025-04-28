@@ -281,7 +281,7 @@ export async function getMyDataMessageCountry(message: Message) {
     // Send the signed message to the server
     const response = await fetchMyDataMessageCountry(signedMessage);
 
-    console.log("response", response);
+    // console.log("response", response);
     return response;
   } catch (error) {
     console.error("Error getting my data message country", error);

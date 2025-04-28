@@ -99,7 +99,7 @@ export async function createReview(
     let ephemeralData: any;
     if (!data?.pubkey || error) {
       console.log("Ephemeral data not found, creating new ephemeral key");
-      const { data: ephemeralDataResult , error: ephemeralError } = await supabase.from("ephemeral_keys").upsert({
+      const { data: ephemeralDataResult, error: ephemeralError } = await supabase.from("ephemeral_keys").upsert({
         pubkey: signedMessage?.ephemeralPubkey?.toString(),
         // ephemeralPubkeyExpiry: signedMessage?.ephemeralPubkeyExpiry,
         // salt: signedMessage.ephemeralPubkeySalt,
@@ -147,10 +147,10 @@ export async function createReview(
         // parent_id: signedMessage?.parentId,
         ...reviewData
       },
-      
-    ]);
 
-    if (insertError) {
+    ]).select("id").single();
+
+    if (insertError || !createdPoll?.id) {
       throw insertError;
     }
 
@@ -164,10 +164,10 @@ export async function createReview(
 
 
     // Return the created message
-    const { data: createdMessage, error: fetchError } = await supabase
-      .from("polls")
+    const { data: createdPollStats, error: fetchError } = await supabase
+      .from("poll_stats")
       .select(`*, poll_options(*)`)
-      .eq("id", signedMessage.id)
+      .eq("poll_id", createdPoll?.id)
       .single();
 
     if (fetchError) {
@@ -176,21 +176,26 @@ export async function createReview(
 
 
     const pollOptionsToInsert = body.answer_options?.map((option: string) => ({
-      poll_id: signedMessage.id,
+      poll_id: createdPoll?.id,
+      option_id: createdPoll?.id,
       option_text: option,
     }));
 
+    console.log("pollOptionsToInsert", pollOptionsToInsert);
     const { data: createdPollOptions, error: createPollOptionsError } = await supabase
       .from("poll_options")
       .insert(pollOptionsToInsert);
+    console.log("createdPollOptions", createdPollOptions);
 
 
-    console.log("createdMessage", createdMessage);
-    res.status(201).json(createdMessage);
+    console.log("createdPoll", createdPoll);
+    console.log("createdPollStats", createdPollStats);
+    console.log("createdPollOptions", createdPollOptions);
+    res.status(201).json(createdPoll);
     res.end();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: (error as Error).message });
+    res.status(500).json({ error: (error as Error)?.message });
     res.end();
   }
 }

@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS memberships (
     nationality TEXT,
     date_of_birth TEXT,
     gender TEXT,
+    domain TEXT,
+    is_kyc_verified BOOLEAN NOT NULL DEFAULT false,
     UNIQUE(pubkey, group_id, provider)
 );
 
@@ -182,6 +184,7 @@ CREATE TABLE IF NOT EXISTS ephemeral_keys (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     pubkey TEXT NOT NULL,
     signature TEXT NOT NULL,
+    expires_at TEXT,
     proof JSONB,
     uuid TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -286,6 +289,7 @@ CREATE TABLE IF NOT EXISTS polls (
     pubkey TEXT,
     selected_countries TEXT[],
     selected_organizations TEXT[],
+    internal BOOLEAN NOT NULL DEFAULT false,
     -- Vote statistics
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,
