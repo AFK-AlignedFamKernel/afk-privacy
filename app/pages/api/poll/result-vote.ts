@@ -152,20 +152,59 @@ export async function fetchResultVote(
 
     console.log("pollOption", pollOption);
 
-    // Return updated poll stats
-    const { data: updatedStats, error: statsError } = await supabase
-      .from("poll_stats")
-      .select("*")
-      .eq("poll_id", pollId);
-
-
-    console.log("updatedStats", updatedStats);
+    // Return updated poll stats with optimized query
+    const { data: pollStats, error: statsError } = await supabase
+      .from('polls')
+      .select(`
+        id,
+        title,
+        total_votes,
+        total_kyc_votes,
+        total_org_votes,
+        options:poll_options(
+          id,
+          option_text,
+          vote_count,
+          kyc_votes: poll_votes!poll_votes_option_id_fkey(
+            count
+          ) filter (where is_kyc_vote = true),
+          org_votes: poll_votes!poll_votes_option_id_fkey(
+            count
+          ) filter (where is_organization_vote = true)
+        ),
+        votes_by_country: (
+          SELECT jsonb_object_agg(
+            COALESCE(nationality, 'unknown'),
+            count
+          )
+          FROM (
+            SELECT nationality, COUNT(*) as count
+            FROM poll_votes
+            WHERE poll_id = polls.id
+            GROUP BY nationality
+          ) nationality_counts
+        ),
+        votes_by_gender: (
+          SELECT jsonb_object_agg(
+            COALESCE(gender, 'unknown'),
+            count
+          )
+          FROM (
+            SELECT gender, COUNT(*) as count
+            FROM poll_votes
+            WHERE poll_id = polls.id
+            GROUP BY gender
+          ) gender_counts
+        )
+      `)
+      .eq('id', pollId)
+      .single();
 
     if (statsError) {
       throw statsError;
     }
 
-    res.status(200).json(updatedStats);
+    res.status(200).json(pollStats);
   } catch (error) {
     console.error("Error voting:", error);
     res.status(500).json({ error: (error as Error).message });
