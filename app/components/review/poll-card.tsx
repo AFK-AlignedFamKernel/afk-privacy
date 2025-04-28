@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import IonIcon from "@reacticons/ionicons";
-import { SignedMessageWithProof, SignedMessage, Message } from "../../lib/types";
+import { SignedMessageWithProof, SignedMessage, Message, PollStats } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
 type ReviewMetadata = {
@@ -50,7 +50,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [isExpanded, setIsExpanded] = useState(false);
   const [isShowStats, setIsShowStats] = useState(false);
 
-  const [statsData, setStatsData] = useState<any>(null);
+  const [statsData, setStatsData] = useState<any | PollStats | undefined>(undefined);
+
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
   const handleOnVote = async (pollId: string, option: string, options?: string) => {
     console.log("handleOnVote")
@@ -279,6 +281,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       const data = await res.json();
       console.log("data", data);
+      setStatsData(data);
     } catch (error) {
       console.error("Error fetching result stats", error);
     }
@@ -362,9 +365,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     console.log("renderPollStats", review);
     if (!review.is_show_results_publicly) return null;
 
+    const totalVotes = statsData?.total_votes || 0;
+    const optionVotes = statsData?.option_votes || {};
 
-    const totalVotes = review.total_votes || 0;
-    const optionVotes = review.option_votes || {};
+    // const totalVotes = review.total_votes || 0;
+    // const optionVotes = review.option_votes || {};
 
     return (
       <div className="poll-stats">

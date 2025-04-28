@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { verifyMessageSignature } from "../../../lib/ephemeral-key";
 import { SignedMessage } from "../../../lib/types";
+import { PollStats } from "@/lib/types/poll";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -99,9 +100,9 @@ export async function fetchResultVote(
       .eq("pubkey", signedMessageFormatted.ephemeralPubkey.toString())
       .single();
 
-    if (ephemeralKeyError || !ephemeralKey) {
-      throw new Error("Voter is not a member");
-    }
+    // if (ephemeralKeyError || !ephemeralKey) {
+    //   throw new Error("Voter is not a member");
+    // }
 
     if (!isPublicResult && owner !== ephemeralKey.pubkey) {
       throw new Error("Not the correct owner of the poll");
@@ -144,31 +145,7 @@ export async function fetchResultVote(
 
     console.log("pollOption", pollOption);
 
-    interface CountryVote {
-      nationality: string | null;
-      count: number;
-    }
 
-    interface PollOption {
-      id: string;
-      option_text: string;
-      vote_count: number;
-      poll_votes: Array<{
-        is_kyc_vote: boolean;
-        is_organization_vote: boolean;
-      }>;
-    }
-
-    interface PollStats {
-      id: string;
-      title: string;
-      total_votes: number;
-      total_kyc_votes: number;
-      total_org_votes: number;
-      options: PollOption[];
-      votes_by_country: Record<string, number>;
-      total_poll_votes: number;
-    }
 
     // Return updated poll stats with optimized query
     const { data: pollStats, error: statsError } = await supabase
