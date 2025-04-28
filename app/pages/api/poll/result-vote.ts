@@ -97,34 +97,13 @@ export async function fetchResultVote(
     console.log("pollId", pollId);
     console.log("poll", poll);
 
+    // const { data: passport, error: passportError } = await supabase
+    //   .from("passport_registrations")
+    //   .select("*")
+    //   .eq("pubkey", signedMessage.ephemeralPubkey.toString())
+    //   .single();
 
-
-    const { data: passport, error: passportError } = await supabase
-      .from("passport_registrations")
-      .select("*")
-      .eq("pubkey", signedMessage.ephemeralPubkey.toString())
-      .single();
-
-    console.log("passport", passport);
-    // Check KYC requirements if needed
-    if (poll.is_only_kyc_verified) {
-
-      if (passportError || !passport) {
-        throw new Error("KYC verification required to vote in this poll");
-      }
-    }
-
-    // Check organization requirements if needed
-    if (poll?.is_only_organizations) {
-      // if (!membership) {
-      //   throw new Error("Only organizations can vote in this poll");
-      // }
-      if (poll?.selected_organizations && poll?.selected_organizations?.length > 0) {
-        if (!membership?.anon_group_id || !poll?.selected_organizations?.includes(membership?.anon_group_id)) {
-          throw new Error("You are not a member of an organization that can vote in this poll");
-        }
-      }
-    }
+    // console.log("passport", passport);
 
     // Check if user has already voted
     const { data: existingVote, error: voteError } = await supabase
@@ -159,6 +138,9 @@ export async function fetchResultVote(
       .from("poll_stats")
       .select("*")
       .eq("poll_id", pollId);
+
+
+    console.log("updatedStats", updatedStats);
 
     if (statsError) {
       throw statsError;
