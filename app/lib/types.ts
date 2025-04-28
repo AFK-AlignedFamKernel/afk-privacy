@@ -116,6 +116,7 @@ export interface SignedMessageWithProof extends SignedMessage {
 export const LocalStorageKeys = {
   EphemeralKey: "ephemeralKey",
   CurrentGroupId: "currentGroupId",
+  CurrentCountryId: "currentCountryId",
   CurrentProvider: "currentProvider",
   GoogleOAuthState: "googleOAuthState",
   GoogleOAuthNonce: "googleOAuthNonce",

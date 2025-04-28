@@ -15,6 +15,7 @@ import logo from "@/assets/logo192.png";
 import logoAfk from "@/assets/afk_logo_circle.png";
 // import logo from "@/assets/logo.png";
 import CryptoLoading from "./small/crypto-loading";
+import COUNTRY_DATA from "@/assets/country";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useLocalStorage<boolean>(
@@ -25,6 +26,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     LocalStorageKeys.CurrentGroupId,
     null
   );
+  const [currentCountryId] = useLocalStorage<string | null>(
+    LocalStorageKeys.CurrentCountryId,
+    null
+  );
   const [currentProvider] = useLocalStorage<string | null>(
     LocalStorageKeys.CurrentProvider,
     null
@@ -32,6 +37,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [consoleShown, setConsoleShown] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isOpenInternal, setIsOpenInternal] = React.useState(false);
   const pathname = usePathname();
 
   let slug = null;
@@ -216,6 +222,16 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   className="sidebar-nav-item"
                 >
                   {currentGroupId} Internal
+                </Link>
+              )}
+
+              {slug && currentCountryId && (
+                <Link
+                  onClick={() => setIsSidebarOpen(false)}
+                  href={`/country/${currentCountryId}/internal`}
+                  className="sidebar-nav-item"
+                >
+                  {currentCountryId} Country {COUNTRY_DATA[currentCountryId].name} {COUNTRY_DATA[currentCountryId].flag}
                 </Link>
               )}
             </div>
