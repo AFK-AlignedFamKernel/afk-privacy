@@ -278,6 +278,7 @@ CREATE TABLE IF NOT EXISTS polls (
     is_nationality BOOLEAN NOT NULL DEFAULT false,
     selected_countries TEXT[],
     internal BOOLEAN NOT NULL DEFAULT false,
+    is_public_result BOOLEAN NOT NULL DEFAULT false,
     selected_organizations TEXT[],
     multiselect BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

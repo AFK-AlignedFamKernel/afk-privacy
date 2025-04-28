@@ -65,6 +65,7 @@ export async function createReview(
       group_provider: signedMessage.anonGroupProvider,
       selected_countries: body.selected_countries,
       selected_organizations: body.selected_organizations,
+      is_public_result: body.is_public_result,
       // pubkey: signedMessage.ephemeralPubkey.toString(),
 
     }
