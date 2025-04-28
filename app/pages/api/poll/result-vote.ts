@@ -51,17 +51,38 @@ export async function fetchResultVote(
     }
 
     // Get the poll details
+    // const { data: poll, error: pollError } = await supabase
+    //   .from("polls")
+    //   .select("*")
+    //   .eq("id", pollId)
+    //   .single();
+
     const { data: poll, error: pollError } = await supabase
-      .from("polls")
-      .select("*")
-      .eq("id", pollId)
+      .from('polls')
+      .select(`
+      id,
+      title,
+      description,
+      total_votes,
+      total_kyc_votes,
+      total_org_votes,
+      is_show_results_publicly,
+      ends_at,
+      pubkey,
+      options:poll_options(
+        id,
+        option_text,
+        vote_count
+      )
+    `)
+      .eq('id', pollId)
       .single();
 
     const owner = poll?.pubkey;
 
     console.log("owner", owner);
 
-    const isPublicResult = poll?.is_public_result;
+    const isPublicResult = poll?.is_show_results_publicly;
 
     if (pollError || !poll) {
       throw new Error("Poll not found");
@@ -81,8 +102,6 @@ export async function fetchResultVote(
     if (ephemeralKeyError || !ephemeralKey) {
       throw new Error("Voter is not a member");
     }
-
-
 
     if (!isPublicResult && owner !== ephemeralKey.pubkey) {
       throw new Error("Not the correct owner of the poll");
@@ -130,7 +149,7 @@ export async function fetchResultVote(
       .single();
     console.log("voteToReview pollOption", pollOption);
 
-   
+
     console.log("pollOption", pollOption);
 
     // Return updated poll stats
@@ -151,108 +170,4 @@ export async function fetchResultVote(
     console.error("Error voting:", error);
     res.status(500).json({ error: (error as Error).message });
   }
-}
-
-export async function fetchMessagesCountry(
-  request: NextApiRequest,
-  res: NextApiResponse
-) {
-  const groupId = request.query?.groupId as string;
-  const isInternal = request.query?.isInternal === "true";
-  const limit = parseInt(request.query?.limit as string) || 50;
-  const afterTimestamp = request.query?.afterTimestamp as string;
-  const beforeTimestamp = request.query?.beforeTimestamp as string;
-  const parentId = request.query?.parentId as string;
-
-  let query = supabase
-    .from("country_messages")
-    .select(
-      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, nationality, gender, date_of_birth"
-    )
-    .order("timestamp", { ascending: false })
-    .limit(limit);
-
-  query = query.eq("internal", !!isInternal);
-
-  if (groupId) {
-    // query = query.eq("group_id", groupId);
-    query = query.eq("nationality", groupId);
-  }
-
-  if (parentId) {
-    query = query.eq("parent_id", parentId);
-  } else {
-    query = query.is("parent_id", null);
-  }
-
-  if (afterTimestamp) {
-    query = query.gt("timestamp", new Date(Number(afterTimestamp)).toISOString());
-  }
-
-  if (beforeTimestamp) {
-    query = query.lt("timestamp", new Date(Number(beforeTimestamp)).toISOString());
-  }
-
-  // Internal messages require a valid pubkey from the same group (as Authorization header)
-  if (isInternal) {
-    if (!groupId) {
-      res
-        .status(400)
-        .json({ error: "Group ID is required for internal messages" });
-      res.end();
-      return;
-    }
-
-    const authHeader = request.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res
-        .status(401)
-        .json({ error: "Authorization required for internal messages" });
-      res.end();
-      return;
-    }
-
-    const pubkey = authHeader.split(" ")[1];
-    const { data: membershipData, error: membershipError } = await supabase
-      .from("memberships")
-      .select("*")
-      .eq("pubkey", pubkey)
-      .eq("group_id", groupId)
-      .single();
-
-    if (membershipError || !membershipData) {
-      res.status(401).json({ error: "Invalid public key for this group" });
-      res.end();
-      return;
-    }
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-    res.end();
-    return;
-  }
-
-  const messages: Partial<SignedMessage>[] = data.map((message) => ({
-    id: message.id,
-    anonGroupId: message.group_id,
-    anonGroupProvider: message.group_provider,
-    text: message.text,
-    timestamp: message.timestamp,
-    signature: message.signature,
-    ephemeralPubkey: message.pubkey,
-    internal: message.internal,
-    likes: message.likes,
-    replyCount: message.reply_count,
-    parentId: message.parent_id,
-    nationality: message.nationality,
-    gender: message.gender,
-    dateOfBirth: message.date_of_birth
-  }));
-
-  res.json(messages);
-  res.end();
 }
