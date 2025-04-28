@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import IonIcon from "@reacticons/ionicons";
-import { SignedMessageWithProof, SignedMessage } from "../../lib/types";
+import { SignedMessageWithProof, SignedMessage, Message } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
-
 type ReviewMetadata = {
   rating?: number;
 };
@@ -263,8 +262,75 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     }
 
 
+    const handleSignMessage = async () => {
+      try {
+        const message: Message = {
+          id: crypto.randomUUID(),
+          text: review.title ?? `View poll results for ${review.id}`,
+          timestamp: new Date(),
+          internal: false,
+          anonGroupId: 'self-xyz',
+          anonGroupProvider: 'self-xyz',
+          likes: 0,
+          replyCount: 0,
+          parentId: null,
+        };
+
+        const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+        if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+          throw new Error("Failed to sign message");
+        }
+
+        const signedMessageFormatted = {
+          ...message,
+          signature,
+          ephemeralPubkey,
+          ephemeralPubkeyExpiry,
+        };
+        return signedMessageFormatted;
+      } catch (error) {
+        console.error("Error signing message", error);
+        return null;
+      }
+    }
+    const handleResultStats = async () => {
+
+      try {
+        console.log("handleResultStats", review);
+        const signedMessage = await handleSignMessage();
+        console.log("signedMessage", signedMessage);
+
+        if (!signedMessage) return;
+
+        const signedMessageFormatted = {
+          ...signedMessage,
+          ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+          signature: signedMessage.signature.toString(),
+        };
+
+        const res = await fetch('/api/poll/result-vote', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
+        });
+        console.log("res", res);
+
+        const data = await res.json();
+        console.log("data", data);
+      } catch (error) {
+        console.error("Error fetching result stats", error);
+      }
+
+    }
     useEffect(() => {
+
+
       if (review.is_show_results_publicly) {
+        console.log("review.is_show_results_publicly", review.is_show_results_publicly);
+        handleResultStats();
         setIsShowStats(true);
       }
     }, [review.is_show_results_publicly]);
@@ -290,6 +356,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     console.log("renderPollStats", review);
     if (!review.is_show_results_publicly) return null;
 
+
     const totalVotes = review.total_votes || 0;
     const optionVotes = review.option_votes || {};
 
@@ -298,8 +365,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         <div className="poll-stats-header">
           <h4>Poll Results</h4>
           <span className="bar-chart-outline total-votes">
-          <IonIcon name="bar-chart-outline" />
-          {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
+            <IonIcon name="bar-chart-outline" />
+            {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}</span>
         </div>
         {/* <div className="stat-item total-votes">
           <IonIcon name="bar-chart-outline" />
@@ -358,6 +425,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     )
 
   }
+
+
 
 
 
