@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import QRCode from "react-qr-code"; // For QR code generation
 import type { ZKPassport } from "@zkpassport/sdk";
+import { loadOrInitializeEphemeralKey, signMessageSelfXyz } from "@/lib/zk-did";
+import { SignedMessage } from "@/lib/types";
 
 function ZkPassportRegistration() {
   const [email, setEmail] = useState("");
@@ -30,8 +32,8 @@ function ZkPassportRegistration() {
 
       // Create a verification request
       const query = await zkpassportRef.current.request({
-        name: "YourApp",
-        logo: "https://yourapp.com/logo.png",
+        name: "AFK",
+        logo: "https://privacy.afk-community.xyz/logo.png",
         purpose: "Account verification for registration",
       });
 
@@ -64,7 +66,7 @@ function ZkPassportRegistration() {
       });
 
       // Store the proofs and query result to send to the server
-      const proofs:any[] = [];
+      const proofs: any[] = [];
 
       onProofGenerated((proof) => {
         proofs.push(proof);
@@ -82,11 +84,47 @@ function ZkPassportRegistration() {
         try {
           // Send the proofs and query result to your server for verification
           setVerificationStatus("sending_to_server");
+          const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
 
-          const response = await fetch("https://yourapi.com/register", {
+
+          const messageObj = {
+            id: crypto.randomUUID(),
+            timestamp: new Date(),
+            text: `link:zk-passport:${uuid}`,
+            internal: false,
+            likes: 0,
+            replyCount: 0,
+            parentId: null,
+            anonGroupId: "zk-passport",
+            anonGroupProvider: "zk-passport",
+          };
+
+
+          // Sign the message with the ephemeral key pair
+          const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(messageObj);
+          if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+            throw new Error("Failed to sign message");
+          }
+          const signedMessage: SignedMessage = {
+            ...messageObj,
+            signature: signature,
+            ephemeralPubkey: BigInt(ephemeralPubkey),
+            ephemeralPubkeyExpiry: ephemeralPubkeyExpiry,
+          };
+
+          const signedMessageFormated = {
+            ...signedMessage,
+            ephemeralPubkey: signedMessage?.ephemeralPubkey?.toString(),
+            ephemeralPubkeyExpiry: signedMessage?.ephemeralPubkeyExpiry?.toString(),
+            signature: signedMessage?.signature?.toString(),
+            uuid: uuid,
+            pubkey: ephemeralKey?.publicKey?.toString(),
+          }
+          const response = await fetch(process.env.ZK_PASSPORT_VERIFY_URL || "/api/register/zk-passport", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${signedMessage?.ephemeralPubkey?.toString}`,
             },
             body: JSON.stringify({
               email,
@@ -95,6 +133,7 @@ function ZkPassportRegistration() {
                 proofs,
                 queryResult,
               },
+              signedMessage:signedMessageFormated
             }),
           });
 
@@ -122,7 +161,7 @@ function ZkPassportRegistration() {
         setError(`Error during verification: ${error}`);
         setVerificationStatus("error");
       });
-    } catch (err:any) {
+    } catch (err: any) {
       setError(`Failed to initialize verification: ${err.message}`);
       setVerificationStatus("error");
     }
