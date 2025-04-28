@@ -4,7 +4,8 @@ import QRCode from "react-qr-code"; // For QR code generation
 import type { ZKPassport } from "@zkpassport/sdk";
 
 import { loadOrInitializeEphemeralKey, signMessageSelfXyz } from "@/lib/zk-did";
-import { SignedMessage } from "@/lib/types";
+import { LocalStorageKeys, SignedMessage } from "@/lib/types";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 let ZKPassportClass: any;
 
@@ -36,7 +37,10 @@ function ZkPassportRegistration() {
   const [verificationUrl, setVerificationUrl] = useState("");
   const [requestId, setRequestId] = useState("");
   const zkpassportRef = useRef<ZKPassport | null>(null);
-
+  const [currentCountryId, setCurrentCountryId] = useLocalStorage<string | null>(
+    LocalStorageKeys.CurrentCountryId,
+    null
+  );
   useEffect(() => {
     const initializeZKPassport = async () => {
       const { ZKPassport } = await import('@zkpassport/sdk');
@@ -178,6 +182,10 @@ function ZkPassportRegistration() {
 
           if (data.success) {
             setVerificationStatus("success");
+
+            if (data?.data && data?.data?.nationality) {
+              setCurrentCountryId(data?.data?.nationality);
+            }
             // Here you can redirect to the user's profile or home page
           } else {
             setError(data.error || "Registration failed");

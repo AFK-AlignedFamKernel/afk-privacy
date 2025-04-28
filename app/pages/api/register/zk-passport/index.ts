@@ -156,11 +156,16 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
             });
         }
 
-
         return res.status(200).json({
             success: true,
             message: "User created successfully",
-            data: insertData,
+            data: {
+                // ...insertData,
+                domainUrl: domainUrl,
+                nationality: nationality,
+                age: age,
+                gender: gender,
+            },
         });
     } catch (error) {
         console.error(error);
@@ -169,7 +174,6 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
             error: "Internal server error",
         });
     }
-
 
 }
 
