@@ -208,6 +208,83 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     );
   };
 
+
+  const handleSignMessage = async () => {
+    try {
+      const message: Message = {
+        id: crypto.randomUUID(),
+        text: review.title ?? `View poll results for ${review.id}`,
+        timestamp: new Date(),
+        internal: false,
+        anonGroupId: 'self-xyz',
+        anonGroupProvider: 'self-xyz',
+        likes: 0,
+        replyCount: 0,
+        parentId: null,
+      };
+
+      const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
+
+      if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+        throw new Error("Failed to sign message");
+      }
+
+      const signedMessageFormatted = {
+        ...message,
+        signature,
+        ephemeralPubkey,
+        ephemeralPubkeyExpiry,
+      };
+      return signedMessageFormatted;
+    } catch (error) {
+      console.error("Error signing message", error);
+      return null;
+    }
+  }
+
+  useEffect(() => {
+
+
+    if (review.is_show_results_publicly) {
+      console.log("review.is_show_results_publicly", review.is_show_results_publicly);
+      handleResultStats();
+      setIsShowStats(true);
+    }
+  }, [review.is_show_results_publicly]);
+
+
+  const handleResultStats = async () => {
+
+    try {
+      console.log("handleResultStats", review);
+      const signedMessage = await handleSignMessage();
+      console.log("signedMessage", signedMessage);
+
+      if (!signedMessage) return;
+
+      const signedMessageFormatted = {
+        ...signedMessage,
+        ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
+        signature: signedMessage.signature.toString(),
+      };
+
+      const res = await fetch('/api/poll/result-vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
+      });
+      console.log("res", res);
+
+      const data = await res.json();
+      console.log("data", data);
+    } catch (error) {
+      console.error("Error fetching result stats", error);
+    }
+
+  }
+
   const renderPollRequirements = () => {
     // console.log("review", review);
     const requirements = [];
@@ -263,79 +340,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
       requirements.push(`Selected Organizations: ${orgNames}`);
     }
 
-
-    const handleSignMessage = async () => {
-      try {
-        const message: Message = {
-          id: crypto.randomUUID(),
-          text: review.title ?? `View poll results for ${review.id}`,
-          timestamp: new Date(),
-          internal: false,
-          anonGroupId: 'self-xyz',
-          anonGroupProvider: 'self-xyz',
-          likes: 0,
-          replyCount: 0,
-          parentId: null,
-        };
-
-        const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
-
-        if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
-          throw new Error("Failed to sign message");
-        }
-
-        const signedMessageFormatted = {
-          ...message,
-          signature,
-          ephemeralPubkey,
-          ephemeralPubkeyExpiry,
-        };
-        return signedMessageFormatted;
-      } catch (error) {
-        console.error("Error signing message", error);
-        return null;
-      }
-    }
-    const handleResultStats = async () => {
-
-      try {
-        console.log("handleResultStats", review);
-        const signedMessage = await handleSignMessage();
-        console.log("signedMessage", signedMessage);
-
-        if (!signedMessage) return;
-
-        const signedMessageFormatted = {
-          ...signedMessage,
-          ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
-          signature: signedMessage.signature.toString(),
-        };
-
-        const res = await fetch('/api/poll/result-vote', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
-        });
-        console.log("res", res);
-
-        const data = await res.json();
-        console.log("data", data);
-      } catch (error) {
-        console.error("Error fetching result stats", error);
-      }
-
-    }
-    useEffect(() => {
-
-
-      if (review.is_show_results_publicly) {
-        console.log("review.is_show_results_publicly", review.is_show_results_publicly);
-        handleResultStats();
-        setIsShowStats(true);
-      }
-    }, [review.is_show_results_publicly]);
 
     // if (requirements.length === 0) return null;
 
@@ -493,7 +497,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
         <button
           className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => {
+            setIsExpanded(!isExpanded)
+            handleResultStats();
+            // setIsShowStats(false)
+          }}
         >
           <IonIcon name="chevron-down-outline" />
           <span>{isExpanded ? 'Show Less' : 'Show More'}</span>

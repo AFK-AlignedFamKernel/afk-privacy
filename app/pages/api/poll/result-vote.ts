@@ -132,14 +132,6 @@ export async function fetchResultVote(
       .eq("voter_pubkey", signedMessage.ephemeralPubkey.toString())
       .single();
 
-    if (voteError && voteError.code !== "PGRST116") { // PGRST116 is "not found" error
-      throw voteError;
-    }
-
-    if (existingVote) {
-      throw new Error("You have already voted in this poll");
-    }
-
     // Get the option ID
     const { data: pollOption, error: optionError } = await supabase
       .from("poll_options")
@@ -151,6 +143,32 @@ export async function fetchResultVote(
 
 
     console.log("pollOption", pollOption);
+
+    interface CountryVote {
+      nationality: string | null;
+      count: number;
+    }
+
+    interface PollOption {
+      id: string;
+      option_text: string;
+      vote_count: number;
+      poll_votes: Array<{
+        is_kyc_vote: boolean;
+        is_organization_vote: boolean;
+      }>;
+    }
+
+    interface PollStats {
+      id: string;
+      title: string;
+      total_votes: number;
+      total_kyc_votes: number;
+      total_org_votes: number;
+      options: PollOption[];
+      votes_by_country: Record<string, number>;
+      total_poll_votes: number;
+    }
 
     // Return updated poll stats with optimized query
     const { data: pollStats, error: statsError } = await supabase
@@ -165,36 +183,10 @@ export async function fetchResultVote(
           id,
           option_text,
           vote_count,
-          kyc_votes: poll_votes!poll_votes_option_id_fkey(
-            count
-          ) filter (where is_kyc_vote = true),
-          org_votes: poll_votes!poll_votes_option_id_fkey(
-            count
-          ) filter (where is_organization_vote = true)
-        ),
-        votes_by_country: (
-          SELECT jsonb_object_agg(
-            COALESCE(nationality, 'unknown'),
-            count
+          poll_votes:poll_votes!poll_votes_option_id_fkey(
+            is_kyc_vote,
+            is_organization_vote
           )
-          FROM (
-            SELECT nationality, COUNT(*) as count
-            FROM poll_votes
-            WHERE poll_id = polls.id
-            GROUP BY nationality
-          ) nationality_counts
-        ),
-        votes_by_gender: (
-          SELECT jsonb_object_agg(
-            COALESCE(gender, 'unknown'),
-            count
-          )
-          FROM (
-            SELECT gender, COUNT(*) as count
-            FROM poll_votes
-            WHERE poll_id = polls.id
-            GROUP BY gender
-          ) gender_counts
         )
       `)
       .eq('id', pollId)
@@ -204,7 +196,40 @@ export async function fetchResultVote(
       throw statsError;
     }
 
-    res.status(200).json(pollStats);
+    // Get total votes count
+    const { count: totalPollVotes } = await supabase
+      .from('poll_votes')
+      .select('*', { count: 'exact', head: true })
+      .eq('poll_id', pollId);
+
+    // Get votes by country in a separate query
+    const { data: countryVotes } = await supabase
+      .from('poll_votes')
+      .select('nationality')
+      .eq('poll_id', pollId);
+
+    // Process the results
+    const processedStats: PollStats = {
+      ...pollStats,
+      total_poll_votes: pollStats.total_votes || totalPollVotes || 0,
+      // total_poll_votes: totalPollVotes || 0,
+      votes_by_country: (countryVotes || []).reduce((acc: Record<string, number>, curr: { nationality: string | null }) => {
+        const country = curr.nationality || 'unknown';
+        acc[country] = (acc[country] || 0) + 1;
+        return acc;
+      }, {})
+    };
+
+    // Process options to get filtered counts
+    processedStats.options = processedStats.options.map(option => ({
+      ...option,
+      kyc_votes: option.poll_votes?.filter(vote => vote.is_kyc_vote).length || 0,
+      org_votes: option.poll_votes?.filter(vote => vote.is_organization_vote).length || 0
+    }));
+
+    console.log("processedStats", processedStats);
+
+    res.status(200).json(processedStats);
   } catch (error) {
     console.error("Error voting:", error);
     res.status(500).json({ error: (error as Error).message });
