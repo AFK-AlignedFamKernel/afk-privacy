@@ -105,8 +105,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         throw new Error(error.error || 'Failed to vote');
       }
 
+      // TODO
       // Refresh polls to show updated results
-      window.location.reload();
     } catch (error) {
       console.error('Error voting:', error);
       setError((error as Error).message);
@@ -141,7 +141,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
   const handleSubmitVote = async () => {
     console.log("handleSubmitVote",);
-    console.log("handleSubmitVote", review);
     // if (!review.id) return;
 
     if (selectedOptions.size === 0) {
@@ -160,7 +159,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       // For multiple selections, submit each vote
       for (const option of selectedOptions) {
-        console.log("handleOnVote", option);
+        // console.log("handleOnVote", option);
         await handleOnVote(review.id, option);
       }
     } catch (err) {
@@ -277,10 +276,10 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         },
         body: JSON.stringify({ pollId: review.id, option: selectedOptions.values().next().value, signedMessage: signedMessageFormatted }),
       });
-      console.log("res", res);
+      // console.log("res", res);
 
       const data = await res.json();
-      console.log("data", data);
+      // console.log("data", data);
       setStatsData(data);
     } catch (error) {
       console.error("Error fetching result stats", error);

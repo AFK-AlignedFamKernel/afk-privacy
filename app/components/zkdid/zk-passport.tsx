@@ -65,7 +65,7 @@ function ZkPassportRegistration() {
       // Create a verification request
       const query = await zkpassportRef.current.request({
         name: "AFK",
-        logo: "/logo.png",
+        logo: "https://privacy.afk-community.xyz/logo.png",
         purpose: "Account verification for registration",
       });
 
@@ -244,8 +244,8 @@ function ZkPassportRegistration() {
 
             {verificationUrl && verificationStatus === "awaiting_scan" && (
               <div className="qr-code-container">
-                <h3>Scan this QR code with the ZKPassport app</h3>
-                <QRCode value={verificationUrl} size={256} />
+                <h3 style={{ textAlign: "center", marginBottom: "10px" }}>Scan this QR code with the ZKPassport app</h3>
+                <QRCode value={verificationUrl} size={300} />
 
                 <div className="verification-options">
                   <p>

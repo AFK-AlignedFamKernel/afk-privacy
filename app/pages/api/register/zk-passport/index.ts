@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
-import { ZKPassport } from "@zkpassport/sdk";
+// import { ZKPassport } from "@zkpassport/sdk";
+import { ZKPassport } from '@zkpassport/sdk/dist/esm/index.js';
 import { verifyMessageSignature } from "@/lib/ephemeral-key";
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -55,14 +56,24 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
             return res.status(400).json({ message: 'UUID, pubkey and signAsync are required' });
         }
 
+        const signedMessageFormated = {
+            ...signedMessage,
+            ephemeralPubkey: BigInt(signedMessage.ephemeralPubkey),
+            signature: BigInt(signedMessage.signature),
+            timestamp: new Date(signedMessage?.timestamp),
+        }
 
-        const isValid = await verifyMessageSignature(signedMessage);
+
+        const isValid = await verifyMessageSignature(signedMessageFormated);
         console.log("isValid:", isValid);
         if (!isValid) {
             throw new Error("Message signature check failed");
         }
 
-        const zkPassport = new ZKPassport(process.env.DOMAIN_URL || "http://localhost:3000");
+        const domainUrl = process.env.ZKPASSPORT_DOMAIN_URL || "http://localhost:3000";
+
+        console.log("domainUrl:", domainUrl);
+        const zkPassport = new ZKPassport(domainUrl);
 
         // Verify the proofs
         const { verified, queryResultErrors, uniqueIdentifier } = await zkPassport.verify({
