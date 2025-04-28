@@ -110,11 +110,10 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 min_options: isYesNo ? 2 : minOptions,
                 multiselect,
                 ends_at: new Date(endDate).toISOString(),
-                show_results_publicly: showResultsPublicly,
+                is_show_results_publicly: showResultsPublicly,
                 is_only_organizations: isOnlyOrganizations,
                 is_only_kyc_verified: isOnlyKycVerified,
                 is_specific_countries: isSpecificCountries,
-                countries_accepted: selectedCountries,
                 selected_organizations: selectedOrganizations,
                 selected_countries: selectedCountries,
                 signedMessage: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import IonIcon from "@reacticons/ionicons";
 import { SignedMessageWithProof, SignedMessage } from "../../lib/types";
 import { signMessageSelfXyz } from "../../lib/zk-did";
@@ -16,7 +16,7 @@ type Review = SignedMessageWithProof & {
   min_options?: number;
   multiselect?: boolean;
   ends_at?: Date;
-  show_results_publicly?: boolean;
+  is_show_results_publicly?: boolean;
   is_only_organizations?: boolean;
   is_only_kyc_verified?: boolean;
   age_required?: number;
@@ -49,6 +49,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [error, setError] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isShowStats, setIsShowStats] = useState(false);
 
   const handleOnVote = async (pollId: string, option: string, options?: string) => {
     console.log("handleOnVote")
@@ -184,7 +185,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
               />
               <label htmlFor={`option-${review.id}-${index}`}>
                 {option}
-                {review.show_results_publicly && review.option_votes && (
+                {review.is_show_results_publicly && review.option_votes && (
                   <span className="option-vote-count">
                     ({review.option_votes[option] || 0})
                   </span>
@@ -262,6 +263,12 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     }
 
 
+    useEffect(() => {
+      if (review.is_show_results_publicly) {
+        setIsShowStats(true);
+      }
+    }, [review.is_show_results_publicly]);
+
     // if (requirements.length === 0) return null;
 
     return (
@@ -280,7 +287,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   };
 
   const renderPollStats = () => {
-    if (!review.show_results_publicly) return null;
+    console.log("renderPollStats", review);
+    if (!review.is_show_results_publicly) return null;
 
     const totalVotes = review.total_votes || 0;
     const optionVotes = review.option_votes || {};
