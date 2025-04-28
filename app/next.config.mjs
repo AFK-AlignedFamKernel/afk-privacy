@@ -5,7 +5,7 @@ dotenv.config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@zkpassport/sdk'],
+  transpilePackages: ['@zkpassport/sdk', '@zkpassport/utils'],
   experimental: {
     outputFileTracingIncludes: {
       '/api/messages': [
@@ -17,6 +17,7 @@ const nextConfig = {
         './node_modules/@aztec/bb.js/dest/node/barretenberg_wasm/barretenberg_wasm_thread/factory/node/thread.worker.js'
       ],
     },
+    esmExternals: true // Enable ESM support
   },
   reactStrictMode: false,
   sassOptions: {
@@ -39,13 +40,61 @@ const nextConfig = {
     NEXT_PUBLIC_SELF_SCOPE_URL: process.env.NEXT_PUBLIC_SELF_SCOPE_URL,
     NEXT_PUBLIC_SELF_VERIFY_URL: process.env.NEXT_PUBLIC_SELF_VERIFY_URL,
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
     config.experiments = {
       asyncWebAssembly: true,
       syncWebAssembly: true,
       layers: true,
     };
-    return config
+
+    // Add configuration for @zkpassport
+    // config.resolve = {
+    //   ...config.resolve,
+    //   alias: {
+    //     ...config.resolve.alias,
+    //     '@zkpassport/utils': '@zkpassport/utils/dist/cjs',
+    //     '@zkpassport/sdk': '@zkpassport/sdk/dist/cjs',
+    //   },
+    //   fallback: {
+    //     ...config.resolve.fallback,
+    //     fs: false,
+    //     net: false,
+    //     tls: false,
+    //   },
+    //   extensionAlias: {
+    //     '.js': ['.js', '.ts', '.tsx']
+    //   }
+    // };
+
+    // Handle CommonJS modules in client-side code
+    // if (!isServer) {
+    //   config.module = {
+    //     ...config.module,
+    //     rules: [
+    //       ...config.module.rules,
+    //       {
+    //         test: /\.(js|mjs|cjs)$/,
+    //         include: /node_modules\/@zkpassport/,
+    //         use: {
+    //           loader: 'babel-loader',
+    //           options: {
+    //             presets: ['next/babel'],
+    //             plugins: ['@babel/plugin-transform-modules-commonjs']
+    //           }
+    //         }
+    //       },
+    //       {
+    //         test: /\.m?js$/,
+    //         type: 'javascript/auto',
+    //         resolve: {
+    //           fullySpecified: false
+    //         }
+    //       }
+    //     ]
+    //   };
+    // }
+
+    return config;
   },
   eslint: {
     ignoreDuringBuilds: false,

@@ -1,8 +1,32 @@
 import { useRef, useState, useEffect } from "react";
 import QRCode from "react-qr-code"; // For QR code generation
+// import { ZKPassport } from "@zkpassport/sdk";
 import type { ZKPassport } from "@zkpassport/sdk";
+
 import { loadOrInitializeEphemeralKey, signMessageSelfXyz } from "@/lib/zk-did";
 import { SignedMessage } from "@/lib/types";
+
+let ZKPassportClass: any;
+
+// export async function getZKPassport() {
+//   if (!ZKPassportClass) {
+//     try {
+//       // Try ESM import first
+//       const mod = await import('@zkpassport/sdk/dist/esm/index.js');
+//       ZKPassportClass = mod.ZKPassport;
+//     } catch (e) {
+//       try {
+//         // Fallback to CJS
+//         const mod = await import('@zkpassport/sdk');
+//         ZKPassportClass = mod.ZKPassport;
+//       } catch (e2) {
+//         console.error('Failed to load ZKPassport:', e2);
+//         throw new Error('Failed to load ZKPassport');
+//       }
+//     }
+//   }
+//   return ZKPassportClass;
+// }
 
 function ZkPassportRegistration() {
   const [email, setEmail] = useState("");
@@ -16,7 +40,15 @@ function ZkPassportRegistration() {
   useEffect(() => {
     const initializeZKPassport = async () => {
       const { ZKPassport } = await import('@zkpassport/sdk');
-      zkpassportRef.current = new ZKPassport();
+
+      try {
+        // Use require instead of dynamic import for CommonJS modules
+
+        zkpassportRef.current = new ZKPassport();
+      } catch (err) {
+        console.error("Failed to initialize ZKPassport:", err);
+        setError("Failed to initialize ZKPassport");
+      }
     };
     initializeZKPassport();
   }, []);
@@ -33,7 +65,7 @@ function ZkPassportRegistration() {
       // Create a verification request
       const query = await zkpassportRef.current.request({
         name: "AFK",
-        logo: "https://privacy.afk-community.xyz/logo.png",
+        logo: "/logo.png",
         purpose: "Account verification for registration",
       });
 
@@ -47,7 +79,12 @@ function ZkPassportRegistration() {
         onResult,
         onReject,
         onError,
-      } = query.gte("age", 18).disclose("nationality").done();
+      } = query
+        // .gte("age", 18)
+        .disclose("nationality")
+        .disclose("birthdate")
+        .disclose("gender")
+        .done();
 
       // Save the URL and requestId to display and for potential cancellation
       setVerificationUrl(url);
@@ -133,7 +170,7 @@ function ZkPassportRegistration() {
                 proofs,
                 queryResult,
               },
-              signedMessage:signedMessageFormated
+              signedMessage: signedMessageFormated
             }),
           });
 
@@ -159,11 +196,13 @@ function ZkPassportRegistration() {
 
       onError((error) => {
         setError(`Error during verification: ${error}`);
-        setVerificationStatus("error");
+        setVerificationStatus("error")
+        console.log("error", error);
       });
     } catch (err: any) {
       setError(`Failed to initialize verification: ${err.message}`);
       setVerificationStatus("error");
+      console.log("error", err);
     }
   };
 
