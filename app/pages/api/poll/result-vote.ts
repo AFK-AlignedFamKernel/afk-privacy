@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
 import { verifyMessageSignature } from "../../../lib/ephemeral-key";
-import { SignedMessage } from "../../../lib/types";
 import { PollStats } from "@/lib/types/poll";
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -33,7 +32,6 @@ export async function fetchResultVote(
     const body = await request.body;
     const { pollId, option, signedMessage } = body;
 
-
     console.log("fetchResultVote body", body);
 
     const signedMessageFormatted = {
@@ -44,7 +42,7 @@ export async function fetchResultVote(
       timestamp: new Date(signedMessage.timestamp),
     }
 
-    console.log("voteToReview signedMessageFormatted", signedMessageFormatted);
+    console.log("fetchResultVote signedMessageFormatted", signedMessageFormatted);
     // Verify the signed message
     const isValid = await verifyMessageSignature(signedMessageFormatted);
     if (!isValid) {
@@ -73,7 +71,8 @@ export async function fetchResultVote(
       options:poll_options(
         id,
         option_text,
-        vote_count
+        vote_count,
+        poll_id
       )
     `)
       .eq('id', pollId)
@@ -136,7 +135,7 @@ export async function fetchResultVote(
     // Get the option ID
     const { data: pollOption, error: optionError } = await supabase
       .from("poll_options")
-      .select("id, option_text, poll_id, poll_option_id")
+      .select("id, option_text, poll_id")
       .eq("poll_id", pollId)
       .eq("option_text", option)
       .single();
@@ -179,6 +178,14 @@ export async function fetchResultVote(
       .select('*', { count: 'exact', head: true })
       .eq('poll_id', pollId);
 
+    const { count: totalPollVotesPerOption } = await supabase
+      .from('poll_votes')
+      .select('*', { count: 'exact', head: true })
+      .eq('poll_id', pollId)
+      .eq('option_id', pollOption?.id);
+
+    console.log("totalPollVotesPerOption", totalPollVotesPerOption);
+
     // Get votes by country in a separate query
     const { data: countryVotes } = await supabase
       .from('poll_votes')
@@ -190,9 +197,11 @@ export async function fetchResultVote(
     // Get all options for the poll
     const { data: options } = await supabase
       .from('poll_options')
-      .select('id, option_text')
+      .select('id, option_text, poll_id, option_id')
       .eq('poll_id', pollId);
+      // .eq('option_isd', pollId);
 
+    console.log("options", options);
     // Get all votes for the poll
     const { data: votes } = await supabase
       .from('poll_votes')
@@ -204,6 +213,8 @@ export async function fetchResultVote(
     // Count votes per option
     const voteCounts = options?.map(option => ({
       option_text: option.option_text,
+      option_id: option.id,
+      poll_id: pollId ?? option?.poll_id,
       vote_count: votes?.filter(vote => vote.option_id === option.id).length
     }));
 
@@ -238,7 +249,7 @@ export async function fetchResultVote(
 
     res.status(200).json(processedStats);
   } catch (error) {
-    console.error("Error voting:", error);
+    console.error("Error fetch result vote:", error);
     res.status(500).json({ error: (error as Error).message });
   }
 }

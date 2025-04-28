@@ -258,9 +258,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const handleResultStats = async () => {
 
     try {
-      console.log("handleResultStats", review);
+      // console.log("handleResultStats", review);
       const signedMessage = await handleSignMessage();
-      console.log("signedMessage", signedMessage);
+      // console.log("signedMessage", signedMessage);
 
       if (!signedMessage) return;
 

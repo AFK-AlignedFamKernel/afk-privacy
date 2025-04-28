@@ -156,8 +156,10 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
             setSelectedCountries([]);
             setSelectedOrganizations([]);
         } catch (err) {
+            setIsPosting(false);
+
             console.error("Error creating poll:", err);
-            setError((err as Error).message);
+            setError((err as Error)?.message);
         } finally {
             setIsPosting(false);
         }
