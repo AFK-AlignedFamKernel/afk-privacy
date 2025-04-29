@@ -1,5 +1,5 @@
 [package]
-name = "email-domain"
+name = "email_domain"
 type = "bin"
 authors = ["saleel"]
 compiler_version = ">=1.0.0"

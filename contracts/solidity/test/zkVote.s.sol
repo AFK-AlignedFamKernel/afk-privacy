@@ -34,7 +34,7 @@ contract VotingTest is Test {
         voteContract.propose("First proposal", deadline);
 
         // string memory proofFilePath = "./circuits/proofs/foundry_voting.proof";
-        string memory proofFilePath = "../../../circuits/zk_vote/target/foundry_voting.proof";
+        string memory proofFilePath = "../../circuits/zk_vote/target/proof/proof";
         string memory proof = vm.readLine(proofFilePath);
 
         proofBytes = vm.parseBytes(proof);

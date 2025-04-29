@@ -29,6 +29,11 @@ circuits-build circuit:
 circuits-fmt circuit:
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo fmt)
 
+
+circuits-witness circuit:
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} &&  nargo execute witness && bb write_vk --scheme ultra_honk --oracle_hash keccak -b ./target/{{circuit}}.json -o ./target/)
+
+
 circuits-proof circuit:
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin && garaga calldata --system ultra_keccak_honk --vk target/vk.bin --proof target/proof.bin --format array > calldata.txt)
 
@@ -38,8 +43,18 @@ circuits-build-nargo circuit:
 
 
 circuits-proof-nargo circuit:
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} && mkdir -p target/proof && bb prove --scheme ultra_honk --bytecode_path target/{{circuit}}.json --witness_path target/witness.gz --output_path target/proof --oracle_hash keccak)
+    # (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_vk --scheme ultra_honk --oracle_hash keccak -b ./target/{{circuit}}.json -o ./target/ && mkdir -p target/proof && bb prove --scheme ultra_honk --bytecode_path target/{{circuit}}.json --witness_path target/witness.gz --output_path target/proof --oracle_hash keccak)
+    # (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_vk --scheme ultra_honk --oracle_hash keccak -b ./target/zk_vote.json -o ./target/ && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin )
     # (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin)
-    (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb prove_ultra_keccak_honk b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin && garaga calldata --system ultra_keccak_honk --vk target/vk.bin --proof target/proof.bin --format array > calldata.txt)
+
+
+circuits-verify circuit:
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb verify --scheme ultra_honk --proof_path target/proof/proof --vk_path target/vk --oracle_hash keccak)
+    # (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_vk --scheme ultra_honk --oracle_hash keccak -b ./target/zk_vote.json -o ./target/ && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin )
+    # (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin)
+
+
 
 
 circuits-generate-verifier circuit path: 
