@@ -4,6 +4,7 @@ import { SignedMessageWithProof, SignedMessage, Message, PollStats } from "../..
 import { signMessageSelfXyz } from "../../lib/zk-did";
 import { countryNames, domainNames } from "../../lib/constants";
 import Link from 'next/link';
+import COUNTRY_DATA from '@/assets/country';
 type ReviewMetadata = {
   rating?: number;
 };
@@ -49,6 +50,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [error, setError] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpandedDescription, setIsExpandedDescription] = useState(false);
   const [isShowStats, setIsShowStats] = useState(false);
 
   const [statsData, setStatsData] = useState<any | PollStats | undefined>(undefined);
@@ -209,12 +211,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           >
             {review.has_voted ? "Already Voted" : isVoting ? "Submitting..." : "Submit Vote"}
           </button>
-          <p
-            className="submit-vote-button"
-          >
-            <IonIcon name="close-outline" />
-            <Link href={`/poll/${review.id}`}>View poll</Link>
-          </p>
+
         </div>
 
       </div>
@@ -305,7 +302,12 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     const requirements = [];
 
     if (review?.selected_countries?.length) {
-      requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => countryNames[code] || code).join(", ") : 'All'}`);
+      console.log("review.selected_countries", review.selected_countries);
+      const countryNamesList = review.selected_countries
+
+      const countryFlags = review.selected_countries.map(code => COUNTRY_DATA[code?.toUpperCase()]?.flag ?? "");
+      console.log("countryFlags", countryFlags);
+      requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => `${COUNTRY_DATA[code?.toUpperCase()]?.name || code} ${COUNTRY_DATA[code?.toUpperCase()]?.flag ?? ""}`).join(", ") : 'All'}`);
     }
     // if (review.is_specific_countries) {
     //   requirements.push(`Countries: ${review.countries_accepted?.length ? review.countries_accepted.map(code => countryNames[code] || code).join(", ") : 'All'}`);
@@ -459,7 +461,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         <div className="poll-header">
           <div className="poll-title-section">
             <h3 className="poll-title">{review.title}</h3>
-            <h4 className="poll-subtitle">{review.description}</h4>
+            {/* <h4 className="poll-subtitle">{review.description}</h4> */}
             <div className="poll-meta poll-author">
               <IonIcon name="person-outline" />
               <span>{getAnonymousName()}</span>
@@ -544,7 +546,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           }}
         >
           <IonIcon name="chevron-down-outline" />
-          <span>{isExpanded ? 'Show Less' : 'Show More'}</span>
+          <span>{isExpanded ? 'Hide results' : 'Show results'}</span>
         </button>
       </div>
 
@@ -576,14 +578,56 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       <div className="poll-content">
         {review.description && (
-          <p className="poll-description">{review.description}</p>
+          <>
+            <button
+              className={`expand-button ${isExpandedDescription ? 'expanded' : ''}`}
+              onClick={() => {
+                setIsExpandedDescription(!isExpandedDescription)
+              }}
+            >
+              <p className="poll-description">
+                {review.description.length > 30 && !isExpandedDescription
+                  ? `${review.description.slice(0, 30)}...`
+                  : review.description
+                }
+              </p>
+
+              {review?.description?.length > 30 && !isExpandedDescription && (
+                <IonIcon name="chevron-down-outline" />
+              )}
+            </button>
+          </>
+
         )}
         {renderPollOptions()}
         {error && <div className="error-message">{error}</div>}
 
       </div>
 
+      <div>
 
+        <button
+          className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+          onClick={() => {
+            setIsExpanded(!isExpanded)
+            handleResultStats();
+            // setIsShowStats(false)
+          }}
+        >
+          <IonIcon name="chevron-down-outline" />
+          <span>{isExpanded ? 'Hide results' : 'Show results'}</span>
+        </button>
+      </div>
+
+
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "2  0px" }}>
+        <p
+          className="submit-vote-button"
+        >
+          <IonIcon name="open-outline" />
+          <Link href={`/poll/${review.id}`}>View poll</Link>
+        </p>
+      </div>
 
     </div >
   );

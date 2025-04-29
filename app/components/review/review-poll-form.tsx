@@ -5,8 +5,8 @@ import { LocalStorageKeys, PassportRegistration, SignedMessage } from "../../lib
 import Dialog from "../dialog";
 import SelfXyzRegistration from "../zkdid/self-xyz";
 import { signMessageSelfXyz } from '@/lib/zk-did';
-import { countryNames, domainNames } from "../../lib/constants";
-
+import { domainNames } from "../../lib/constants";
+import COUNTRY_DATA from '@/assets/country';
 type PollFormProps = {
     onSubmit: (poll: any) => void;
     connectedKyc?: PassportRegistration;
@@ -90,9 +90,9 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
 
             const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessageSelfXyz(message);
 
-            if(!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
+            if (!signature || !ephemeralPubkey || !ephemeralPubkeyExpiry) {
                 throw new Error("Failed to sign message");
-            }   
+            }
 
             const signedMessage: SignedMessage = {
                 ...message,
@@ -337,15 +337,15 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                     <div className="form-group">
                         <label>Select Countries</label>
                         <div className="country-selector">
-                            {Object.entries(countryNames).map(([code, name]) => (
-                                <div key={code} className="country-option">
+                            {Object.entries(COUNTRY_DATA).map((country) => (
+                                <div key={country?.[0]} className="country-option">
                                     <label>
                                         <input
                                             type="checkbox"
-                                            checked={selectedCountries.includes(code)}
-                                            onChange={() => handleCountrySelect(code)}
+                                            checked={selectedCountries.includes(country?.[1]?.isoCode)}
+                                            onChange={() => handleCountrySelect(country?.[1]?.isoCode)}
                                         />
-                                        {name}
+                                        {country?.[1]?.name}
                                     </label>
                                 </div>
                             ))}
@@ -355,7 +355,21 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
 
                 {isOnlyOrganizations && (
                     <div className="form-group">
-                        <label>Select Organization Types</label>
+                        {/* <label>Select Organization Types</label>
+                        <div className="organization-selector">
+                            {Object.entries(domainNames).map(([domain, description]) => (
+                                <div key={domain} className="organization-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrganizations.includes(domain)}
+                                            onChange={() => handleOrganizationSelect(domain)}
+                                        />
+                                        {description} (.{domain})
+                                    </label>
+                                </div>
+                            ))}
+                        </div> */}
                         <div className="organization-selector">
                             {Object.entries(domainNames).map(([domain, description]) => (
                                 <div key={domain} className="organization-option">
