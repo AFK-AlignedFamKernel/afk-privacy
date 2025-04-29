@@ -3,8 +3,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
-// import {UltraVerifier} from "../../../circuits/zk_vote/target/Verifier.sol";
-import {HonkVerifier} from "./verifiers/VoteVerifier.sol";
+import "./verifiers/Verifier.sol";
 
 contract zkVote {
     HonkVerifier verifier;

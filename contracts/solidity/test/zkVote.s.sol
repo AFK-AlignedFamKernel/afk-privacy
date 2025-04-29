@@ -3,9 +3,7 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/zkVote.sol";
-// import "../circuits/contract/foundry_voting/plonk_vk.sol";
-// import "../../../circuits/zk_vote/target/Verifier.sol";
-import {HonkVerifier} from "../src/verifiers/VoteVerifier.sol";
+import "../src/verifiers/Verifier.sol";
 
 contract VotingTest is Test {
     zkVote public voteContract;
@@ -19,7 +17,6 @@ contract VotingTest is Test {
 
     function readInputs() internal view returns (string memory) {
         string memory inputDir = string.concat(vm.projectRoot(), "/data/input");
-
         return vm.readFile(string.concat(inputDir, ".json"));
     }
 
@@ -33,11 +30,10 @@ contract VotingTest is Test {
         voteContract = new zkVote(merkleRoot, address(verifier));
         voteContract.propose("First proposal", deadline);
 
-        // string memory proofFilePath = "./circuits/proofs/foundry_voting.proof";
-        string memory proofFilePath = "../../circuits/zk_vote/target/proof/proof";
-        string memory proof = vm.readLine(proofFilePath);
-
-        proofBytes = vm.parseBytes(proof);
+        string memory proofFilePath = "../../circuits/zk_vote/target/proof/calldata.txt";
+        // string memory proofFilePath = "../../circuits/zk_vote/target/proof/proof";
+        string memory proofData = vm.readLine(proofFilePath);
+        proofBytes = vm.parseBytes(proofData);
     }
 
     function test_validVote() public {
