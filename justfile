@@ -32,11 +32,22 @@ circuits-fmt circuit:
 circuits-proof circuit:
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin && garaga calldata --system ultra_keccak_honk --vk target/vk.bin --proof target/proof.bin --format array > calldata.txt)
 
+
+circuits-build-nargo circuit:
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb write_vk --scheme ultra_honk -b --oracle_hash keccak ./target/{{circuit}}.json -o ./target/)
+
+
+circuits-proof-nargo circuit:
+    # (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo execute witness && bb prove_ultra_keccak_honk -b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin)
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb prove_ultra_keccak_honk b target/{{circuit}}.json -w target/witness.gz -o target/proof.bin && garaga calldata --system ultra_keccak_honk --vk target/vk.bin --proof target/proof.bin --format array > calldata.txt)
+
+
 circuits-generate-verifier circuit path: 
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && nargo build)
     # (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_vk -b ./target/{{path}}.json -o ./target/ && cp ./target/vk ./target/vk.bin)
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_vk --scheme ultra_honk --oracle_hash keccak  -b ./target/{{path}}.json -o ./target/ && cp ./target/vk ./target/vk.bin)
     (cd {{CIRCUIT_ROOT}}/{{circuit}} && garaga gen --system ultra_keccak_honk --vk target/vk --project-name contracts)
+    (cd {{CIRCUIT_ROOT}}/{{circuit}} && bb write_solidity_verifier -k ./target/vk -o ./target/Verifier.sol)
 
 circuits-declare-verifier circuit:
     (cd {{CIRCUIT_ROOT}}/{{circuit}}/contracts && sncast --account deployer declare --url {{RPC_URL}} --contract-name UltraKeccakHonkVerifier --fee-token ETH)
