@@ -256,7 +256,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
             <span className="like-count">{likeCount}</span>
           </button>
         </div>
-        <div className="message-card-actions">
+        <div className="like-button-container">
           <button 
             onClick={handleShowComments}
             className="message-card-action-button"
