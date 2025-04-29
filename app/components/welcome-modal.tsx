@@ -72,7 +72,18 @@ export const WelcomeModal = () => {
         </div>
 
         <div className="modal-footer">
-          <p className="button" onClick={handleClose}>Ready to start? Click me</p>
+
+
+          <div className="button-container"
+          // style={{ display: 'flex', flexDirection: 'row', gap: '10px', alignItems: "baseline", alignSelf: "baseline", justifyContent: 'baseline' }}
+          >
+            <p className="button" onClick={handleClose}>Ready to start? Click me</p>
+
+            <button className="button" onClick={handleClose}>
+              <IonIcon name="open" />
+              LFG
+            </button>
+          </div>
         </div>
 
       </div>
