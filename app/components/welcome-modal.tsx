@@ -15,35 +15,66 @@ export const WelcomeModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className={'modal-overlay'}>
-      <div className={'modal'}>
-        <button className={'modal-close-button'} onClick={handleClose}>
+    <div className="modal-overlay">
+      <div className="modal">
+        <button className="modal-close-button" onClick={handleClose}>
           <IonIcon name="close" />
         </button>
-        <h2 className={'modal-title'}>Welcome to AFK!</h2>
-        <div className={'modal-content'}>
-        <p>
-            The messages you post cannot be linked to you (except for some edge cases).
-            Read more about how it works {' '}
-            <a href="https://saleel.xyz/blog/stealthnote/" target="_blank" rel="noopener noreferrer">here</a>.
-          </p>
+        <h2 className="modal-title">Welcome to AFK!</h2>
+        <div className="modal-content">
           <p>
-            AFK is a platform to anonymously post messages while proving you belong to an organization -
-            without revealing who you are.
+            AFK is a platform that allows you to post messages anonymously while proving your identity attributes - all without revealing who you are.
           </p>
+
           <p>
-            We use {' '}
+            Here's what makes AFK unique:
+          </p>
+
+          <ul>
+            <li>
+              <strong>Organization Verification:</strong> Prove you belong to an organization without revealing your identity
+            </li>
+            <li>
+              <strong>Country Verification:</strong> Show you're from a specific country while maintaining anonymity
+            </li>
+            <li>
+              <strong>Demographic Verification:</strong> Verify your age/gender without exposing personal details
+            </li>
+            <li>
+              <strong>Status Verification:</strong> Prove you're a student, government employee, or organization member anonymously
+            </li>
+          </ul>
+
+          <p>
+            We use advanced{' '}
             <a
               href="https://en.wikipedia.org/wiki/Zero-knowledge_proof"
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               Zero Knowledge Proofs
             </a>
-            , which allows you to prove you have a valid Google Workspace account from your 
-            organization or a zkIdentity, while keeping your data (email or identity) private.
+            {' '}technology to ensure your privacy. This means you can verify your credentials while keeping your actual identity completely private.
           </p>
- 
+
+          <p>
+            Your messages are secure and cannot be linked back to you (except in rare edge cases). Learn more about how it works{' '}
+            <a href="https://saleel.xyz/blog/stealthnote/" target="_blank" rel="noopener noreferrer">
+              here
+            </a>.
+          </p>
+          <p>Start your journey to anonymity</p>
+
+          <button className="close-button" onClick={handleClose}>
+            <IonIcon name="open" />
+            LFG
+          </button>
         </div>
+
+        <div className="modal-footer">
+          <p className="button" onClick={handleClose}>Ready to start? Click me</p>
+        </div>
+
       </div>
     </div>
   );
