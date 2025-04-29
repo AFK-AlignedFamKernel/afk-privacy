@@ -214,26 +214,38 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 🪪 zkDID
               </Link>
 
+              <button
+                onClick={() => setIsOpenInternal(!isOpenInternal)}
+                className="sidebar-nav-item"
+              >
+                {isOpenInternal ? "🔒 Close Internal fam" : "🔑 Internal communities"}
+              </button>
 
-              {slug && (
-                <Link
-                  onClick={() => setIsSidebarOpen(false)}
-                  href={`/${slug}/${currentGroupId}/internal`}
-                  className="sidebar-nav-item"
-                >
-                  {currentGroupId} Internal
-                </Link>
-              )}
+              {isOpenInternal &&
 
-              {slug && currentCountryId && (
-                <Link
-                  onClick={() => setIsSidebarOpen(false)}
-                  href={`/country/${currentCountryId}/internal`}
-                  className="sidebar-nav-item"
-                >
-                  {currentCountryId} Country {COUNTRY_DATA[currentCountryId].name} {COUNTRY_DATA[currentCountryId].flag}
-                </Link>
-              )}
+                <>
+                  {slug && (
+                    <Link
+                      onClick={() => setIsSidebarOpen(false)}
+                      href={`/${slug}/${currentGroupId}/internal`}
+                      className="sidebar-nav-item"
+                    >
+                      {currentGroupId} Internal
+                    </Link>
+                  )}
+
+                  {slug && currentCountryId && (
+                    <Link
+                      onClick={() => setIsSidebarOpen(false)}
+                      href={`/country/${currentCountryId}/internal`}
+                      className="sidebar-nav-item"
+                    >
+                      {currentCountryId} Country {COUNTRY_DATA[currentCountryId].name} {COUNTRY_DATA[currentCountryId].flag}
+                    </Link>
+                  )}
+                </>}
+
+
             </div>
 
 

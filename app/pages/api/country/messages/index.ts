@@ -218,13 +218,16 @@ export async function fetchMessagesCountry(
 
     const pubkey = authHeader.split(" ")[1];
     const { data: membershipData, error: membershipError } = await supabase
-      .from("memberships")
+      // .from("memberships")
+      .from("passport_registrations")
       .select("*")
       .eq("pubkey", pubkey)
-      .eq("group_id", groupId)
+      .eq("nationality", groupId)
       .single();
 
-    if (membershipError || !membershipData) {
+    console.log("membershipData", membershipData);
+
+    if (membershipError || !membershipData?.pubkey) {
       res.status(401).json({ error: "Invalid public key for this group" });
       res.end();
       return;
