@@ -1,40 +1,11 @@
-import { useState } from "react";
-import ZkPassportRegistration from "@/components/zkdid/zk-passport";
-import SelfXyzRegistration from "@/components/zkdid/self-xyz";
-
-type Provider = 'self' | 'zkpassport';
-
-function RegistrationForm() {
-  const [selectedProvider, setSelectedProvider] = useState<Provider>('self');
-
+import ZkIdentityComponent from "@/components/zkdid/zk-identity";
+function ZkIdentityPage() {
+  
   return (
-    <div className="identity-verification">
-      <h2>Identity Verification</h2>
-      
-      <div className="provider-tabs">
-        <button
-          className={`tab-button ${selectedProvider === 'self' ? 'active' : ''}`}
-          onClick={() => setSelectedProvider('self')}
-        >
-          SelfXYZ
-        </button>
-        <button
-          className={`tab-button ${selectedProvider === 'zkpassport' ? 'active' : ''}`}
-          onClick={() => setSelectedProvider('zkpassport')}
-        >
-          ZKPassport
-        </button>
-      </div>
-
-      <div className="verification-container">
-        {selectedProvider === 'self' ? (
-          <SelfXyzRegistration />
-        ) : (
-          <ZkPassportRegistration />
-        )}
-      </div>
+    <div>
+     <ZkIdentityComponent />
     </div>
   );
 }
 
-export default RegistrationForm;
+export default ZkIdentityPage;
