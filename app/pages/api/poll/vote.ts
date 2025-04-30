@@ -35,6 +35,14 @@ export async function voteToReview(
 
     console.log("voteToReview body", body);
 
+    if (!pollId) {
+      throw new Error("Poll ID is required");
+    }
+
+    if (!option) {
+      throw new Error("Option is required");
+    }
+
     const signedMessageFormatted = {
       ...signedMessage,
       ephemeralPubkey: BigInt(signedMessage.ephemeralPubkey),
@@ -176,17 +184,18 @@ export async function voteToReview(
     // Get the option ID
     const { data: pollOption, error: optionError } = await supabase
       .from("poll_options")
-      .select("id, option_text, poll_id, poll_option_id")
+      .select("id, option_text, poll_id, option_id")
       .eq("poll_id", pollId)
       .eq("option_text", option)
       .single();
-    console.log("voteToReview pollOption", pollOption);
 
+
+    console.log("pollOption", pollOption);
+    console.log("optionError", optionError);
     if (optionError || !pollOption) {
       // throw new Error("Invalid poll option");
     }
 
-    console.log("pollOption", pollOption);
     // Create the vote
     const { error: insertError } = await supabase.from("poll_votes").insert([
       {
@@ -219,108 +228,4 @@ export async function voteToReview(
     console.error("Error voting:", error);
     res.status(500).json({ error: (error as Error).message });
   }
-}
-
-export async function fetchMessagesCountry(
-  request: NextApiRequest,
-  res: NextApiResponse
-) {
-  const groupId = request.query?.groupId as string;
-  const isInternal = request.query?.isInternal === "true";
-  const limit = parseInt(request.query?.limit as string) || 50;
-  const afterTimestamp = request.query?.afterTimestamp as string;
-  const beforeTimestamp = request.query?.beforeTimestamp as string;
-  const parentId = request.query?.parentId as string;
-
-  let query = supabase
-    .from("country_messages")
-    .select(
-      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, nationality, gender, date_of_birth"
-    )
-    .order("timestamp", { ascending: false })
-    .limit(limit);
-
-  query = query.eq("internal", !!isInternal);
-
-  if (groupId) {
-    // query = query.eq("group_id", groupId);
-    query = query.eq("nationality", groupId);
-  }
-
-  if (parentId) {
-    query = query.eq("parent_id", parentId);
-  } else {
-    query = query.is("parent_id", null);
-  }
-
-  if (afterTimestamp) {
-    query = query.gt("timestamp", new Date(Number(afterTimestamp)).toISOString());
-  }
-
-  if (beforeTimestamp) {
-    query = query.lt("timestamp", new Date(Number(beforeTimestamp)).toISOString());
-  }
-
-  // Internal messages require a valid pubkey from the same group (as Authorization header)
-  if (isInternal) {
-    if (!groupId) {
-      res
-        .status(400)
-        .json({ error: "Group ID is required for internal messages" });
-      res.end();
-      return;
-    }
-
-    const authHeader = request.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res
-        .status(401)
-        .json({ error: "Authorization required for internal messages" });
-      res.end();
-      return;
-    }
-
-    const pubkey = authHeader.split(" ")[1];
-    const { data: membershipData, error: membershipError } = await supabase
-      .from("memberships")
-      .select("*")
-      .eq("pubkey", pubkey)
-      .eq("group_id", groupId)
-      .single();
-
-    if (membershipError || !membershipData) {
-      res.status(401).json({ error: "Invalid public key for this group" });
-      res.end();
-      return;
-    }
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-    res.end();
-    return;
-  }
-
-  const messages: Partial<SignedMessage>[] = data.map((message) => ({
-    id: message.id,
-    anonGroupId: message.group_id,
-    anonGroupProvider: message.group_provider,
-    text: message.text,
-    timestamp: message.timestamp,
-    signature: message.signature,
-    ephemeralPubkey: message.pubkey,
-    internal: message.internal,
-    likes: message.likes,
-    replyCount: message.reply_count,
-    parentId: message.parent_id,
-    nationality: message.nationality,
-    gender: message.gender,
-    dateOfBirth: message.date_of_birth
-  }));
-
-  res.json(messages);
-  res.end();
 }
