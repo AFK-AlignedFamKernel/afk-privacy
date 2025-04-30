@@ -4,14 +4,12 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys, Message, SignedMessageWithProof, PassportRegistration } from "../../lib/types";
 import { getEphemeralPubkey } from "../../lib/ephemeral-key";
-import { generateKeyPairAndRegister, postMessage } from "../../lib/core";
 import { generateNameFromPubkey } from "../../lib/utils";
 import { Providers } from "../../lib/providers";
-import SignWithGoogleButton from "../siwg";
 import { postMessageCountry } from "@/lib/country";
 import Dialog from "../dialog";
-import SelfXyzRegistration from "../zkdid/self-xyz";
 import COUNTRY_DATA from "@/assets/country";
+import ZkIdentityComponent from "../zkdid/zk-identity";
 // import SignInWithMicrosoftButton from "./siwm";
 
 type MessageFormProps = {
@@ -223,7 +221,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
                 <h2>Sign in with passport</h2>
                 <button onClick={handleOpenDialog}>Close</button>
                 <Dialog title="Sign in with passport" onClose={handleOpenDialog}>
-                  <SelfXyzRegistration />
+                  <ZkIdentityComponent />
                 </Dialog>
               </div>
             )}</>
