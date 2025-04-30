@@ -257,7 +257,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
     if (review.is_show_results_publicly) {
-      console.log("review.is_show_results_publicly", review.is_show_results_publicly);
       handleResultStats();
       setIsShowStats(true);
     }
@@ -302,11 +301,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     const requirements = [];
 
     if (review?.selected_countries?.length) {
-      console.log("review.selected_countries", review.selected_countries);
-      const countryNamesList = review.selected_countries
-
+      // console.log("review.selected_countries", review.selected_countries);
       const countryFlags = review.selected_countries.map(code => COUNTRY_DATA[code?.toUpperCase()]?.flag ?? "");
-      console.log("countryFlags", countryFlags);
+      // console.log("countryFlags", countryFlags);
       requirements.push(`Countries: ${review.selected_countries?.length ? review.selected_countries.map(code => `${COUNTRY_DATA[code?.toUpperCase()]?.name || code} ${COUNTRY_DATA[code?.toUpperCase()]?.flag ?? ""}`).join(", ") : 'All'}`);
     }
     // if (review.is_specific_countries) {
@@ -378,15 +375,13 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const renderPollStats = () => {
 
     if (!review.is_show_results_publicly) return null;
-    console.log("renderPollStats", review);
-    console.log("statsData", statsData);
+
     const totalVotes = statsData?.total_votes || 0;
     const optionVotes = statsData?.options || [];
-
-    console.log("optionVotes", optionVotes);
-    // const totalVotes = review.total_votes || 0;
-    // const optionVotes = review.option_votes || {};
-
+    // console.log("optionVotes", optionVotes);
+    // console.log("renderPollStats", review);
+    // console.log("statsData", statsData);
+    
     return (
       <div className="poll-stats">
         <div className="poll-stats-header">

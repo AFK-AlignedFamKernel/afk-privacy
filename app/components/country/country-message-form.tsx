@@ -12,6 +12,7 @@ import { postMessageCountry } from "@/lib/country";
 import Dialog from "../dialog";
 import SelfXyzRegistration from "../zkdid/self-xyz";
 import COUNTRY_DATA from "@/assets/country";
+import ZkIdentityComponent from "../zkdid/zk-identity";
 // import SignInWithMicrosoftButton from "./siwm";
 
 type MessageFormProps = {
@@ -223,7 +224,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
                 <h2>Sign in with passport</h2>
                 <button onClick={handleOpenDialog}>Close</button>
                 <Dialog title="Sign in with passport" onClose={handleOpenDialog}>
-                  <SelfXyzRegistration />
+                  <ZkIdentityComponent />
                 </Dialog>
               </div>
             )}</>
