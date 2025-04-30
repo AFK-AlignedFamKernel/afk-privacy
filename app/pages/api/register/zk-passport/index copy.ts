@@ -1,13 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
+// import { ZKPassport } from "@zkpassport/sdk";
+// import { ZKPassport } from '@zkpassport/sdk/dist/esm/index.js';
 import { verifyMessageSignature } from "@/lib/ephemeral-key";
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
-
-// Use require for utils to ensure CJS compatibility
-// import { ZKPassport } from '@zkpassport/sdk';
-// import { ZKPassport } from '@zkpassport/sdk';
+import { createZKPassportInstance } from "@/lib/server/zkpassport";
+// Remove dynamic import and use direct import
+// const { ZKPassport } = require('@zkpassport/sdk');
+// import { ZKPassport } from '@zkpassport/sdk/dist/esm/index.js';
+// import { ZKPassport } from '@zkpassport/sdk/dist/esm/index.js';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -23,8 +23,8 @@ export default async function handler(
     res: NextApiResponse
 ) {
     if (req.method === "GET") {
-        testZKPassport(req, res)
         // fetchMessages(req, res);
+        loadZKPassport(req, res);
     } else if (req.method === "POST") {
         registerIdentity(req, res);
     } else {
@@ -33,19 +33,42 @@ export default async function handler(
     }
 }
 
-async function testZKPassport(req: NextApiRequest, res: NextApiResponse) {
+async function loadZKPassport(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { ZKPassport } = await import('@zkpassport/sdk/dist/esm/index.js');
+        const domainUrl = process.env.ZKPASSPORT_DOMAIN_URL || "http://localhost:3000";
 
-        const zkPassport = new ZKPassport("https://zkpassport.dev");
-        const { verified, queryResultErrors, uniqueIdentifier } = await zkPassport.verify({
+        console.log("domainUrl:", domainUrl);
+        // Dynamic import of ZKPassport
+        const { ZKPassport } = await import('@zkpassport/sdk/dist/esm/index.js').catch(e => {
+            console.error('Failed to import ZKPassport:', e);
+            return { ZKPassport: null };
+        });
+
+        console.log("ZKPassport", ZKPassport);
+        if (!ZKPassport) {
+            throw new Error("Failed to import ZKPassport");
+        }
+        console.log("load ZKPassport", ZKPassport);
+        const zkPassport = new ZKPassport(domainUrl);
+        // const zkPassport = createZKPassportInstance(domainUrl);
+
+        // Verify the proofs
+        console.log("verify the proofs ZKPassport");
+
+        const verification = {
             proofs: [],
             queryResult: {},
+        }
+        const { verified, queryResultErrors, uniqueIdentifier } = await zkPassport.verify({
+            proofs: verification.proofs,
+            queryResult: verification.queryResult,
         });
+
+        console.log("verified", verified);
         return res.status(200).json({
             success: true,
-            message: "ZKPassport verified",
-            data: { verified, queryResultErrors, uniqueIdentifier },
+            message: "ZKPassport loaded successfully",
+            data: zkPassport,
         });
     } catch (error) {
         console.error(error);
@@ -54,15 +77,15 @@ async function testZKPassport(req: NextApiRequest, res: NextApiResponse) {
             error: "Internal server error",
         });
     }
-
 }
-async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
-    try {
-        const { email, password, proofs, queryResult, verification, signedMessage, } = req.body;
 
-        const { data, error } = await supabase
-            .from("memberships")
-            .insert({ email, password, proofs, queryResult });
+async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
+
+    try {
+
+        console.log("registerIdentity", req.body);
+        const { proofs, queryResult, verification, signedMessage } = req.body;
+
 
 
         if (!verification || !verification.proofs || !verification.queryResult) {
@@ -71,7 +94,6 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
                 error: "Missing ZKPassport verification data",
             });
         }
-
 
         if (!signedMessage) {
             return res.status(400).json({
@@ -93,41 +115,39 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
             timestamp: new Date(signedMessage?.timestamp),
         }
 
+
         const isValid = await verifyMessageSignature(signedMessageFormated);
         console.log("isValid:", isValid);
         if (!isValid) {
             throw new Error("Message signature check failed");
         }
 
-        const domainUrl = process.env.ZKPASSPORT_DOMAIN_URL || "localhost";
-        // const zkPassport = new ZKPassport(domainUrl);
-        const { ZKPassport } = await import('@zkpassport/sdk');
+        const domainUrl = process.env.ZKPASSPORT_DOMAIN_URL || "http://localhost:3000";
 
+        console.log("domainUrl:", domainUrl);
+
+        // Dynamic import of ZKPassport
+        const { ZKPassport } = await import('@zkpassport/sdk/dist/esm/index.js').catch(e => {
+            console.error('Failed to import ZKPassport:', e);
+            return { ZKPassport: null };
+        });
+
+        console.log("ZKPassport", ZKPassport);
+        if (!ZKPassport) {
+            throw new Error("Failed to import ZKPassport");
+        }
+        console.log("load ZKPassport", ZKPassport);
         const zkPassport = new ZKPassport(domainUrl);
+        // const zkPassport = createZKPassportInstance(domainUrl);
+
         // Verify the proofs
+        console.log("verify the proofs ZKPassport");
+        // console.log("verification", verification);
+
         const { verified, queryResultErrors, uniqueIdentifier } = await zkPassport.verify({
             proofs: verification.proofs,
             queryResult: verification.queryResult,
         });
-
-        if (!verified) {
-            console.error("Verification failed:", queryResultErrors);
-            return res.status(400).json({
-                success: false,
-                error: "Identity verification failed",
-            });
-        }
-
-        if (!uniqueIdentifier) {
-            return res.status(400).json({
-                success: false,
-                error: "Could not extract the unique identifier",
-            });
-        }
-
-        // Extract any disclosed information
-        console.log("query result", verification.queryResult);
-
 
         console.log("verified", verified);
 
@@ -222,6 +242,7 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
             error: "Internal server error",
         });
     }
+
 }
 
 export async function createUser({ email, password, id, nationality,

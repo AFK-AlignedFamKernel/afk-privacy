@@ -41,6 +41,10 @@ function ZkPassportRegistration() {
     LocalStorageKeys.CurrentCountryId,
     null
   );
+  const [currentGender, setCurrentGender] = useLocalStorage<string | null>(
+    LocalStorageKeys.CurrentGender,
+    null
+  );
   useEffect(() => {
     const initializeZKPassport = async () => {
       const { ZKPassport } = await import('@zkpassport/sdk');
@@ -183,9 +187,15 @@ function ZkPassportRegistration() {
           if (data.success) {
             setVerificationStatus("success");
 
-            if (data?.data && data?.data?.nationality) {
-              setCurrentCountryId(data?.data?.nationality);
+            if (data?.data ) {
+              if(data?.data?.nationality) {
+                setCurrentCountryId(data?.data?.nationality);
+              }
+              if(data?.data?.gender) {
+                setCurrentGender(data?.data?.gender);
+              }
             }
+
             // Here you can redirect to the user's profile or home page
           } else {
             setError(data.error || "Registration failed");

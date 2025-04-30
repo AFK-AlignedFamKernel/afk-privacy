@@ -8,11 +8,10 @@ dotenv.config();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@zkpassport/sdk'],
+  transpilePackages: ['@zkpassport/sdk', '@zkpassport/utils', '@aztec/bb.js'],
   experimental: {
-    esmExternals: 'loose',
-    // esmExternals: true,
-    // serverComponentsExternalPackages: ['@zkpassport/sdk', '@zkpassport/utils'],
+    esmExternals: 'loose',  // Use 'loose' to better handle mixed modules
+    serverComponentsExternalPackages: ['@zkpassport/utils'], // Force Node.js handling for utils
     outputFileTracingIncludes: {
       '/api/**/*': [
         './node_modules/@zkpassport/sdk/**/*',
@@ -47,37 +46,17 @@ const nextConfig = {
       asyncWebAssembly: true,
       syncWebAssembly: true,
       layers: true,
+      topLevelAwait: true,
     };
 
-    // Force CJS for @zkpassport/utils
-    config.module.rules.push({
-      test: /node_modules\/@zkpassport\/utils\/.*\.js$/,
-      // type: 'esm',
-    });
-
-
-    // Handle WASM files
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: 'asset/resource'
-    });
-
-    // Handle worker files
-    config.module.rules.push({
-      test: /\.worker\.js$/,
-      type: 'asset/resource',
-      generator: {
-        filename: 'static/workers/[name][ext]'
-      }
-    });
-
     if (isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        worker_threads: false,
-        fs: false,
-        net: false,
-        tls: false,
+      // Force Node.js handling for server-side
+      config.resolve.byDependency = {
+        ...config.resolve.byDependency,
+        'commonjs': {
+          ...config.resolve.byDependency?.commonjs,
+          fullySpecified: false
+        }
       };
     }
 
@@ -104,6 +83,46 @@ const nextConfig = {
       },
     ];
   },
+  // async headers() {
+  //   return [
+  //     {
+  //       // Exclude all oauth-callback paths
+  //       source: '/((?!oauth-callback).*)',
+  //       headers: [
+  //         {
+  //           key: 'Cross-Origin-Embedder-Policy',
+  //           value: 'require-corp',
+  //         },
+  //         {
+  //           key: 'Cross-Origin-Opener-Policy',
+  //           value: 'same-origin',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       // Special case for iOS devices - disable COOP/COEP
+  //       source: '/((?!oauth-callback).*)',
+  //       headers: [
+  //         {
+  //           key: 'Cross-Origin-Embedder-Policy',
+  //           value: 'unsafe-none',
+  //         },
+  //         {
+  //           key: 'Cross-Origin-Opener-Policy',
+  //           value: 'unsafe-none',
+  //         },
+  //       ],
+  //       // Only apply these headers for iOS devices
+  //       has: [
+  //         {
+  //           type: 'header',
+  //           key: 'user-agent',
+  //           value: '(.*iPhone|iPad|iPod.*)',
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
 };
 
 export default nextConfig;
