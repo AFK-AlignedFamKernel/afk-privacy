@@ -18,11 +18,11 @@ export default function GroupPage() {
   const groupId = useRouter().query.groupId as string;
   const slug = useRouter().query.slug as string;
 
-  if (!groupId || !slug) {
+  if (!groupId) {
     return null;
   }
 
-  const provider = ProviderSlugKeyMap[slug];
+  const provider = ProviderSlugKeyMap[slug ?? "domain"];
   const anonGroup = provider.getAnonGroup(groupId);
 
   return (
