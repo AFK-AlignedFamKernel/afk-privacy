@@ -27,7 +27,7 @@ export const WelcomeModal = () => {
           </p>
 
           <p>
-            Here's what makes AFK unique:
+            Here&apos;s what makes AFK unique:
           </p>
 
           <ul>
@@ -35,13 +35,13 @@ export const WelcomeModal = () => {
               <strong>Organization Verification:</strong> Prove you belong to an organization without revealing your identity
             </li>
             <li>
-              <strong>Country Verification:</strong> Show you're from a specific country while maintaining anonymity
+              <strong>Country Verification:</strong> Show you&apos;re from a specific country while maintaining anonymity
             </li>
             <li>
               <strong>Demographic Verification:</strong> Verify your age/gender without exposing personal details
             </li>
             <li>
-              <strong>Status Verification:</strong> Prove you're a student, government employee, or organization member anonymously
+              <strong>Status Verification:</strong> Prove you&apos;re a student, government employee, or organization member anonymously
             </li>
           </ul>
 

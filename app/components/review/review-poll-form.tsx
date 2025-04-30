@@ -7,6 +7,8 @@ import SelfXyzRegistration from "../zkdid/self-xyz";
 import { signMessageSelfXyz } from '@/lib/zk-did';
 import { domainNames } from "../../lib/constants";
 import COUNTRY_DATA from '@/assets/country';
+import { useRouter } from 'next/router';
+
 type PollFormProps = {
     onSubmit: (poll: any) => void;
     connectedKyc?: PassportRegistration;
@@ -30,7 +32,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
     const [isSpecificCountries, setIsSpecificCountries] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const isRegistered = !!connectedKyc;
-
+    const router = useRouter();
     const [isPosting, setIsPosting] = useState(false);
     const [error, setError] = useState("");
 
@@ -138,6 +140,11 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
             }
 
             const createdPoll = await response.json();
+
+
+            console.log("createdPoll", createdPoll);
+
+            router.push(`/poll/${createdPoll.id}`);
             // onSubmit(createdPoll);
 
             // Reset form

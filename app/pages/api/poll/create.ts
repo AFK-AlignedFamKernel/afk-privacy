@@ -185,6 +185,8 @@ export async function createReview(
     const { data: createdPollOptions, error: createPollOptionsError } = await supabase
       .from("poll_options")
       .insert(pollOptionsToInsert);
+      
+    console.log("createPollOptionsError", createPollOptionsError);
     console.log("createdPollOptions", createdPollOptions);
 
 
