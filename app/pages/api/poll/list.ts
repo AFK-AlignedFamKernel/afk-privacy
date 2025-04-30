@@ -66,6 +66,7 @@ export async function fetchPolls(
       selected_organizations
     `)
     .order("created_at", { ascending: false })
+    .eq("internal", false)
     .limit(limit);
 
   // query = query.eq("internal", !!isInternal);
