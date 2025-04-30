@@ -126,6 +126,7 @@ export const LocalStorageKeys = {
   SelfKeyPassportRegistration: "selfKeyPassportRegistration",
   CurrentKYCProvider: "currentKYCProvider",
   PassportVerified: "passportVerified",
+  CurrentGender: "currentGender",
 
 };
 

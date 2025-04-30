@@ -380,8 +380,12 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     if (!review.is_show_results_publicly) return null;
 
     const totalVotes = statsData?.total_votes || 0;
-    const optionVotes = statsData?.option_votes || {};
+    // const optionVotes = statsData?.option_votes || {};
 
+    const optionVotes = statsData?.options || [];
+     console.log("optionVotes", optionVotes);
+    // const totalVotes = review.total_votes || 0;	    // console.log("renderPollStats", review);
+    // const optionVotes = review.option_votes || {};	    // console.log("statsData", statsData);
     // const totalVotes = review.total_votes || 0;
     // const optionVotes = review.option_votes || {};
 
@@ -400,7 +404,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
         <div className="poll-stats-options">
           {review.answer_options?.map((option, index) => {
-            const votes = optionVotes[option] || 0;
+            const votes = optionVotes[index]?.vote_count || 0;
             const percentage = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
 
             return (

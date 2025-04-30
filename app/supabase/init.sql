@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS memberships (
     UNIQUE(pubkey, group_id, provider)
 );
 
+    -- Create poll options/answers table
+CREATE TABLE IF NOT EXISTS organizations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    total_polls INTEGER NOT NULL DEFAULT 0,
+    total_votes INTEGER NOT NULL DEFAULT 0,
+    total_messages INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(name)
+);
+
 CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id TEXT NOT NULL,
@@ -303,7 +314,8 @@ CREATE TABLE IF NOT EXISTS poll_options (
     poll_id UUID NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
     option_text TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    vote_count INTEGER DEFAULT 0
+    vote_count INTEGER DEFAULT 0,
+    option_id TEXT
 );
 
 -- Create poll votes table with one vote per user constraint
@@ -324,6 +336,7 @@ CREATE TABLE IF NOT EXISTS poll_votes (
     membership_id UUID REFERENCES memberships(id) ON DELETE CASCADE,
     passport_registration_id UUID REFERENCES passport_registrations(id) ON DELETE CASCADE,
     ephemeral_key_id UUID REFERENCES ephemeral_keys(id) ON DELETE CASCADE,
+    internal BOOLEAN NOT NULL DEFAULT false,
     -- Ensure one vote per user per poll
     UNIQUE(poll_id, voter_pubkey)
 );
