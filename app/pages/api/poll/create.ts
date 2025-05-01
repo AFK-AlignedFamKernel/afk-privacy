@@ -68,6 +68,7 @@ export async function createReview(
       is_only_organizations: body.is_only_organizations,
       is_only_kyc_verified: body.is_only_kyc_verified,
       pubkey: signedMessage.ephemeralPubkey.toString(),
+      internal: body.is_internal,
 
     }
     console.log("createReview reviewData", reviewData);
