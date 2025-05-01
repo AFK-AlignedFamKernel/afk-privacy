@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
-import "./verifiers/VerifierPropose.sol";
-import "./verifiers/VerifierVote.sol";
+import {HonkVerifier as VerifierPropose} from "./verifiers/VerifierPropose.sol";
+import {HonkVerifier as VerifierVote} from "./verifiers/VerifierVote.sol";
 
 contract zkVote {
     VerifierPropose public verifierPropose;
@@ -37,6 +37,13 @@ contract zkVote {
         verifierPropose = VerifierPropose(_verifierPropose);
         verifierVote = VerifierVote(_verifierVote);
     }
+
+    function propose(string memory description, uint256 deadline) public returns (uint256) {
+        proposals[proposalCount] = Proposal(description, deadline, 0, 0, address(0), false);
+        proposalCount += 1;
+        return proposalCount;
+    }
+
 
     /// Cast a private proposal using a Noir circuit
     /// publicInputs: [proposerMerkleRoot, proposalId, nullifier]

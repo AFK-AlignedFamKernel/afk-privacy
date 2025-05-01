@@ -1,20 +1,22 @@
 use dep::std;
 use std::hash::poseidon2::Poseidon2::hash;
+use trees::merkle::MerkleTree;
 use trees::{
-    sparse_merkle::SparseMerkleTree,
-    types::{Calculator, SMT_Creator},
+    sparse_merkle::{Modifier, SparseMerkleTree},
+    types::{Calculator, MembershipProver, SMT_Creator},
 };
-// use afk_common::verify_vote::{verify_vote};
+use afk_common::verify_vote::{verify_vote};
 
 
 fn main(
     root: pub Field,
+    index: Field,
     secret: Field,
     proposal_id: pub Field,
+    vote: pub Field,
     nullifier_default: pub Field,
     leaf: [Field; 2],
     siblings: [Field; 254],
-    // vote: pub Field,
 ) -> pub Field {
     let hash2 = |x: [Field; 2]| -> Field { hash(x, 2) };
     let hash3 = |x: [Field; 3]| -> Field { hash(x, 3) };
@@ -26,13 +28,9 @@ fn main(
     let key = leaf[0];
     let value = leaf[1];
     let entry = (key, value);
-    // let note_commitment = std::hash::pedersen_hash([secret]);
+    let note_commitment = std::hash::pedersen_hash([secret]);
 
     let root_check = tree.calculate_root(entry, key, siblings);
-    std::println("root_check");
-    std::println([root_check]);
-    std::println("root");
-    std::println([root]);
     assert(root_check == root);
 
 
@@ -42,15 +40,9 @@ fn main(
 
     // Verify nullifier
     let computed_nullifier = std::hash::pedersen_hash([secret, proposal_id]);
-    std::println("computed_nullifier");
-    std::println([computed_nullifier]);
-    std::println("nullifier_default");
-    std::println([nullifier_default]);
     assert(computed_nullifier == nullifier_default);
 
-    // assert(U128::from_integer(vote) <= 1);
-
-    //  verify_vote(root_check, secret, proposal_id, vote, nullifier_default, leaf, siblings);
+    let res = verify_vote(root_check, secret, proposal_id, vote, nullifier_default, leaf, siblings);
 
     // Return the commitment
     std::hash::pedersen_hash([root, secret, proposal_id])
@@ -65,10 +57,10 @@ fn test_valid_sparse_merkle_tree_membership() {
     // Create a simple tree structure
     let key = 12345;
     let value = 999;
-    // let entry = (key, value);
+    let entry = (key, value);
 
     // Initialize tree
-    // let mut tree = SparseMerkleTree::new(hash3, hash2);
+    let mut tree = SparseMerkleTree::new(hash3, hash2);
 
     // Create siblings array with default values
     let mut siblings = [0; 254];
@@ -95,7 +87,7 @@ fn test_valid_sparse_merkle_tree_membership() {
     // Create vote parameters
     let secret = 777;
     let proposal_id = 1;
-    // let vote = 1;
+    let vote = 1;
     let leaf = [key, value];
 
     // Calculate nullifier
@@ -104,12 +96,13 @@ fn test_valid_sparse_merkle_tree_membership() {
     // Execute the main circuit
     let result = main(
         root,
+        0,
         secret,
         proposal_id,
+        vote,
         nullifier,
         leaf,
         siblings,
-        // vote,
     );
 
     // Calculate expected output
@@ -126,10 +119,10 @@ fn test_vote_verification() {
     // Create a different tree structure for testing
     let key = 98765; // Different key
     let value = 444; // Different value
-    // let entry = (key, value);
+    let entry = (key, value);
 
     // Initialize tree
-    // let mut tree = SparseMerkleTree::new(hash3, hash2);
+    let mut tree = SparseMerkleTree::new(hash3, hash2);
 
     // Create siblings array with default values
     let mut siblings = [0; 254];
@@ -155,7 +148,7 @@ fn test_vote_verification() {
     // Create different vote parameters
     let secret = 888; // Different secret
     let proposal_id = 2; // Different proposal
-    // let vote = 0; // Different vote
+    let vote = 0; // Different vote
     let leaf = [key, value];
 
     // Calculate nullifier
@@ -164,13 +157,13 @@ fn test_vote_verification() {
     // Execute the main circuit
     let result = main(
         root,
+        0,
         secret,
         proposal_id,
+        vote,
         nullifier,
         leaf,
         siblings,
-        // vote,
-
     );
 
     // Calculate expected output
