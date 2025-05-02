@@ -100,7 +100,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const emojisList = [
     "👥",
     "🤐",
-    "🔏",
     "🪪",
     "🕵️‍♂️",
     "🧑‍💻",
@@ -214,12 +213,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 🪪 zkDID
               </Link>
 
-              <button
+              <div
                 onClick={() => setIsOpenInternal(!isOpenInternal)}
                 className="sidebar-nav-item"
               >
+                <IonIcon name={isOpenInternal ? "chevron-down-outline" : "chevron-forward-outline"} />
+
                 {isOpenInternal ? "🔒 Close Internal fam" : "🔑 Internal communities"}
-              </button>
+              </div>
 
               {isOpenInternal &&
 
