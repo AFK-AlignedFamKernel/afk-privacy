@@ -213,7 +213,9 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
             <button
               onClick={() => handleOpenDialog()}
               disabled={!!isRegistering}
+              style={{ marginTop: "10px", borderRadius: "10px", border: "1px solid #000", padding: "5px" }}
             >
+              <IonIcon name="person-outline" />
               {isRegistering ? <span className="spinner-icon small" /> : "Sign in with passport"}
             </button>
             {isDialogOpen && (

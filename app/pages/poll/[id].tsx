@@ -12,6 +12,8 @@ import COUNTRY_DATA from "@/assets/country";
 import PollCard from "@/components/review/poll-card";
 import { Review } from "@/lib/types";
 import Loading from "@/components/small/loading";
+import IonIcon from "@reacticons/ionicons";
+import Link from "next/link";
 export default function PollPage() {
   const [currentGroupId] = useLocalStorage<string | null>(
     "currentGroupId",
@@ -70,10 +72,27 @@ export default function PollPage() {
       </div>}
 
 
-      {review &&
-        <PollCard review={review} isInternal={currentGroupId == nationality} />
+      <div>
+        {review &&
+          <PollCard review={review} isInternal={currentGroupId == nationality}
+            isShowLink={false}
+          />
+        }
 
-      }
+
+
+        <div style={{ marginTop: "1.5rem", padding: "10px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+
+          <Link href="/poll">
+            <p>
+              <IonIcon name="chevron-back-outline" />
+              View all polls
+            </p>
+          </Link>
+        </div>
+
+
+      </div>
 
     </>
   );
