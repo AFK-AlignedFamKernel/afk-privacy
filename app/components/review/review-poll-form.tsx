@@ -34,9 +34,9 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
     const [minOptions, setMinOptions] = useState(1);
     const [endDate, setEndDate] = useState("");
     const [showResultsPublicly, setShowResultsPublicly] = useState(true);
-    const [isOnlyOrganizations, setIsOnlyOrganizations] = useState(false);
+    const [isOnlyOrganizations, setIsOnlyOrganizations] = useState(selectedOrganizations && selectedOrganizations?.length > 0 ? true : false);
     const [isOnlyKycVerified, setIsOnlyKycVerified] = useState(false);
-    const [isSpecificCountries, setIsSpecificCountries] = useState(false);
+    const [isSpecificCountries, setIsSpecificCountries] = useState(selectedCountries && selectedCountries?.length > 0 ? true : false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isOnlySelfXyz, setIsOnlySelfXyz] = useState(false);
     const isRegistered = !!connectedKyc;
@@ -356,7 +356,7 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
                                     checked={isOnlyOrganizations}
                                     onChange={(e) => setIsOnlyOrganizations(e.target.checked)}
                                 />
-                                Only Organizations
+                                Organizations requirements
                             </label>
                         </div>
                         <div className="requirement-option">
@@ -366,7 +366,7 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
                                     checked={isOnlyKycVerified}
                                     onChange={(e) => setIsOnlyKycVerified(e.target.checked)}
                                 />
-                                Only KYC Verified Users
+                                KYC Verified Users
                             </label>
                         </div>
                         <div className="requirement-option">
@@ -376,11 +376,62 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
                                     checked={isSpecificCountries}
                                     onChange={(e) => setIsSpecificCountries(e.target.checked)}
                                 />
-                                Specific Countries
+                                Specific Countries to target
                             </label>
                         </div>
                     </div>
                 </div>
+
+                {isOnlyOrganizations && (
+                    <div className="form-group">
+                        {/* <label>Select Organization Types</label>
+                        <div className="organization-selector">
+                            {Object.entries(domainNames).map(([domain, description]) => (
+                                <div key={domain} className="organization-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrganizations.includes(domain)}
+                                            onChange={() => handleOrganizationSelect(domain)}
+                                        />
+                                        {description} (.{domain})
+                                    </label>
+                                </div>
+                            ))}
+                        </div> */}
+                        <p>Select organizations</p>
+                        <div className="organization-selector">
+                            {organizations.map((organization) => (
+                                <div key={organization?.id} className="organization-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrganizations.includes(organization?.name)}
+                                            onChange={() => handleOrganizationSelect(organization?.name)}
+                                        />
+                                        {organization.name}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* <div className="organization-selector">
+                            {Object.entries(domainNames).map(([domain, description]) => (
+                                <div key={domain} className="organization-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrganizations.includes(domain)}
+                                            onChange={() => handleOrganizationSelect(domain)}
+                                        />
+                                        {description} (.{domain})
+                                    </label>
+                                </div>
+                            ))}
+                        </div> */}
+                    </div>
+                )}
+
 
                 {isSpecificCountries && (
                     <div className="form-group">
@@ -402,53 +453,6 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
                     </div>
                 )}
 
-                {isOnlyOrganizations && (
-                    <div className="form-group">
-                        {/* <label>Select Organization Types</label>
-                        <div className="organization-selector">
-                            {Object.entries(domainNames).map(([domain, description]) => (
-                                <div key={domain} className="organization-option">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedOrganizations.includes(domain)}
-                                            onChange={() => handleOrganizationSelect(domain)}
-                                        />
-                                        {description} (.{domain})
-                                    </label>
-                                </div>
-                            ))}
-                        </div> */}
-                        <div className="organization-selector">
-                            {organizations.map((organization) => (
-                                <div key={organization?.id} className="organization-option">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedOrganizations.includes(organization?.name)}
-                                            onChange={() => handleOrganizationSelect(organization?.name)}
-                                        />
-                                        {organization.name}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="organization-selector">
-                            {Object.entries(domainNames).map(([domain, description]) => (
-                                <div key={domain} className="organization-option">
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedOrganizations.includes(domain)}
-                                            onChange={() => handleOrganizationSelect(domain)}
-                                        />
-                                        {description} (.{domain})
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
                 {error && <div className="error-message">{error}</div>}
 
