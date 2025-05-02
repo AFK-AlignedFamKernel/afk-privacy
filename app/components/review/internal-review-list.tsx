@@ -37,6 +37,7 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
   const [showPollForm, setShowPollForm] = useState(false);
   const [polls, setPolls] = useState<any[]>([]);
   const [selectedPoll, setSelectedPoll] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Refs
   const observer = useRef<IntersectionObserver | null>(null);
@@ -66,7 +67,7 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
   // Fetch polls
   const fetchPolls = useCallback(async () => {
     try {
-
+      setIsLoading(true);
 
       const content = `getPollsInternal:${groupId}:${country}`;
 
@@ -121,6 +122,8 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
       setPolls(data);
     } catch (error) {
       console.error('Error fetching polls:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -179,7 +182,7 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
     if (isInternal && !groupId) return;
 
     try {
-      const response = await fetch(`/api/poll/list?isInternal=${!!isInternal}&limit=${MESSAGES_PER_PAGE}&afterTimestamp=${reviews[0]?.timestamp.getTime()}&groupId=${groupId}`);
+      const response = await fetch(`/api/poll/list?isInternal=${!!isInternal}&limit=${MESSAGES_PER_PAGE}&afterTimestamp=${reviews[0]?.timestamp?.getTime()}&groupId=${groupId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch polls');
       }
@@ -351,10 +354,14 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
           <ReviewPollForm
             onSubmit={handlePollCreated}
             connectedKyc={myData}
+            isInternal={true}
+            selectedOrganization={[groupId ?? ""]}
+            selectedCountriesProps={[country ?? ""]}
           />
         </Dialog>
       )}
 
+      {isLoading && <CryptoLoading />}
       <div className="review-list" ref={reviewListRef}>
         {polls.map((poll, index) => (
           <div
@@ -369,7 +376,7 @@ const InternalReviewList: React.FC<ReviewListProps> = ({
           </div>
         ))}
         {loading && renderLoading()}
-        {!loading && !error && polls.length === 0 && renderNoReviews()}
+        {!loading && !error && polls.length === 0 && !isLoading && renderNoReviews()}
       </div>
 
       {error && <div className="error-message">{error}</div>}
