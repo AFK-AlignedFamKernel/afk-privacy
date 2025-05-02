@@ -45,6 +45,10 @@ function ZkPassportRegistration() {
     LocalStorageKeys.CurrentGender,
     null
   );
+  const [isAdult, setIsAdult] = useLocalStorage<boolean | null>(
+    LocalStorageKeys.IsAdult,
+    null
+  );
   useEffect(() => {
     const initializeZKPassport = async () => {
       const { ZKPassport } = await import('@zkpassport/sdk');
@@ -194,6 +198,10 @@ function ZkPassportRegistration() {
               }
               if(data?.data?.gender) {
                 setCurrentGender(data?.data?.gender);
+              }
+
+              if(data?.data?.age) {
+                setIsAdult(data?.data?.age >= 18);
               }
             }
             // Here you can redirect to the user's profile or home page

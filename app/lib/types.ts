@@ -127,7 +127,9 @@ export const LocalStorageKeys = {
   CurrentKYCProvider: "currentKYCProvider",
   PassportVerified: "passportVerified",
   CurrentGender: "currentGender",
-
+  CurrentBirthdate: "currentBirthdate",
+  CurrentOrganization: "currentOrganization",
+  IsAdult: "isAdult",
 };
 
 export interface PassportRegistration {

@@ -24,7 +24,7 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [options, setOptions] = useState<string[]>(['', '']); // Minimum 2 options
-    const [isYesNo, setIsYesNo] = useState(false);
+    const [isYesNo, setIsYesNo] = useState(true);
     const [selectedCountries, setSelectedCountries] = useState<string[]>(selectedCountriesProps || []);
     const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>(selectedOrganization || []);
     const [isInternal, setIsInternal] = useState(isInternalProps || false);
@@ -32,7 +32,8 @@ const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
     const [multiselect, setMultiselect] = useState(false);
     const [maxOptions, setMaxOptions] = useState(1);
     const [minOptions, setMinOptions] = useState(1);
-    const [endDate, setEndDate] = useState("");
+    // const [endDate, setEndDate] = useState( new Date().toISOString().slice(0, 16));
+    const [endDate, setEndDate] = useState(new Date(new Date().setHours(new Date().getHours() + 72)).toISOString().slice(0, 16));
     const [showResultsPublicly, setShowResultsPublicly] = useState(true);
     const [isOnlyOrganizations, setIsOnlyOrganizations] = useState(selectedOrganizations && selectedOrganizations?.length > 0 ? true : false);
     const [isOnlyKycVerified, setIsOnlyKycVerified] = useState(false);
