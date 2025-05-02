@@ -56,6 +56,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
   const [statsData, setStatsData] = useState<any | PollStats | undefined>(undefined);
 
   const [isLoadingStats, setIsLoadingStats] = useState(false);
+  const [isExpandedRequirements, setIsExpandedRequirements] = useState(false)
 
   const handleOnVote = async (pollId: string, option: string, options?: string) => {
     console.log("handleOnVote")
@@ -361,16 +362,25 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     if (requirements.length === 0) return null;
 
     return (
-      <div className="poll-requirements">
-        <p>Requirements</p>
-        <ul>
-          {requirements.map((req, index) => (
-            <li key={index}>
-              <IonIcon name="checkmark-circle-outline" />
-              <span>{req}</span>
-            </li>
-          ))}
-        </ul>
+      <div className="poll-requirements"
+        onClick={() => setIsExpandedRequirements(!isExpandedRequirements)}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <IonIcon name={isExpandedRequirements ? "chevron-down-outline" : "chevron-forward-outline"} />
+          <p>Requirements</p>
+        </div>
+
+        {isExpandedRequirements &&
+          <ul>
+            {requirements.map((req, index) => (
+              <li key={index}>
+                <IonIcon name="checkmark-circle-outline" />
+                <span>{req}</span>
+              </li>
+            ))}
+          </ul>
+        }
+
       </div>
     );
   };
@@ -382,7 +392,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
     // const optionVotes = statsData?.option_votes || {};
 
     const optionVotes = statsData?.options || [];
-     console.log("optionVotes", optionVotes);
+    console.log("optionVotes", optionVotes);
     // const totalVotes = review.total_votes || 0;	    // console.log("renderPollStats", review);
     // const optionVotes = review.option_votes || {};	    // console.log("statsData", statsData);
     // const totalVotes = review.total_votes || 0;
@@ -456,6 +466,41 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
 
+  const renderPollDescription = () => {
+    return (
+
+      <div className="poll-content">
+        {review.description && (
+          <>
+            <div
+              className={`expand-button ${isExpandedDescription ? 'expanded' : ''}`}
+              onClick={() => {
+                setIsExpandedDescription(!isExpandedDescription)
+              }}
+            >
+              <p className="poll-description">
+                {review.description.length > 30 && !isExpandedDescription
+                  ? `${review.description.slice(0, 30)}...`
+                  : review.description
+                }
+              </p>
+
+              {review?.description?.length > 30 && !isExpandedDescription && (
+                <IonIcon name="eye-outline" />
+              )}
+
+              {review?.description?.length > 30 && isExpandedDescription && (
+                <IonIcon name="eye-off-sharp" />
+              )}
+            </div>
+          </>
+
+        )}
+
+      </div>
+    )
+  }
+
 
 
   return (
@@ -464,6 +509,8 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
         <div className="poll-header">
           <div className="poll-title-section">
             <h3 className="poll-title">{review.title}</h3>
+            {renderPollDescription()}
+
             {/* <h4 className="poll-subtitle">{review.description}</h4> */}
             <div className="poll-meta poll-author">
               <IonIcon name="person-outline" />
@@ -540,18 +587,10 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
         {renderPollRequirements()}
 
-        <button
-          className={`expand-button ${isExpanded ? 'expanded' : ''}`}
-          onClick={() => {
-            setIsExpanded(!isExpanded)
-            handleResultStats();
-            // setIsShowStats(false)
-          }}
-        >
-          <IonIcon name="chevron-down-outline" />
-          <span>{isExpanded ? 'Hide results' : 'Show results'}</span>
-        </button>
+
       </div>
+
+
 
 
 
@@ -566,11 +605,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
       {
         isExpanded &&
-
         <>
           <div className="details-content">
             {/* {renderPollOverview()} */}
-
             {renderPollStats()}
           </div>
 
@@ -579,29 +616,11 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
 
 
 
-      <div className="poll-content">
-        {review.description && (
-          <>
-            <button
-              className={`expand-button ${isExpandedDescription ? 'expanded' : ''}`}
-              onClick={() => {
-                setIsExpandedDescription(!isExpandedDescription)
-              }}
-            >
-              <p className="poll-description">
-                {review.description.length > 30 && !isExpandedDescription
-                  ? `${review.description.slice(0, 30)}...`
-                  : review.description
-                }
-              </p>
+      {renderPollDescription()}
 
-              {review?.description?.length > 30 && !isExpandedDescription && (
-                <IonIcon name="chevron-down-outline" />
-              )}
-            </button>
-          </>
 
-        )}
+      <div className="poll-form">
+
         {renderPollOptions()}
         {error && <div className="error-message">{error}</div>}
 
@@ -621,6 +640,18 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote }) => 
           <span>{isExpanded ? 'Hide results' : 'Show results'}</span>
         </button>
       </div>
+      {/* 
+      <button
+          className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+          onClick={() => {
+            setIsExpanded(!isExpanded)
+            handleResultStats();
+            // setIsShowStats(false)
+          }}
+        >
+          <IonIcon name="chevron-down-outline" />
+          <span>{isExpanded ? 'Hide results' : 'Show results'}</span>
+        </button> */}
 
 
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "2  0px" }}>

@@ -5,12 +5,14 @@ import { loadOrInitializeEphemeralKey } from '@/lib/zk-did';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import CryptoLoading from '../small/crypto-loading';
 
 function SelfXyzRegistration() {
   const [userId, setUserId] = useState<string | null>(null);
   const [pubkey, setPubkey] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [SelfComponents, setSelfComponents] = useState<any>(null);
+  const [isInit, setIsInit] = useState(false);
   const [usedPubkeySelfXyz, setUsedPubkeySelfXyz] = useLocalStorage<string | null>(
     "usedPubkeySelfXyz",
     null
@@ -32,8 +34,6 @@ function SelfXyzRegistration() {
     const loadEphemeralKeySelfXyz = async () => {
       try {
         const { ephemeralKey, uuid } = await loadOrInitializeEphemeralKey();
-        console.log("ephemeralKey", ephemeralKey);
-        console.log("uuid", uuid);
         // setUserId(`0x${ephemeralKey?.publicKey?.toString()}`);
 
         const messageObj = {
@@ -57,6 +57,7 @@ function SelfXyzRegistration() {
         }
         setUserId(uuid);
         setPubkey(ephemeralKey?.publicKey?.toString());
+        setIsInit(true)
       } catch (error) {
         console.error("Error loading ephemeral key:", error);
       }
@@ -70,7 +71,8 @@ function SelfXyzRegistration() {
 
   }, [userId]);
 
-  if (!isClient || !userId || !SelfComponents) return null;
+  // if (!isClient || !userId || !SelfComponents) return null;
+  if (!isClient || !userId || !SelfComponents) return (<CryptoLoading/>);
 
   // Create the SelfApp configuration
   console.log("process.env.NEXT_PUBLIC_SELF_SCOPE_URL", process.env.NEXT_PUBLIC_SELF_SCOPE_URL);
@@ -97,6 +99,7 @@ function SelfXyzRegistration() {
   return (
     <div className="verification-container">
       <h1>Verify Your Identity</h1>
+
       <p>Scan this QR code with the Self app to verify your identity</p>
 
       <p className="text-sm text-gray-500">
@@ -117,7 +120,7 @@ function SelfXyzRegistration() {
           // Redirect or update UI
         }}
         // type="deeplink"
-        size={350}
+        size={300}
       />
 
     </div>
