@@ -67,7 +67,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
 
 
     if (review.is_show_results_publicly) {
-      console.log("review.is_show_results_publicly", review.is_show_results_publicly);
       setIsLoadingResults(true);
       handleResultStats();
       setIsShowStats(true);
@@ -317,7 +316,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
     // console.log("review.selected_countries", review.selected_countries);
     const countryNamesList = review.selected_countries
     const countryFlags = review.selected_countries?.map(code => COUNTRY_DATA[code?.toUpperCase()]?.flag ?? "");
-    console.log("countryFlags", countryFlags);
+    // console.log("countryFlags", countryFlags);
     const isCountrySelection = review?.selected_countries && review?.selected_countries?.length > 0;
     const isOrganizationSelection = review?.selected_organizations && review?.selected_organizations?.length > 0;
     //  setCountryFlags(countryFlags);
@@ -408,15 +407,9 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
     if (!review.is_show_results_publicly) return null;
 
     const totalVotes = statsData?.total_votes || 0;
-    // const optionVotes = statsData?.option_votes || {};
-
     const optionVotes = statsData?.options || [];
-    console.log("optionVotes", optionVotes);
-    // const totalVotes = review.total_votes || 0;	    // console.log("renderPollStats", review);
-    // const optionVotes = review.option_votes || {};	    // console.log("statsData", statsData);
-    // const totalVotes = review.total_votes || 0;
-    // const optionVotes = review.option_votes || {};
-
+    // console.log("optionVotes", optionVotes);
+ 
     return (
       <div className="poll-stats">
         <div className="poll-stats-header">
