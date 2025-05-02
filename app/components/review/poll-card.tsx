@@ -383,7 +383,7 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}
         >
-          <p>
+          <p style={{ fontSize: "14px" }}>
             <IonIcon name={isExpandedRequirements ? "chevron-down-outline" : "chevron-forward-outline"} />
             Requirements</p>
         </div>
@@ -544,15 +544,6 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
 
       {renderPollRequirements()}
 
-      {
-        isExpanded &&
-        <>
-          <div className="details-content">
-            {isLoadingResults && <CryptoLoading />}
-            {!isLoadingResults && renderPollStats()}
-          </div>
-        </>
-      }
 
       <div className="poll-form">
         {/* {renderPollDescription()} */}
@@ -561,6 +552,17 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
       </div>
 
       <div>
+
+        {
+          isExpanded &&
+          <>
+            <div className="details-content">
+              {isLoadingResults && <CryptoLoading />}
+              {!isLoadingResults && renderPollStats()}
+            </div>
+          </>
+        }
+
         <button
           className={`expand-button ${isExpanded ? 'expanded' : ''}`}
           onClick={() => {
@@ -574,17 +576,22 @@ const PollCard: React.FC<ReviewCardProps> = ({ review, isInternal, onVote, isSho
         </button>
       </div>
 
-      {isShowLink && (
 
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "2  0px" }}>
-          <p
-            className="submit-vote-button"
-          >
-            <IonIcon name="open-outline" />
-            <Link href={`/poll/${review.id}`}>View poll</Link>
-          </p>
-        </div>
-      )}
+      <div style={{ marginTop: "1.5rem", padding: "10px" }}>
+        {isShowLink && (
+
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "2  0px" }}>
+            <p
+              className="submit-vote-button"
+            >
+              <IonIcon name="open-outline" />
+              <Link href={`/poll/${review.id}`}>View poll</Link>
+            </p>
+          </div>
+        )}
+      </div>
+
+
 
     </div >
   );
