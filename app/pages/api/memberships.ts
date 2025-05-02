@@ -47,7 +47,7 @@ async function createMembership(req: NextApiRequest, res: NextApiResponse) {
       throw new Error("Invalid proof");
     }
 
-    const { error } = await supabase.from("memberships").insert([
+    const { error, data: membership } = await supabase.from("memberships").insert([
       {
         provider: providerName,
         pubkey: ephemeralPubkey,
@@ -62,6 +62,20 @@ async function createMembership(req: NextApiRequest, res: NextApiResponse) {
       throw new Error(
         `Error inserting to membership table: ${error?.message}`
       );
+    }
+
+    try {
+      const { error: orgError, data:organization } = await supabase.from("organizations").upsert([
+        {
+          name: groupId,
+        },
+      ]);
+
+      if (orgError) {
+        console.error("Error inserting to organization table:", orgError);
+      }
+    } catch (error) {
+      console.error("Error inserting to organization table:", error);
     }
 
     res.status(200).json({ success: true });

@@ -1,5 +1,5 @@
 [package]
-name = "zk_vote"
+name = "zk_vote_example"
 type = "bin"
 authors = [""]
 

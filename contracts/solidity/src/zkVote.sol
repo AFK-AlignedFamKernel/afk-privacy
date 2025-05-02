@@ -1,59 +1,115 @@
-// https://gist.github.com/Turupawn/6a4391fb54d09aae7a091ad2478c1f62#file-zkvoting-sol
-
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19;
 
-import "./verifiers/Verifier.sol";
+import {HonkVerifier as VerifierPropose} from "./verifiers/VerifierPropose.sol";
+import {HonkVerifier as VerifierVote} from "./verifiers/VerifierVote.sol";
 
 contract zkVote {
-    HonkVerifier verifier;
+    VerifierPropose public verifierPropose;
+    VerifierVote public verifierVote;
+
+    bytes32 public voterMerkleRoot;
+    bytes32 public proposerMerkleRoot;
+
+    uint256 public proposalCount;
+    uint256 public constant CREATOR_REWARD = 0.01 ether;
 
     struct Proposal {
         string description;
         uint256 deadline;
         uint256 forVotes;
         uint256 againstVotes;
+        address creator;         // optional — not used in ZK claim
+        bool rewardClaimed;
     }
 
-    bytes32 merkleRoot;
-    uint256 proposalCount;
-    mapping(uint256 proposalId => Proposal) public proposals;
-    mapping(bytes32 hash => bool isNullified) nullifiers;
+    mapping(uint256 => Proposal) public proposals;
 
-    constructor(bytes32 _merkleRoot, address _verifier) {
-        merkleRoot = _merkleRoot;
-        verifier = HonkVerifier(_verifier);
+    mapping(bytes32 => bool) public voteNullifiers;
+    mapping(bytes32 => bool) public proposeNullifiers;
+
+    event ProposalCreated(uint256 indexed proposalId, string description, uint256 deadline);
+    event VoteCast(uint256 indexed proposalId, bool vote);
+
+    constructor(bytes32 _proposerMerkleRoot, bytes32 _voterMerkleRoot, address _verifierPropose, address _verifierVote) {
+        proposerMerkleRoot = _proposerMerkleRoot;
+        voterMerkleRoot = _voterMerkleRoot;
+        verifierPropose = VerifierPropose(_verifierPropose);
+        verifierVote = VerifierVote(_verifierVote);
     }
 
     function propose(string memory description, uint256 deadline) public returns (uint256) {
-        proposals[proposalCount] = Proposal(description, deadline, 0, 0);
+        proposals[proposalCount] = Proposal(description, deadline, 0, 0, address(0), false);
         proposalCount += 1;
         return proposalCount;
     }
 
-    /// @param vote - Must be "1" to count as a forVote
-    function castVote(bytes calldata proof, uint256 proposalId, uint256 vote, bytes32 nullifierHash)
-        public
+
+    /// Cast a private proposal using a Noir circuit
+    /// publicInputs: [proposerMerkleRoot, proposalId, nullifier]
+    function castPropose(bytes calldata proof, bytes32[] calldata publicInputs, string calldata description, uint256 deadline)
+        external
+        returns (uint256)
+    {
+        require(publicInputs.length == 3, "Invalid inputs");
+
+        bytes32 root = publicInputs[0];
+        uint256 proposalId = uint256(publicInputs[1]);
+        bytes32 nullifier = publicInputs[2];
+
+        require(root == proposerMerkleRoot, "Invalid proposer Merkle root");
+        require(!proposeNullifiers[nullifier], "Propose nullifier used");
+        require(deadline > block.timestamp, "Deadline must be in future");
+
+        require(verifierPropose.verify(proof, publicInputs), "Invalid propose proof");
+
+        proposeNullifiers[nullifier] = true;
+
+        proposals[proposalId] = Proposal({
+            description: description,
+            deadline: deadline,
+            forVotes: 0,
+            againstVotes: 0,
+            creator: address(0), // optional
+            rewardClaimed: false
+        });
+
+        emit ProposalCreated(proposalId, description, deadline);
+        return proposalId;
+    }
+
+    /// Cast a private vote using a Noir circuit
+    /// publicInputs: [voterMerkleRoot, proposalId, vote, nullifier]
+    function castVote(bytes calldata proof, bytes32[] calldata publicInputs)
+        external
         returns (bool)
     {
-        require(!nullifiers[nullifierHash], "Proof has been already submitted");
-        require(block.timestamp < proposals[proposalId].deadline, "Voting period is over.");
-        nullifiers[nullifierHash] = true;
+        require(publicInputs.length == 4, "Invalid inputs");
 
-        bytes32[] memory publicInputs = new bytes32[](4);
-        publicInputs[0] = merkleRoot;
-        publicInputs[1] = bytes32(proposalId);
-        publicInputs[2] = bytes32(vote);
-        publicInputs[3] = nullifierHash;
-        require(verifier.verify(proof, publicInputs), "Invalid proof");
+        bytes32 root = publicInputs[0];
+        uint256 proposalId = uint256(publicInputs[1]);
+        uint256 vote = uint256(publicInputs[2]);
+        bytes32 nullifier = publicInputs[3];
+
+        require(root == voterMerkleRoot, "Invalid voter Merkle root");
+        require(!voteNullifiers[nullifier], "Vote nullifier used");
+        require(proposalId < proposalCount, "Invalid proposal");
+        require(block.timestamp < proposals[proposalId].deadline, "Voting closed");
+        require(vote == 0 || vote == 1, "Invalid vote");
+
+        require(verifierVote.verify(proof, publicInputs), "Invalid vote proof");
+
+        voteNullifiers[nullifier] = true;
 
         if (vote == 1) {
-            proposals[proposalId].forVotes += 1;
-        } // vote = 0
-        else {
-            proposals[proposalId].againstVotes += 1;
+            proposals[proposalId].forVotes++;
+        } else {
+            proposals[proposalId].againstVotes++;
         }
 
+        emit VoteCast(proposalId, vote == 1);
         return true;
     }
+
+    receive() external payable {}
 }

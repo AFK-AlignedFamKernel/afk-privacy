@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocalStorage } from "@uidotdev/usehooks";
 import IonIcon from "@reacticons/ionicons";
 import { LocalStorageKeys, PassportRegistration, SignedMessage } from "../../lib/types";
@@ -11,17 +11,24 @@ import { useRouter } from 'next/router';
 type PollFormProps = {
     onSubmit: (poll: any) => void;
     connectedKyc?: PassportRegistration;
+    selectedOrganization?: string[];
+    selectedCountriesProps?: string[];
+    isInternal?: boolean;
 };
 
-const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => {
+const ReviewPollForm: React.FC<PollFormProps> = (props: PollFormProps) => {
+
+    const { connectedKyc, selectedOrganization, selectedCountriesProps, isInternal: isInternalProps } = props;
     const router = useRouter();
     // State for poll form
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [options, setOptions] = useState<string[]>(['', '']); // Minimum 2 options
     const [isYesNo, setIsYesNo] = useState(false);
-    const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-    const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>([]);
+    const [selectedCountries, setSelectedCountries] = useState<string[]>(selectedCountriesProps || []);
+    const [selectedOrganizations, setSelectedOrganizations] = useState<string[]>(selectedOrganization || []);
+    const [isInternal, setIsInternal] = useState(isInternalProps || false);
+
     const [multiselect, setMultiselect] = useState(false);
     const [maxOptions, setMaxOptions] = useState(1);
     const [minOptions, setMinOptions] = useState(1);
@@ -31,14 +38,34 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
     const [isOnlyKycVerified, setIsOnlyKycVerified] = useState(false);
     const [isSpecificCountries, setIsSpecificCountries] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isOnlySelfXyz, setIsOnlySelfXyz] = useState(false);
     const isRegistered = !!connectedKyc;
+
+    const [isOrganizationsFetched, setIsOrganizationsFetched] = useState(false);
 
     const [isPosting, setIsPosting] = useState(false);
     const [error, setError] = useState("");
 
+    const [organizations, setOrganizations] = useState<any[]>([]);
+
     const handleAddOption = () => {
         setOptions([...options, '']);
     };
+
+    const handleFetchOrganizations = async () => {
+        const response = await fetch('/api/messages/fetchOrganizations');
+        const data = await response.json();
+        console.log("data", data);
+        setOrganizations(data);
+        return data;
+    }
+
+    useEffect(() => {
+        if (!isOrganizationsFetched) {
+            handleFetchOrganizations();
+            setIsOrganizationsFetched(true);
+        }
+    }, [isOrganizationsFetched]);
 
     const handleRemoveOption = (index: number) => {
         if (options.length > 2) {
@@ -118,6 +145,7 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                 is_specific_countries: isSpecificCountries,
                 selected_organizations: selectedOrganizations,
                 selected_countries: selectedCountries,
+                is_internal: isInternal,
                 signedMessage: {
                     ...signedMessage,
                     pubkey: signedMessage.ephemeralPubkey.toString(),
@@ -155,12 +183,13 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
             setEndDate("");
             setShowResultsPublicly(true);
             setIsOnlyOrganizations(false);
+            setIsInternal(false);
             setIsOnlyKycVerified(false);
             setIsSpecificCountries(false);
             setSelectedCountries([]);
             setSelectedOrganizations([]);
 
-            if(createdPoll?.id) {
+            if (createdPoll?.id) {
                 router.push(`/poll/${createdPoll?.id}`);
             }
 
@@ -306,6 +335,17 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                     </label>
                 </div>
 
+                <div className="requirement-option">
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={isInternal}
+                            onChange={(e) => setIsInternal(e.target.checked)}
+                        />
+                        Internal Poll
+                    </label>
+                </div>
+
                 <div className="form-group">
                     <label>Who can vote?</label>
                     <div className="voter-requirements">
@@ -379,6 +419,20 @@ const ReviewPollForm: React.FC<PollFormProps> = ({ onSubmit, connectedKyc }) => 
                                 </div>
                             ))}
                         </div> */}
+                        <div className="organization-selector">
+                            {organizations.map((organization) => (
+                                <div key={organization?.id} className="organization-option">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrganizations.includes(organization?.name)}
+                                            onChange={() => handleOrganizationSelect(organization?.name)}
+                                        />
+                                        {organization.name}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
                         <div className="organization-selector">
                             {Object.entries(domainNames).map(([domain, description]) => (
                                 <div key={domain} className="organization-option">

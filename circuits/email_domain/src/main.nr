@@ -69,7 +69,7 @@ fn main(
     // Get email claim
     let email: BoundedVec<u8, MAX_EMAIL_LENGTH> = jwt.get_claim_string("email".as_bytes());
 
-    // Get domain start_index from email claim - unconstrained, but we verify the domain bytes below
+    // Safety: Get domain start_index from email claim - unconstrained, but we verify the domain bytes below
     let domain_start_index = unsafe { get_domain_start_index_in_email(email) };
 
     // Verify domain passed is present in the email claim after the @

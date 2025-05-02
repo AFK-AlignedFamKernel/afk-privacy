@@ -1,0 +1,24 @@
+# Merkle tree parameters
+root = "0x215597bacd9c7e977dfc170f320074155de974be494579d2586e5b268fa3b629"
+index = "0"
+
+# Vote parameters
+secret = "777"
+proposal_id = "1"
+vote = "1"
+
+# Nullifier (computed as pedersen_hash([secret, proposal_id]))
+nullifier_default = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+
+# Leaf data [key, value]
+leaf = [
+    "12345",  # key
+    "999"     # value
+]
+
+# Merkle proof siblings (254 elements needed)
+siblings = [
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000000",
+    # ... fill remaining siblings with default values
+]

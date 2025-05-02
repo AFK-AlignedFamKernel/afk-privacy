@@ -1,0 +1,3 @@
+[workspace]
+members = ["email_domain", "cast_vote", "propose_vote", "afk_common", "zk_vote_example"]
+

@@ -1,0 +1,14 @@
+# Public inputs that will be verified
+jwt_pubkey_modulus_limbs = [
+    0x00000000000000000000000000000001,
+    # ... (17 more limbs)
+]
+
+domain = [
+    101, 120, 97, 109, 112, 108, 101, 46, 99, 111, 109, # "example.com"
+    0, 0, 0, 0, 0, # Padding with zeros
+    # ... (continue padding until 64 bytes)
+]
+
+ephemeral_pubkey = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+ephemeral_pubkey_expiry = 1735689600
