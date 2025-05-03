@@ -37,7 +37,7 @@
     "react-dom": "^18",
     "react-qr-code": "^2.0.15",
     "starknet": "^6.24.1",
-    "starknetkit-next": "yarn:starknetkit@^2.6.1",
+    "starknetkit": "2.10.4",
     "twitter-api-v2": "^1.20.2",
     "unique-names-generator": "^4.7.1",
     "viem": "~2.21.2",
@@ -48,6 +48,7 @@
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.26.3",
     "@babel/runtime": "^7.27.0",
+    "@types/formidable": "^3.4.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

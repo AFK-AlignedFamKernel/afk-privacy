@@ -1,4 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { IncomingForm } from 'formidable';
+import { createReadStream } from 'fs';
 import { pinata } from '@/services/pinata';
 import { ErrorCode } from '@/utils/errors';
 import { HTTPStatus } from '@/utils/http';
@@ -22,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Use formidable to parse multipart form data
     const formData = await new Promise((resolve, reject) => {
-      const { IncomingForm } = require('formidable');
       const form = new IncomingForm();
       
       form.parse(req, (err: any, fields: any, files: any) => {
@@ -41,8 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Create a readable stream from the temporary file
-    const fs = require('fs');
-    const stream = fs.createReadStream(file.filepath);
+    const stream = createReadStream(file.filepath);
 
     const { IpfsHash } = await pinata.pinFileToIPFS(stream, {
       pinataMetadata: {
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(HTTPStatus.OK).json({ 
       hash: IpfsHash, 
-      url: `${process.env.IPFS_GATEWAY}${IpfsHash}` 
+      url: `${process.env.IPFS_GATEWAY}/${IpfsHash}` 
     });
 
   } catch (error) {
