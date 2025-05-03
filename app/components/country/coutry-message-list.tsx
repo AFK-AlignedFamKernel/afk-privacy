@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { fetchMessagesCountry, getMyDataMessageCountry, postMessageCountry } from "../../lib/country/index";
+import { fetchMessagesCountry } from "../../lib/country/index";
+import { getMyDataMessageCountry } from "../../lib/profile/index";
 import CountryMessageCard from "./country-message-card";
-import { Message, SignedMessageWithProof } from "../../lib/types";
+import { LocalStorageKeys, Message, SignedMessageWithProof } from "../../lib/types";
 import CountryMessageForm from "./country-message-form";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const MESSAGES_PER_PAGE = 30;
 const INITIAL_POLL_INTERVAL = 10000; // 10 seconds
@@ -33,6 +35,7 @@ const MessageListCountry: React.FC<MessageListProps> = ({
   const observer = useRef<IntersectionObserver | null>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
 
+  const [isVerified, setIsVerified] = useLocalStorage(LocalStorageKeys.IsVerified, false);
 
   const [myData, setMyData] = useState<any>(null);
 
@@ -68,6 +71,10 @@ const MessageListCountry: React.FC<MessageListProps> = ({
       const res = await getMyDataMessageCountry(messageObj);
 
       const myData = res?.credentialSubject;
+      console.log("myData", myData);
+      if(myData?.is_verified) {
+        setIsVerified(true);
+      }
       setMyData(myData);
     };
     fetchMyData();

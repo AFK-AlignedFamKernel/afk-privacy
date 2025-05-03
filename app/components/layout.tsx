@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import IonIcon from "@reacticons/ionicons";
-import { LocalStorageKeys } from "../lib/types";
+import { LocalStorageKeys, Message } from "../lib/types";
 import { Providers } from "../lib/providers";
 import { WelcomeModal } from './welcome-modal';
 import Loading from './small/loading';
@@ -16,6 +16,7 @@ import logoAfk from "@/assets/afk_logo_circle.png";
 // import logo from "@/assets/logo.png";
 import CryptoLoading from "./small/crypto-loading";
 import COUNTRY_DATA from "@/assets/country";
+import { getMyDataMessageCountry } from "@/lib/profile";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useLocalStorage<boolean>(
@@ -26,7 +27,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     LocalStorageKeys.CurrentGroupId,
     null
   );
-  const [currentCountryId] = useLocalStorage<string | null>(
+  const [currentCountryId, setCurrentCountryId] = useLocalStorage<string | null>(
     LocalStorageKeys.CurrentCountryId,
     null
   );
@@ -38,6 +39,55 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [consoleShown, setConsoleShown] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isOpenInternal, setIsOpenInternal] = React.useState(false);
+
+  const [isVerified, setIsVerified] = React.useState(false);
+  const [isInternal, setIsInternal] = React.useState(false);
+  const emojisList = [
+    "👥",
+    "🤐",
+    "🪪",
+    "🕵️‍♂️",
+    "🧑‍💻",
+    "🔒",
+    "🔑",
+    "🌐",
+    "👻",
+    "👁️‍🗨️",
+    "👤"
+  ]
+
+  const getRandomEmojis = () => {
+    const shuffled = [...emojisList].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3); // Get first 3 unique emojis after shuffling
+  };
+
+  const [randomEmojis] = React.useState(getRandomEmojis());
+  const [randomEmojisSidebar] = React.useState(getRandomEmojis());
+  const [myData, setMyData] = React.useState<any>(null);
+
+  const isRegistered = useMemo(() => {
+    if (myData && myData?.is_verified && myData?.nationality) {
+      return true;
+    }
+    return false;
+  }, [myData]);
+
+  const currentKyc = useMemo(() => {
+    if (myData && myData?.is_verified && myData?.nationality) {
+      return myData;
+    }
+    return null;
+  }, [myData]);
+
+  const [currentGender, setCurrentGender] = useLocalStorage<string | null>(
+    LocalStorageKeys.CurrentGender,
+    null
+  );
+  const [isAdult, setIsAdult] = useLocalStorage<boolean | null>(
+    LocalStorageKeys.IsAdult,
+    null
+  );
+
   const pathname = usePathname();
 
   let slug = null;
@@ -97,27 +147,42 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [consoleShown]);
 
 
-  const emojisList = [
-    "👥",
-    "🤐",
-    "🪪",
-    "🕵️‍♂️",
-    "🧑‍💻",
-    "🔒",
-    "🔑",
-    "🌐",
-    "👻",
-    "👁️‍🗨️",
-    "👤"
-  ]
 
-  const getRandomEmojis = () => {
-    const shuffled = [...emojisList].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3); // Get first 3 unique emojis after shuffling
-  };
+  React.useEffect(() => {
+    const fetchMyData = async () => {
+      const message = "getMyData";
+      const messageObj: Message = {
+        // id: crypto.randomUUID().split("-").slice(0, 2).join(""),
+        id: crypto.randomUUID(),
+        timestamp: new Date(),
+        text: message,
+        internal: !!isInternal,
+        likes: 0,
+        anonGroupId: "selfxyz",
+        anonGroupProvider: "selfxyz",
+      };
 
-  const [randomEmojis] = React.useState(getRandomEmojis());
-  const [randomEmojisSidebar] = React.useState(getRandomEmojis());
+      const res = await getMyDataMessageCountry(messageObj);
+
+      const credentialSubject = res?.credentialSubject;
+      if (credentialSubject?.is_verified) {
+        setIsVerified(true);
+      }
+      if (credentialSubject) {
+
+        if (credentialSubject?.nationality) {
+          setCurrentCountryId(credentialSubject?.nationality);
+        }
+        if (credentialSubject?.gender) {
+          setCurrentGender(credentialSubject?.gender);
+        }
+
+      }
+      setMyData(myData);
+    };
+    fetchMyData();
+  }, []);
+
   return (
     <>
       <div className="page">

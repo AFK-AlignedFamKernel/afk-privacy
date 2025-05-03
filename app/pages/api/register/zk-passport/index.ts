@@ -34,8 +34,6 @@ async function registerIdentity(req: NextApiRequest, res: NextApiResponse) {
         console.log("registerIdentity", req.body);
         const { proofs, queryResult, verification, signedMessage } = req.body;
 
-
-
         if (!verification || !verification.proofs || !verification.queryResult) {
             return res.status(400).json({
                 success: false,
