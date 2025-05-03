@@ -105,7 +105,7 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
       if(imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
-        const imageUrl = await axios.post("api/file", formData, {
+        const imageUrl = await axios.post("api/file/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
