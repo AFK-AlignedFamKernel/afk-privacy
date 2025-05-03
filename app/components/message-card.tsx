@@ -3,7 +3,7 @@ import Image from "next/image";
 import TimeAgo from "javascript-time-ago";
 import Link from "next/link";
 import IonIcon from "@reacticons/ionicons";
-import type { SignedMessageWithProof } from "../lib/types";
+import type { SignedMessageWithProof, SignedMessageWithProofWithMedia } from "../lib/types";
 import { generateNameFromPubkey } from "../lib/utils";
 import { setMessageLiked, isMessageLiked } from "../lib/store";
 import { fetchMessageVerify, toggleLike, fetchMessages } from "../lib/api";
@@ -14,7 +14,7 @@ import Dialog from "./dialog";
 import CommentForm from "./comment-form";
 
 interface MessageCardProps {
-  message: SignedMessageWithProof;
+  message: SignedMessageWithProofWithMedia;
   isInternal?: boolean;
 }
 
@@ -243,7 +243,17 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
         {renderVerificationStatus()}
       </header>
 
-      <main className="message-card-content">{message.text}</main>
+      <main className="message-card-content">
+        {message.text}
+
+      </main>
+
+      <div className="message-card-media">
+        {message?.imageUrl && message?.imageUrl !== "" && message?.imageUrl?.length > 0 && 
+        <Image src={message.imageUrl} alt="Image" width={250} height={250} />}
+        {message?.videoUrl && message?.videoUrl !== "" && message?.videoUrl?.length > 0 && <video src={message.videoUrl} controls />}
+      </div>
+
 
       <div className="message-card-footer">
         <div className="like-button-container">
@@ -257,7 +267,7 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, isInternal }) => {
           </button>
         </div>
         <div className="like-button-container">
-          <button 
+          <button
             onClick={handleShowComments}
             className="message-card-action-button"
             disabled={isLoading}

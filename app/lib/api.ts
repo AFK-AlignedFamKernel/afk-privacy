@@ -123,7 +123,10 @@ export async function createMembership({
   }
 }
 
-export async function createMessage(signedMessage: SignedMessage) {
+export async function createMessage(signedMessage: SignedMessage, options?: {
+  imageUrl?: string,
+  videoUrl?: string
+}) {
   const response = await fetch("/api/messages", {
     method: "POST",
     headers: {
@@ -133,6 +136,8 @@ export async function createMessage(signedMessage: SignedMessage) {
       ...signedMessage,
       ephemeralPubkey: signedMessage.ephemeralPubkey.toString(),
       signature: signedMessage.signature.toString(),
+      imageUrl: options?.imageUrl,
+      videoUrl: options?.videoUrl,
     }),
   });
 

@@ -47,7 +47,7 @@ export async function postMessage(message: Message, options?: {
   };
 
   // Send the signed message to the server
-  await createMessage(signedMessage);
+  await createMessage(signedMessage, options);
 
   return signedMessage;
 }
@@ -74,10 +74,10 @@ export async function verifyMessage(message: SignedMessageWithProof, options?: {
 
     // Verify the proof that the sender (their ephemeral pubkey) belongs to the AnonGroup
     const provider = Providers[message.anonGroupProvider];
-    console.log("message.anonGroupProvider", message.anonGroupProvider);
-    console.log("provider", provider);
-    console.log("message.proof", message.proof);
-    console.log("options?.proof", options?.proof);
+    // console.log("message.anonGroupProvider", message.anonGroupProvider);
+    // console.log("provider", provider);
+    // console.log("message.proof", message.proof);
+    // console.log("options?.proof", options?.proof);
     isValid = await provider.verifyProof(
       options?.proof|| message.proof,
       message.anonGroupId,

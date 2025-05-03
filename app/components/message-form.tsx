@@ -102,6 +102,8 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
         anonGroupProvider: currentProvider as string,
       };
 
+      let imageUrlString = null;
+
       if(imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
@@ -112,20 +114,15 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
         });
         const data = await imageUrl.data;
 
-        // const imageUrl = await fetch("api/file", {
-        //   method: "POST",
-        //   body: JSON.stringify({
-        //     file: imageFile,
-        //   }),
-        // });
-        // const data = await imageUrl.json();
-
         console.log("data", data);
-        setImageUrl(data.url);
+        imageUrlString = data.url;
+        console.log("imageUrl", imageUrlString);
+        setImageUrl(imageUrlString);
       }
 
-      return;
-      const signedMessage = await postMessage(messageObj);
+      const signedMessage = await postMessage(messageObj, {
+        imageUrl: imageUrlString,
+      });
       console.log("signedMessage", signedMessage);
 
       setMessage("");

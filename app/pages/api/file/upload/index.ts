@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(HTTPStatus.OK).json({ 
       hash: IpfsHash, 
-      url: `${process.env.IPFS_GATEWAY}/${IpfsHash}` 
+      url: `${process.env.IPFS_GATEWAY}${IpfsHash}` 
     });
 
   } catch (error) {

@@ -136,6 +136,22 @@ a.message-card-header-logo:hover {
   white-space: break-spaces;
 }
 
+.message-card-media {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 5px;
+  }
+  
+}
+
 .message-card-skeleton {
   @extend .message-card;
   height: 100px;
