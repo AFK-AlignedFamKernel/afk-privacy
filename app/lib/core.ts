@@ -31,7 +31,12 @@ export async function generateKeyPairAndRegister(
   return { anonGroup, ephemeralPubkey: ephemeralKey.publicKey.toString(), proofArgs, uuid };
 }
 
-export async function postMessage(message: Message) {
+export async function postMessage(message: Message, options?: {
+  imageFile?: File,
+  videoFile?: File,
+  imageUrl?: string,
+  videoUrl?: string
+}) {
   // Sign the message with the ephemeral key pair
   const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessage(message);
   const signedMessage: SignedMessage = {
@@ -42,7 +47,7 @@ export async function postMessage(message: Message) {
   };
 
   // Send the signed message to the server
-  await createMessage(signedMessage);
+  await createMessage(signedMessage, options);
 
   return signedMessage;
 }
@@ -69,10 +74,10 @@ export async function verifyMessage(message: SignedMessageWithProof, options?: {
 
     // Verify the proof that the sender (their ephemeral pubkey) belongs to the AnonGroup
     const provider = Providers[message.anonGroupProvider];
-    console.log("message.anonGroupProvider", message.anonGroupProvider);
-    console.log("provider", provider);
-    console.log("message.proof", message.proof);
-    console.log("options?.proof", options?.proof);
+    // console.log("message.anonGroupProvider", message.anonGroupProvider);
+    // console.log("provider", provider);
+    // console.log("message.proof", message.proof);
+    // console.log("options?.proof", options?.proof);
     isValid = await provider.verifyProof(
       options?.proof|| message.proof,
       message.anonGroupId,

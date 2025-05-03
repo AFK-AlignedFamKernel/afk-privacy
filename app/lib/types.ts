@@ -113,6 +113,11 @@ export interface SignedMessageWithProof extends SignedMessage {
   proofArgsString?: string;
 }
 
+export interface SignedMessageWithProofWithMedia extends SignedMessageWithProof {
+  imageUrl?: string;
+  videoUrl?: string;
+}
+
 export const LocalStorageKeys = {
   EphemeralKey: "ephemeralKey",
   CurrentGroupId: "currentGroupId",

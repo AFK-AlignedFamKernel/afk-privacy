@@ -7,3 +7,6 @@ libs = ["lib"]
 fs_permissions = [{ access = "read", path = "../../"},
 { access = "read", path = "../../../"}
 ]
+
+[profile.default.dependencies]
+selfxyz-contracts = "https://github.com/selfxyz/self.git"

@@ -1,0 +1,30 @@
+name: Solidity Contracts
+
+on:
+  push:
+    paths:
+      - "contracts/solidity/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "contracts/solidity/**"
+
+permissions: read-all
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Foundry version
+        run: forge --version
+        working-directory: contracts/solidity
+      - name: Build Solidity contracts
+        run: forge build
+        working-directory: contracts/solidity
+      - name: Test Solidity contracts
+        run: forge test
+        working-directory: contracts/solidity

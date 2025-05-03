@@ -48,6 +48,10 @@ export async function postMessage(
       replyCount: 0
     }
 
+    const {imageUrl, videoUrl} = body;
+    console.log("imageUrl", imageUrl);
+    console.log("videoUrl", videoUrl);
+
     // Verify pubkey is registered
     const { data, error } = await supabase
       .from("memberships")
@@ -85,7 +89,9 @@ export async function postMessage(
         pubkey: signedMessage.ephemeralPubkey.toString(),
         internal: signedMessage.internal,
         parent_id: signedMessage?.parentId,
-        reply_count: 0
+        reply_count: 0,
+        image_url: imageUrl,
+        video_url: videoUrl
       },
     ]);
 
@@ -108,6 +114,8 @@ export async function postMessage(
         likes,
         reply_count,
         parent_id,
+        image_url,
+        video_url,
         memberships!fk_message_membership (
           proof,
           pubkey_expiry,
@@ -144,7 +152,7 @@ export async function fetchMessages(
   let query = supabase
     .from("messages")
     .select(
-      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id"
+      "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, image_url, video_url"
     )
     .order("timestamp", { ascending: false })
     .limit(limit);
@@ -205,6 +213,7 @@ export async function fetchMessages(
 
   const { data, error } = await query;
 
+  console.log("data", data);
   if (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -223,7 +232,9 @@ export async function fetchMessages(
     internal: message.internal,
     likes: message.likes,
     replyCount: message.reply_count,
-    parentId: message.parent_id
+    parentId: message.parent_id,
+    imageUrl: message.image_url,
+    videoUrl: message.video_url
   }));
 
   res.json(messages);
