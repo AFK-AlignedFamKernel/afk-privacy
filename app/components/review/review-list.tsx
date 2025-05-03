@@ -19,12 +19,14 @@ type ReviewListProps = {
   isInternal?: boolean;
   groupId?: string;
   showMessageForm?: boolean;
+  countryId?: string; 
 };
 
 const ReviewList: React.FC<ReviewListProps> = ({
   isInternal,
   groupId,
   showMessageForm = false,
+  countryId,
 }) => {
   // State
   const [reviews, setReviews] = useState<SignedMessageWithProof[]>([]);
