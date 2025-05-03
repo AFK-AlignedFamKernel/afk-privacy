@@ -1,0 +1,55 @@
+name: Starknet Contracts
+
+on:
+  push:
+    paths:
+      - "contracts/cairo/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "contracts/cairo/**"
+
+permissions: read-all
+
+jobs:
+  afk-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          tool-versions: contracts/cairo/afk/.tool-versions
+          scarb-lock: contracts/cairo/afk/scarb.lock
+      # - name: Check cairo format
+      #   run: scarb fmt --check
+      #   working-directory: onchain/cairo/afk
+      - name: Build cairo programs
+        run: scarb build
+        working-directory: contracts/cairo/afk
+      - uses: foundry-rs/setup-snfoundry@v3
+        with:
+          tool-versions: contracts/cairo/afk/.tool-versions
+      - name: Run cairo tests
+        run: snforge test
+        working-directory: contracts/cairo/afk
+  launchpad:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: software-mansion/setup-scarb@v1
+        with:
+          tool-versions: contracts/cairo/launchpad/.tool-versions
+          scarb-lock: contracts/cairo/launchpad/scarb.lock
+      # - name: Check cairo format
+      #   run: scarb fmt --check
+      #   working-directory: onchain/cairo/launchpad
+      - name: Build cairo programs
+        run: scarb build
+        working-directory: onchain/cairo/launchpad
+      - uses: foundry-rs/setup-snfoundry@v3
+        with:
+          tool-versions: onchain/cairo/launchpad/.tool-versions
+      - name: Run cairo tests
+        run: snforge test
+        working-directory: onchain/cairo/launchpad
