@@ -130,6 +130,7 @@ export const LocalStorageKeys = {
   CurrentBirthdate: "currentBirthdate",
   CurrentOrganization: "currentOrganization",
   IsAdult: "isAdult",
+  IsVerified: "isVerified",
 };
 
 export interface PassportRegistration {
