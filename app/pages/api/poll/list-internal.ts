@@ -134,10 +134,10 @@ export async function fetchPollsInternal(
 
     // Internal messages require a valid pubkey from the same group (as Authorization header)
     if (isInternal) {
-      if (!groupId) {
+      if (!groupId && !country) {
         return res
           .status(400)
-          .json({ error: "Group ID is required for internal messages" });
+          .json({ error: "Group ID or country is required for internal messages" });
       }
 
 

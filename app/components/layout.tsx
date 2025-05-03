@@ -169,6 +169,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         setIsVerified(true);
       }
       if (credentialSubject) {
+        console.log("credentialSubject", credentialSubject);
 
         if (credentialSubject?.nationality) {
           setCurrentCountryId(credentialSubject?.nationality);
@@ -290,7 +291,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               {isOpenInternal &&
 
                 <>
-                  {slug && (
+                  {/* {slug && (
                     <Link
                       onClick={() => setIsSidebarOpen(false)}
                       href={`/${slug}/${currentGroupId}/internal`}
@@ -298,9 +299,20 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     >
                       {currentGroupId} Internal
                     </Link>
-                  )}
+                  )} */}
 
-                  {slug && currentCountryId && (
+                  {currentGroupId &&
+                    <Link
+                      onClick={() => setIsSidebarOpen(false)}
+                      href={`/${slug}/${currentGroupId}/internal`}
+                      className="sidebar-nav-item"
+                    >
+                      {currentGroupId} Internal
+                    </Link>
+                  }
+
+
+                  {currentCountryId && (
                     <Link
                       onClick={() => setIsSidebarOpen(false)}
                       href={`/country/${currentCountryId}/internal`}
@@ -309,8 +321,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       {currentCountryId} Country {COUNTRY_DATA[currentCountryId].name} {COUNTRY_DATA[currentCountryId].flag}
                     </Link>
                   )}
-                </>}
 
+                </>}
 
             </div>
 
