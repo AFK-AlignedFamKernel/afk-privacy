@@ -51,6 +51,8 @@ CREATE TABLE IF NOT EXISTS messages (
     parent_id UUID REFERENCES messages(id) ON DELETE CASCADE,
     reply_count INTEGER NOT NULL DEFAULT 0,
     membership_id UUID REFERENCES memberships(id) ON DELETE CASCADE,
+    image_url TEXT,
+    video_url TEXT,
     CONSTRAINT fk_message_membership 
         FOREIGN KEY (pubkey, group_id, group_provider) 
         REFERENCES memberships(pubkey, group_id, provider)
@@ -248,7 +250,9 @@ CREATE TABLE IF NOT EXISTS country_messages (
     gender TEXT,
     group_id TEXT NOT NULL,
     group_provider TEXT NOT NULL,
-    internal BOOLEAN NOT NULL DEFAULT false
+    internal BOOLEAN NOT NULL DEFAULT false,
+    image_url TEXT,
+    video_url TEXT,
 );
 
 CREATE INDEX IF NOT EXISTS idx_country_messages_nationality ON country_messages(nationality);
@@ -306,7 +310,9 @@ CREATE TABLE IF NOT EXISTS polls (
     total_votes INTEGER DEFAULT 0,
     total_kyc_votes INTEGER DEFAULT 0,
     total_org_votes INTEGER DEFAULT 0,
-    total_org_user_votes INTEGER DEFAULT 0
+    total_org_user_votes INTEGER DEFAULT 0,
+    image_url TEXT,
+    video_url TEXT
 );
 
 -- Create poll options/answers table
@@ -316,7 +322,9 @@ CREATE TABLE IF NOT EXISTS poll_options (
     option_text TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     vote_count INTEGER DEFAULT 0,
-    option_id TEXT
+    option_id TEXT,
+    image_url TEXT,
+    video_url TEXT
 );
 
 -- Create poll votes table with one vote per user constraint

@@ -9,7 +9,7 @@ import { generateNameFromPubkey } from "../lib/utils";
 import { Providers } from "../lib/providers";
 import SignWithGoogleButton from "./siwg";
 // import SignInWithMicrosoftButton from "./siwm";
-
+import axios from "axios";
 type MessageFormProps = {
   isInternal?: boolean;
   onSubmit: (message: SignedMessageWithProof) => void;
@@ -33,6 +33,11 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
     LocalStorageKeys.CurrentProvider,
     null
   );
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
 
   const provider = currentProvider ? Providers[currentProvider] : null;
   const anonGroup =
@@ -97,6 +102,29 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
         anonGroupProvider: currentProvider as string,
       };
 
+      if(imageFile) {
+        const formData = new FormData();
+        formData.append('file', imageFile);
+        const imageUrl = await axios.post("api/file", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        const data = await imageUrl.data;
+
+        // const imageUrl = await fetch("api/file", {
+        //   method: "POST",
+        //   body: JSON.stringify({
+        //     file: imageFile,
+        //   }),
+        // });
+        // const data = await imageUrl.json();
+
+        console.log("data", data);
+        setImageUrl(data.url);
+      }
+
+      return;
       const signedMessage = await postMessage(messageObj);
       console.log("signedMessage", signedMessage);
 
@@ -128,6 +156,19 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
           <span className="message-form-character-count">
             {message.length}/280
           </span>
+        )}
+
+        {imageFile && (
+          <div className="message-form-image-preview">
+            <img src={URL.createObjectURL(imageFile)} alt="Image preview"
+            style={{
+              width: '100%',
+              maxHeight: '250px',
+              objectFit: 'cover',
+              borderRadius: '8px',
+            }}
+             />
+          </div>
         )}
       </div>
 
@@ -164,6 +205,24 @@ const MessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit }) => {
               </button>
             </div>
           )}
+
+
+          <div className="message-form-footer-buttons">
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              onChange={(e) => setImageFile(e?.target?.files?.[0] ?? null)}
+              style={{ display: 'none' }}
+            />
+            <button
+              title="Upload image"
+              onClick={() => document.getElementById('imageUpload')?.click()}
+              tabIndex={-1}
+            >
+              <IonIcon name="image-outline" />
+            </button>
+          </div>
         </div>
 
         {isRegistered && (

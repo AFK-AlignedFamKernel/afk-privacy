@@ -31,7 +31,12 @@ export async function generateKeyPairAndRegister(
   return { anonGroup, ephemeralPubkey: ephemeralKey.publicKey.toString(), proofArgs, uuid };
 }
 
-export async function postMessage(message: Message) {
+export async function postMessage(message: Message, options?: {
+  imageFile?: File,
+  videoFile?: File,
+  imageUrl?: string,
+  videoUrl?: string
+}) {
   // Sign the message with the ephemeral key pair
   const { signature, ephemeralPubkey, ephemeralPubkeyExpiry } = await signMessage(message);
   const signedMessage: SignedMessage = {
