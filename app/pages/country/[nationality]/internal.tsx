@@ -39,7 +39,7 @@ export default function NationalityPageInternal() {
       return (
         <div className="company-description">
           Messages sent here are hidden from the public board, and only visible to members of {COUNTRY_DATA[nationality]?.name} {COUNTRY_DATA[nationality]?.flag}.
-          . Server hosting these messages can still see them.
+          Server hosting these messages can still see them.
         </div>)
     } else {
       return (
@@ -60,6 +60,24 @@ export default function NationalityPageInternal() {
       </Head>
 
 
+
+
+      <div className="domain-page">
+        <div className="company-info">
+          <div className="company-logo">
+            {COUNTRY_DATA[nationality]?.flag}
+
+          </div>
+          <div>
+            <div className="company-title">{COUNTRY_DATA[nationality]?.name}</div>
+            <div className="company-description">
+              Anonymous messages from members of {COUNTRY_DATA[nationality]?.name}
+            </div>
+          </div>
+        </div>
+
+
+      </div>
       <div className="tab-selector">
         <div className="tabs">
           {tabs.map((tab) => (
@@ -76,22 +94,6 @@ export default function NationalityPageInternal() {
 
       {renderDescriptionMessages()}
 
-      <div className="domain-page">
-        <div className="company-info">
-          <div className="company-logo">
-            {COUNTRY_DATA[nationality]?.flag}
-    
-          </div>
-          <div>
-            <div className="company-title">{COUNTRY_DATA[nationality]?.name}</div>
-            <div className="company-description">
-              Anonymous messages from members of {COUNTRY_DATA[nationality]?.name}
-            </div>
-          </div>
-        </div>
-
-
-      </div>
       {activeTab === "messages" && (
         <MessageListCountry
           groupId={nationality}
