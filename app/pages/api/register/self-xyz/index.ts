@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log("Result:", result);
       if (result.isValid) {
 
-        const { error: insertError } = await supabase.from("passport_registrations").update({
+        const { error: insertError, data } = await supabase.from("passport_registrations").update({
           is_verified: true,
           proof: proof,
           proof_args: publicSignals,
@@ -62,7 +62,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           gender: result.credentialSubject.gender,
         }).eq("id_register", userId);
 
-        console.log("Inserted passport registration:", insertError);
+        console.log("Inserted passport registration:", data);
+
+        console.log("Inserted error passport registration:", insertError);
         // Return successful verification response
         return res.status(200).json({
           status: 'success',
