@@ -21,11 +21,11 @@ type MessageFormProps = {
 
 const prompts = (companyName: string, nationality: string) => [
   // `What’s the tea at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What’s we can improve in ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What’s going unsaid at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What’s happening behind the scenes at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
-  `What would you say if you weren’t being watched? ${COUNTRY_DATA[nationality]?.flag}`,
-  `What’s the thing nobody’s admitting at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What's can we improve in ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What's going unsaid at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What's happening behind the scenes at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
+  `What would you say if you weren't being watched? ${COUNTRY_DATA[nationality]?.flag}`,
+  `What's the thing nobody's admitting at ${COUNTRY_DATA[companyName]?.name ?? companyName} ${COUNTRY_DATA[nationality]?.flag}?`,
 ];
 const randomPromptIndex = Math.floor(Math.random() * prompts("", "your Nationality").length);
 

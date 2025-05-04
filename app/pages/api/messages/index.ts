@@ -49,8 +49,8 @@ export async function postMessage(
     }
 
     const {imageUrl, videoUrl} = body;
-    console.log("imageUrl", imageUrl);
-    console.log("videoUrl", videoUrl);
+    // console.log("imageUrl", imageUrl);
+    // console.log("videoUrl", videoUrl);
 
     // Verify pubkey is registered
     const { data, error } = await supabase
