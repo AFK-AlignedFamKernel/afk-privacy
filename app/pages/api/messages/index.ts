@@ -95,6 +95,7 @@ export async function postMessage(
       },
     ]);
 
+    console.log("insertError", insertError);
     if (insertError) {
       throw insertError;
     }
@@ -122,8 +123,10 @@ export async function postMessage(
           proof_args
         )
       `)
-      // .eq("id", signedMessage.id)
+      .eq("id", signedMessage.id)
       .single();
+
+    console.log("fetchError", fetchError);
 
     if (fetchError) {
       throw fetchError;
@@ -154,7 +157,8 @@ export async function fetchMessages(
     let query = supabase
       .from("messages")
       .select(
-        "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, image_url, video_url"
+        "*"
+        // "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, image_url, video_url"
       )
       .order("timestamp", { ascending: false })
     // .limit(limit); 
@@ -166,14 +170,14 @@ export async function fetchMessages(
 
     query = query.eq("internal", !!isInternal);
 
-    if (isInternal) {
-      query = query.eq("internal", true);
-    } else {
-      query = query.eq("internal", false);
-    }
-    if (request.query.hasOwnProperty('isInternal')) {
-      query = query.eq("internal", isInternal);
-    }
+    // if (isInternal) {
+    //   query = query.eq("internal", true);
+    // } else {
+    //   query = query.eq("internal", false);
+    // }
+    // if (request.query.hasOwnProperty('isInternal')) {
+    //   query = query.eq("internal", isInternal);
+    // }
 
     if (parentId) {
       query = query.eq("parent_id", parentId);
@@ -188,6 +192,8 @@ export async function fetchMessages(
     if (beforeTimestamp) {
       query = query.lt("timestamp", new Date(Number(beforeTimestamp)).toISOString());
     }
+
+    // console.log("group_id", groupId);
 
     // Internal messages require a valid pubkey from the same group (as Authorization header)
     if (isInternal) {
@@ -216,7 +222,6 @@ export async function fetchMessages(
         .eq("group_id", groupId)
         .single();
 
-      // console.log("membershipData", membershipData);
       if (membershipError || !membershipData) {
         res.status(401).json({ error: "Invalid public key for this group" });
         res.end();
@@ -224,26 +229,11 @@ export async function fetchMessages(
       }
     }
 
-
-    query = query.limit(limit);
+    // query = query.limit(limit);
 
     const { data, error } = await query;
+    // console.log("data", data);
 
-    console.log("data", data);
-
-    const { data: messagesData, error: messagesError } = await supabase
-      .from("messages")
-      .select(
-        "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, image_url, video_url"
-      )
-      .eq("internal", isInternal)
-      // .eq("is_internal", isInternal)
-      // .eq("group_id", groupId)
-      .order("timestamp", { ascending: false })
-      .limit(50)
-      .single();
-    console.log("messagesData", messagesData);
-    console.log("messagesError", messagesError);
     if (error) {
       console.error(error);
       res.status(500).json({ error: error.message });
@@ -266,7 +256,7 @@ export async function fetchMessages(
       imageUrl: message.image_url,
       videoUrl: message.video_url
     }));
-    console.log("messages", messages);
+    // console.log("messages", messages);
 
     return res.status(200).json(messages);
   } catch (error) {

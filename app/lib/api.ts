@@ -27,6 +27,7 @@ export async function fetchMessages({
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
+    // "Cache-Control": "no-cache",
   };
 
   if (isInternal) {

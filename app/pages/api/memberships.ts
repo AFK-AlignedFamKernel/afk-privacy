@@ -55,16 +55,18 @@ async function createMembership(req: NextApiRequest, res: NextApiResponse) {
         proof: JSON.stringify(proof),
         proof_args: JSON.stringify(proofArgs),
         group_id: groupId,
+        
       },
     ]);
 
     if (error) {
+      console.error("Error inserting to membership table:", error);
       throw new Error(
         `Error inserting to membership table: ${error?.message}`
       );
     }
 
-    try {
+    try {                                                                                                                                                                                                                                                                                                                                                                 
       const { error: orgErrorFind, data: organizationFind } = await supabase.from("organizations").select("*").eq("id", groupId).single();
       if (organizationFind) {
         return res.status(200).json({ success: true });
