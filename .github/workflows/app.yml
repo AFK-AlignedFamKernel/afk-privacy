@@ -28,40 +28,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
+          cache: 'yarn'
 
-      - name: Install yarn
-        uses: yarn/action-setup@v4
-
-      - name: Get yarn store directory
-        id: yarn-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(yarn store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup yarn cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.yarn-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-yarn-store-${{ hashFiles('**/yarn-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-store-
+      - name: Install Yarn
+        run: npm install -g yarn
 
       - name: Install Dependencies
         run: |
-          if [ -f "apps/app/yarn-lock.yaml" ]; then
-            yarn install --frozen-lockfile
-          else
-            yarn install
-          fi
+          yarn install --frozen-lockfile
 
-#      - name: Prettier Format Check
-#        run: yarn format:check
-#
-#      - name: Lint
-#        run: yarn lint
-#
-      # - name: TypeScript Check
-      #   run: yarn ts:check
+      - name: Run Prettier Check
+        run: yarn prettier --check .
+
+      - name: Run ESLint
+        run: yarn eslint .
+
+      - name: Type Check
+        run: yarn tsc --noEmit
 
       - name: Build
         run: yarn build

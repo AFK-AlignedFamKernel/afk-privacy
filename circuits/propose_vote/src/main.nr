@@ -1,11 +1,6 @@
 use dep::std;
+use afk_common::verify_vote::verify_vote;
 use std::hash::poseidon2::Poseidon2::hash;
-use trees::{
-    sparse_merkle::SparseMerkleTree,
-    types::{Calculator, SMT_Creator},
-};
-// use afk_common::verify_vote::{verify_vote};
-
 
 fn main(
     root: pub Field,
@@ -16,45 +11,15 @@ fn main(
     siblings: [Field; 254],
     // vote: pub Field,
 ) -> pub Field {
-    let hash2 = |x: [Field; 2]| -> Field { hash(x, 2) };
-    let hash3 = |x: [Field; 3]| -> Field { hash(x, 3) };
-
-    // let mut tree = SparseMerkleTree::new(hash3, hash2);
-    // let mut tree = MerkleTree::new(hash2);
-    let mut tree = SparseMerkleTree::new(hash3, hash2);
-
-    let key = leaf[0];
-    let value = leaf[1];
-    let entry = (key, value);
-    // let note_commitment = std::hash::pedersen_hash([secret]);
-
-    let root_check = tree.calculate_root(entry, key, siblings);
-    std::println("root_check");
-    std::println([root_check]);
-    std::println("root");
-    std::println([root]);
-    assert(root_check == root);
-
-
-    // tree.add(entry, index, siblings);
-    // // Calculate and verify root
-    // tree.membership(entry, index, siblings);
-
-    // Verify nullifier
-    let computed_nullifier = std::hash::pedersen_hash([secret, proposal_id]);
-    std::println("computed_nullifier");
-    std::println([computed_nullifier]);
-    std::println("nullifier_default");
-    std::println([nullifier_default]);
-    assert(computed_nullifier == nullifier_default);
-
-    // assert(U128::from_integer(vote) <= 1);
-
-    //  verify_vote(root_check, secret, proposal_id, vote, nullifier_default, leaf, siblings);
-
-    // Return the commitment
-    std::hash::pedersen_hash([root, secret, proposal_id])
-
+    verify_vote(
+        root,
+        secret,
+        proposal_id,
+        0,
+        nullifier_default,
+        leaf,
+        siblings,
+    )
 }
 
 #[test]
@@ -117,7 +82,6 @@ fn test_valid_sparse_merkle_tree_membership() {
     assert(result == expected_output);
 }
 
-
 #[test]
 fn test_vote_verification() {
     let hash2 = |x: [Field; 2]| -> Field { hash(x, 2) };
@@ -142,7 +106,8 @@ fn test_vote_verification() {
 
     // Calculate intermediate nodes with more levels
     let mut current_hash = leaf_hash;
-    for i in 0..5 { // Keep consistent depth
+    for i in 0..5 {
+        // Keep consistent depth
         current_hash = hash2([current_hash, siblings[i]]);
         if i + 1 < 5 {
             siblings[i + 1] = hash2([0, 0]); // Use consistent default siblings
@@ -170,7 +135,6 @@ fn test_vote_verification() {
         leaf,
         siblings,
         // vote,
-
     );
 
     // Calculate expected output

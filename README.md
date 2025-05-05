@@ -31,6 +31,13 @@ Starting with Social and governance usecases:
 # TODO
 -
 
+# Tech and tools used
+
+- ZK Email
+- ZK JWT
+- ZK Kit
+- Zk Passport SDK
+- Garaga
 
 # After NoirHack
 
