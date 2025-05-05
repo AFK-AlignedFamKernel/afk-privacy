@@ -4,6 +4,7 @@ import { generateEphemeralKey, signMessage, verifyMessageSignature } from "./eph
 import { initProver } from "./lazy-modules";
 import { Providers } from "./providers";
 import { k12 } from "@noble/hashes/sha3-addons";
+import { loadOrInitializeEphemeralKey } from "./zk-did";
 
 export async function generateKeyPairAndRegister(
   providerName: keyof typeof Providers
@@ -12,8 +13,16 @@ export async function generateKeyPairAndRegister(
   initProver();
 
   // Generate ephemeral key pair and a random salt
-  const {ephemeralKey, uuid} = await generateEphemeralKey();
+  // const {ephemeralKey:ephemeralKeyProps, uuid} = await generateEphemeralKey();
+  const {ephemeralKey:ephemeralKeyProps, uuid} = await loadOrInitializeEphemeralKey();
 
+  const ephemeralKey = {
+    publicKey: BigInt(ephemeralKeyProps.publicKey),
+    privateKey: BigInt(ephemeralKeyProps.privateKey),
+    salt: BigInt(ephemeralKeyProps.salt),
+    expiry: new Date(ephemeralKeyProps.expiry),
+    ephemeralPubkeyHash: BigInt(ephemeralKeyProps.ephemeralPubkeyHash),
+  };
   // Ask the AnonGroup provider to generate a proof
   const provider = Providers[providerName];
   const { anonGroup, proof, proofArgs } = await provider.generateProof(ephemeralKey);
