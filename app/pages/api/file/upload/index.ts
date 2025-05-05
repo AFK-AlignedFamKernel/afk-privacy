@@ -5,7 +5,6 @@ import { pinata } from '@/services/pinata';
 import { ErrorCode } from '@/utils/errors';
 import { HTTPStatus } from '@/utils/http';
 
-// export const runtime = "edge";
 
 // Add this configuration for handling file uploads
 export const config = {

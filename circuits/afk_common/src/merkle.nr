@@ -1,7 +1,6 @@
 use dep::std;
 use std::hash::poseidon2::Poseidon2::hash;
-use trees::{sparse_merkle::SparseMerkleTree, types::{Calculator, MembershipProver, SMT_Creator}};
-use trees::{merkle::MerkleTree};
+use trees::{types::{Calculator, MT_Creator}, merkle::MerkleTree};
 
 
 pub fn verify_merkle_tree_vote(

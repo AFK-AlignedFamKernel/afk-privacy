@@ -23,8 +23,8 @@ export default function PrivacyPolicyPage() {
                         AFK is designed with privacy at its core. Our server:
                     </p>
                     <ul>
-                        <li>Never collects any personal information from the users</li>
-                        <li>Only stores messages, public keys, and Zero-Knowledge proofs</li>
+                        <li>Never collects any personal information from the users if not needed</li>
+                        <li>Only stores messages, public keys, and Zero-Knowledge proofs with the Data your accept to share</li>
                         <li>Never has access to your full JWT token</li>
                     </ul>
 

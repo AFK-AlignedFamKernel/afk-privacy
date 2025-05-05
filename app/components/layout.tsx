@@ -17,7 +17,7 @@ import logoAfk from "@/assets/afk_logo_circle.png";
 import CryptoLoading from "./small/crypto-loading";
 import COUNTRY_DATA from "@/assets/country";
 import { getMyDataMessageCountry } from "@/lib/profile";
-
+import { useAppStore } from "@/store/app";
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDark, setIsDark] = useLocalStorage<boolean>(
     LocalStorageKeys.DarkMode,
@@ -42,6 +42,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const [isVerified, setIsVerified] = React.useState(false);
   const [isInternal, setIsInternal] = React.useState(false);
+  const { isFetchedDataInitialized, setIsFetchedDataInitialized } = useAppStore();
   const emojisList = [
     "👥",
     "🤐",
@@ -180,9 +181,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       }
       setMyData(myData);
+      setIsFetchedDataInitialized(true);
     };
-    fetchMyData();
-  }, []);
+    if (!isFetchedDataInitialized) {
+      fetchMyData();
+    }
+  }, [isFetchedDataInitialized]);
 
   return (
     <>
@@ -336,13 +340,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 className="sidebar-nav-footer-item"
               >
                 {isDark ? <IonIcon name="moon" /> : <IonIcon name="sunny" />}
+
               </button>
-              <Link
+              {/* <Link
                 onClick={() => setIsSidebarOpen(false)}
                 href="https://saleel.xyz/blog/stealthnote/"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="How it works"
+                className="sidebar-nav-footer-item"
+              >
+                <IonIcon name="reader" />
+              </Link> */}
+              <Link
+                onClick={() => setIsSidebarOpen(false)}
+                href="/about"
+                // target="_blank"
+                title="About AFK"
                 className="sidebar-nav-footer-item"
               >
                 <IonIcon name="reader" />
