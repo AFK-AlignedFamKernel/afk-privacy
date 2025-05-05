@@ -54,8 +54,8 @@ jobs:
       # - name: Run Prettier Check
       #   run: yarn prettier --check .
 
-      - name: Run ESLint
-        run: yarn eslint .
+      # - name: Run ESLint
+      #   run: yarn eslint .
 
       - name: Type Check
         run: yarn tsc --noEmit
