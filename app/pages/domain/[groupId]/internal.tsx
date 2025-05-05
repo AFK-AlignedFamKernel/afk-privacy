@@ -36,7 +36,6 @@ export default function GroupPage() {
     </>;
   }
 
-
   const renderDescriptionMessages = () => {
     if (activeTab === "messages") {
       return (

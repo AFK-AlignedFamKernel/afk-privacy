@@ -48,7 +48,7 @@ export async function postMessage(
       replyCount: 0
     }
 
-    const {imageUrl, videoUrl} = body;
+    const { imageUrl, videoUrl } = body;
     // console.log("imageUrl", imageUrl);
     // console.log("videoUrl", videoUrl);
 
@@ -122,7 +122,7 @@ export async function postMessage(
           proof_args
         )
       `)
-      .eq("id", signedMessage.id)
+      // .eq("id", signedMessage.id)
       .single();
 
     if (fetchError) {
@@ -179,6 +179,7 @@ export async function fetchMessages(
 
   // Internal messages require a valid pubkey from the same group (as Authorization header)
   if (isInternal) {
+    query = query.eq("internal", true);
     if (!groupId) {
       res
         .status(400)
@@ -204,12 +205,15 @@ export async function fetchMessages(
       .eq("group_id", groupId)
       .single();
 
+    // console.log("membershipData", membershipData);
     if (membershipError || !membershipData) {
       res.status(401).json({ error: "Invalid public key for this group" });
       res.end();
       return;
     }
   }
+
+  console.log("query", query);
 
   const { data, error } = await query;
 
@@ -236,7 +240,8 @@ export async function fetchMessages(
     imageUrl: message.image_url,
     videoUrl: message.video_url
   }));
+  console.log("messages", messages);
+  // res.end();
 
-  res.json(messages);
-  res.end();
+  return res.status(200).json(messages);
 }

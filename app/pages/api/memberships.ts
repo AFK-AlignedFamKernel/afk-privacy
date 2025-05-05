@@ -65,6 +65,10 @@ async function createMembership(req: NextApiRequest, res: NextApiResponse) {
     }
 
     try {
+      const { error: orgErrorFind, data: organizationFind } = await supabase.from("organizations").select("*").eq("id", groupId).single();
+      if (organizationFind) {
+        return res.status(200).json({ success: true });
+      }
       const { error: orgError, data:organization } = await supabase.from("organizations").upsert([
         {
           name: groupId,
