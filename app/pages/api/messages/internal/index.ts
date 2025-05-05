@@ -41,6 +41,9 @@ export async function fetchInternalMessages(
     .select(
       "id, text, timestamp, signature, pubkey, internal, likes, reply_count, group_id, group_provider, parent_id, image_url, video_url"
     )
+    .eq("internal", true)
+    .eq("parent_id", null)
+    .eq("group_id", groupId)
     .order("timestamp", { ascending: false })
     .limit(limit);
 
