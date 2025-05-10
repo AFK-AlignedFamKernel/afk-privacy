@@ -19,37 +19,18 @@ jobs:
       - uses: actions/checkout@v4
       - uses: software-mansion/setup-scarb@v1
         with:
-          tool-versions: contracts/cairo/afk/.tool-versions
-          scarb-lock: contracts/cairo/afk/scarb.lock
+          tool-versions: contracts/cairo/.tool-versions
+          scarb-lock: contracts/cairo/scarb.lock
       # - name: Check cairo format
       #   run: scarb fmt --check
       #   working-directory: onchain/cairo/afk
       - name: Build cairo programs
         run: scarb build
-        working-directory: contracts/cairo/afk
+        working-directory: contracts/cairo/
       - uses: foundry-rs/setup-snfoundry@v3
         with:
-          tool-versions: contracts/cairo/afk/.tool-versions
+          tool-versions: contracts/cairo/.tool-versions
       - name: Run cairo tests
         run: snforge test
-        working-directory: contracts/cairo/afk
-  launchpad:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: software-mansion/setup-scarb@v1
-        with:
-          tool-versions: contracts/cairo/launchpad/.tool-versions
-          scarb-lock: contracts/cairo/launchpad/scarb.lock
-      # - name: Check cairo format
-      #   run: scarb fmt --check
-      #   working-directory: onchain/cairo/launchpad
-      - name: Build cairo programs
-        run: scarb build
-        working-directory: onchain/cairo/launchpad
-      - uses: foundry-rs/setup-snfoundry@v3
-        with:
-          tool-versions: onchain/cairo/launchpad/.tool-versions
-      - name: Run cairo tests
-        run: snforge test
-        working-directory: onchain/cairo/launchpad
+        working-directory: contracts/cairo/
+ 
