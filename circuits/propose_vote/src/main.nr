@@ -6,16 +6,16 @@ fn main(
     root: pub Field,
     secret: Field,
     proposal_id: pub Field,
+    vote: pub Field,
     nullifier_default: pub Field,
     leaf: [Field; 2],
     siblings: [Field; 254],
-    // vote: pub Field,
 ) -> pub Field {
     verify_vote(
         root,
         secret,
         proposal_id,
-        0,
+        vote,
         nullifier_default,
         leaf,
         siblings,
@@ -60,7 +60,7 @@ fn test_valid_sparse_merkle_tree_membership() {
     // Create vote parameters
     let secret = 777;
     let proposal_id = 1;
-    // let vote = 1;
+    let vote = 1;
     let leaf = [key, value];
 
     // Calculate nullifier
@@ -71,10 +71,10 @@ fn test_valid_sparse_merkle_tree_membership() {
         root,
         secret,
         proposal_id,
+        vote,
         nullifier,
         leaf,
         siblings,
-        // vote,
     );
 
     // Calculate expected output
@@ -120,7 +120,7 @@ fn test_vote_verification() {
     // Create different vote parameters
     let secret = 888; // Different secret
     let proposal_id = 2; // Different proposal
-    // let vote = 0; // Different vote
+    let vote = 0; // Different vote
     let leaf = [key, value];
 
     // Calculate nullifier
@@ -131,10 +131,10 @@ fn test_vote_verification() {
         root,
         secret,
         proposal_id,
+        vote,
         nullifier,
         leaf,
         siblings,
-        // vote,
     );
 
     // Calculate expected output

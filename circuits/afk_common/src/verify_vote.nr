@@ -1,9 +1,6 @@
 use dep::std;
 use std::hash::poseidon2::Poseidon2::hash;
-use trees::{
-    sparse_merkle::SparseMerkleTree,
-    types::{Calculator, SMT_Creator, MT_Creator},
-};
+use trees::{sparse_merkle::SparseMerkleTree, types::{Calculator, MT_Creator, SMT_Creator}};
 
 pub fn verify_vote(
     root: pub Field,
@@ -28,21 +25,27 @@ pub fn verify_vote(
     // Calculate and verify root
     // tree.membership(entry, key, siblings);
 
+
     let root_check = tree.calculate_root(entry, key, siblings);
-    //  std::println("root_check");
-    // std::println([root_check]);
-    // std::println("root");
-    // std::println([root]);
+    std::println("root_check");
+    std::println([root_check]);
+    std::println("root");
+    std::println([root]);
     assert(root_check == root);
 
     // Verify nullifier
     let computed_nullifier = std::hash::pedersen_hash([secret, proposal_id]);
     assert(computed_nullifier == nullifier_default);
-    // std::println("computed_nullifier");
-    // std::println([computed_nullifier]);
-    // std::println("nullifier_default");
-    // std::println([nullifier_default]);
+    std::println("computed_nullifier");
+    std::println([computed_nullifier]);
+    std::println("nullifier_default");
+    std::println([nullifier_default]);
     // Return the commitment
+
+    // Verify the vote
+    // assert(U128::from_integer(vote) <= 1);
+
+    // Verify if already voted
     std::hash::pedersen_hash([root, secret, proposal_id])
 }
 
