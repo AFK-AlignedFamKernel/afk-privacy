@@ -42,7 +42,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const [isVerified, setIsVerified] = React.useState(false);
   const [isInternal, setIsInternal] = React.useState(false);
-  const { isFetchedDataInitialized, setIsFetchedDataInitialized } = useAppStore();
+  const { isFetchedDataInitialized, setIsFetchedDataInitialized, isRegistered: isRegisteredAppStore, setIsRegistered } = useAppStore();
   const emojisList = [
     "👥",
     "🤐",
@@ -171,6 +171,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       }
       if (credentialSubject) {
         console.log("credentialSubject", credentialSubject);
+        setIsRegistered(true);
 
         if (credentialSubject?.nationality) {
           setCurrentCountryId(credentialSubject?.nationality);

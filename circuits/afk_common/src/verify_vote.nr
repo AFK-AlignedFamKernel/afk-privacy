@@ -25,6 +25,7 @@ pub fn verify_vote(
     // Calculate and verify root
     // tree.membership(entry, key, siblings);
 
+
     let root_check = tree.calculate_root(entry, key, siblings);
     std::println("root_check");
     std::println([root_check]);

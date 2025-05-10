@@ -139,8 +139,10 @@ CREATE POLICY "Allow authenticated users to read internal messages"
         internal = true AND
         EXISTS (
             SELECT 1 FROM memberships
-            WHERE memberships.pubkey = current_setting('request.jwt.claims', true)::json->>'pubkey'
-            AND memberships.group_id = messages.group_id
+            -- WHERE memberships.pubkey = current_setting('request.jwt.claims', true)::json->>'pubkey'
+            -- WHERE memberships.pubkey = auth.jwt()->>'pubkey'
+            WHERE memberships.group_id = messages.group_id
+            -- AND memberships.group_id = messages.group_id
         )
     );
 
