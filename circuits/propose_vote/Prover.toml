@@ -1,6 +1,7 @@
 root = "0x17c1bf4c6492d3e6c7e66be7f922989ba3ecd352abfca9dbfe6706d889ffa5a2"
 secret = "777"
 proposal_id = "1"
+vote="1"
 nullifier_default = "0x11db632bb4ad673b60455b8e7d62b268d6150191606847fb3e8bf36b1824d568"
 leaf = ["12345", "999"]
 siblings = [
