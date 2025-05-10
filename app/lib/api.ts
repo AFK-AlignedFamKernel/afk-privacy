@@ -27,6 +27,7 @@ export async function fetchMessages({
 
   const headers: HeadersInit = {
     "Content-Type": "application/json",
+    // "Cache-Control": "no-cache",
   };
 
   if (isInternal) {
@@ -50,6 +51,57 @@ export async function fetchMessages({
     timestamp: new Date(message.timestamp),
   }));
 }
+
+export async function fetchInternalMessages({
+  limit,
+  groupId,
+  isInternal,
+  beforeTimestamp,
+  afterTimestamp,
+  parentId,
+}: {
+  limit: number;
+  isInternal?: boolean;
+  groupId?: string;
+  beforeTimestamp?: number | null;
+  afterTimestamp?: number | null;
+  parentId?: string | null;
+}) {
+  const url = new URL(window.location.origin + "/api/messages/internal");
+
+  url.searchParams.set("limit", limit.toString());
+  if (groupId) url.searchParams.set("groupId", groupId);
+  if (isInternal) url.searchParams.set("isInternal", "true");
+  if (afterTimestamp) url.searchParams.set("afterTimestamp", afterTimestamp.toString());
+  if (beforeTimestamp) url.searchParams.set("beforeTimestamp", beforeTimestamp.toString());
+  if (parentId) url.searchParams.set("parentId", parentId);
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (isInternal) {
+    const pubkey = getEphemeralPubkey();
+    if (!pubkey) {
+      throw new Error("No public key found");
+    }
+    headers["Authorization"] = `Bearer ${pubkey}`;
+  }
+
+  const response = await fetch(url, { headers, method: "POST" });
+
+  if (!response.ok) {
+    const errorMessage = await response.text();
+    throw new Error(`Call to /messages API failed: ${errorMessage}`);
+  }
+
+  const messages = await response.json();
+  return messages.map((message: Message) => ({
+    ...message,
+    timestamp: new Date(message.timestamp),
+  }));
+}
+
 
 export async function fetchMessage(
   id: string,

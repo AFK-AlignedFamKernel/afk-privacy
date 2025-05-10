@@ -10,6 +10,8 @@ import { postMessageCountry } from "@/lib/country";
 import Dialog from "../dialog";
 import COUNTRY_DATA from "@/assets/country";
 import ZkIdentityComponent from "../zkdid/zk-identity";
+import Link from "next/link";
+import { useAppStore } from "@/store/app";
 // import SignInWithMicrosoftButton from "./siwm";
 
 type MessageFormProps = {
@@ -29,8 +31,9 @@ const prompts = (companyName: string, nationality: string) => [
 ];
 const randomPromptIndex = Math.floor(Math.random() * prompts("", "your Nationality").length);
 
-const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc, isRegisteredProps  }) => {
+const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, connectedKyc, isRegisteredProps }) => {
 
+  const { isRegistered: isRegisteredAppStore } = useAppStore();
   const [currentKYCProvider, setCurrentKYCProvider] = useLocalStorage<string | null>(
     "currentKYCProvider",
     null
@@ -52,6 +55,9 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
   const provider = currentProvider ? Providers[currentProvider] : null;
   // const isRegistered = !!connectedKyc;
   const isRegistered = useMemo(() => {
+    if (isRegisteredAppStore) {
+      return true;
+    }
     if (isRegisteredProps) {
       return true;
     }
@@ -59,7 +65,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
       return true;
     }
     return false;
-  }, [connectedKyc, isRegisteredProps]);
+  }, [connectedKyc, isRegisteredProps, isRegisteredAppStore]);
   console.log("isRegistered", isRegistered);
 
   const senderName = isInternal
@@ -148,7 +154,7 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           // placeholder={isRegistered ? randomPrompt : "Sign in with passport to anonymously post as 'Someone from KYC (country, gender, age)'"}
-          placeholder={randomPrompt }
+          placeholder={randomPrompt}
           maxLength={280}
           disabled={isTextAreaDisabled}
         />
@@ -210,7 +216,8 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
 
           <>
 
-            <button
+            <Link href="/zk-passport">Sign in with passport</Link>
+            {/* <button
               onClick={() => handleOpenDialog()}
               disabled={!!isRegistering}
               style={{ marginTop: "10px", borderRadius: "10px", border: "1px solid #000", padding: "5px" }}
@@ -220,13 +227,13 @@ const CountryMessageForm: React.FC<MessageFormProps> = ({ isInternal, onSubmit, 
             </button>
             {isDialogOpen && (
               <div className="message-form-dialog">
-                <h2>Sign in with passport</h2>
                 <button onClick={handleOpenDialog}>Close</button>
                 <Dialog title="Sign in with passport" onClose={handleOpenDialog}>
                   <ZkIdentityComponent />
                 </Dialog>
               </div>
-            )}</>
+            )} */}
+          </>
 
 
 

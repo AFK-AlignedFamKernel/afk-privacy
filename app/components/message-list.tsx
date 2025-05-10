@@ -63,6 +63,8 @@ const MessageList: React.FC<MessageListProps> = ({
           groupId,
         });
 
+        // console.log("fetchedMessages", fetchedMessages);
+
         const existingMessageIds: Record<string, boolean> = {};
         messages.forEach((m) => {
           existingMessageIds[m.id!] = true;
